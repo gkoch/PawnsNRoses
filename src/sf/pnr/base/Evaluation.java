@@ -51,7 +51,7 @@ public final class Evaluation {
     public static final int BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE = 5;
     public static final int BONUS_PASSED_PAWN_PER_SQUARE = 5;
     public static final int BONUS_DEFENSE = 2;
-    public static final int BONUS_ATTACK = 2;
+    public static final int BONUS_ATTACK = 3;
     public static final int BONUS_HUNG_PIECE = 3;
     public static final int BONUS_MOBILITY = 1;
     public static final int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 1, 2, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};

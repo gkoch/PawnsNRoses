@@ -26,34 +26,32 @@ public class TranspositionTable {
     public static final int TT_SHIFT_AGE = 2 + TT_SHIFT_TYPE; // 2 + 49
     public static final long TT_AGE = 0x0FFFL << TT_SHIFT_AGE;
 
+    private static final int MAX_CHECK_COUNT_EXACT = 20;
+    private static final int MAX_CHECK_COUNT_CUT = 10;
+    private static final int MAX_CHECK_INDEX = 2 * MAX_CHECK_COUNT_EXACT;
+
     private final long[][] arrays;
-    private final int[] entryCounts;
 
     public TranspositionTable(final int size) {
         final int arrayCount = size >> ARRAY_SIZE_SHIFT;
         arrays = new long[arrayCount][ARRAY_LENGHT];
-        entryCounts = new int[arrayCount];
     }
 
     public long read(final long zobrist) {
         final int hashed = hash(zobrist);
         final int startIndex = hashed << 1;
-        int arrayIndex = (int) (zobrist % arrays.length);
-        if (arrayIndex < 0) {
-            arrayIndex += arrays.length;
-        }
-        final long[] array = arrays[arrayIndex];
+        final long[] array = getArraySegment(zobrist);
 
         for (int i = startIndex; i < ARRAY_LENGHT; i += 2) {
             if (array[i] == zobrist) {
                 return array[i + 1];
             } else if (array[i] == 0) {
                 return 0;
-            } else if (i > startIndex + 40) {
+            } else if (i > startIndex + MAX_CHECK_INDEX) {
                 return 0;
             }
         }
-        final int toCheck = 40 - (ARRAY_LENGHT - startIndex);
+        final int toCheck = MAX_CHECK_INDEX - (ARRAY_LENGHT - startIndex);
         for (int i = 0; i < startIndex; i += 2) {
             if (array[i] == zobrist) {
                 return array[i + 1];
@@ -70,11 +68,7 @@ public class TranspositionTable {
                     final int age) {
         final int hashed = hash(zobrist);
         final int startIndex = hashed << 1;
-        int arrayIndex = (int) (zobrist % arrays.length);
-        if (arrayIndex < 0) {
-            arrayIndex += arrays.length;
-        }
-        final long[] array = arrays[arrayIndex];
+        final long[] array = getArraySegment(zobrist);
         final long ttValue = type | (((long) (move & BASE_INFO)) << TT_SHIFT_MOVE) | (depth << TT_SHIFT_DEPTH) |
             (value << TT_SHIFT_VALUE) | (((long) age) << TT_SHIFT_AGE);
         for (int i = startIndex; i < ARRAY_LENGHT; i += 2) {
@@ -84,15 +78,14 @@ public class TranspositionTable {
             } else if (array[i] == 0) {
                 array[i] = zobrist;
                 array[i + 1] = ttValue;
-                entryCounts[arrayIndex]++;
                 return;
             } else {
                 final int distance = (i - startIndex) >> 1;
                 final long ttStored = array[i + 1];
                 // if it's too old or we've tried at least 20 and it's not an exact match then overwrite it
                 final long ttAge = (ttStored & TT_AGE) >> TT_SHIFT_AGE;
-                if ((ttAge < age - 15 + (distance >> 1)) || distance > 10 && (ttStored & TT_TYPE) != TT_TYPE_EXACT ||
-                        distance >= 20) {
+                if ((ttAge < age - 15 + (distance >> 1)) || distance >= MAX_CHECK_COUNT_EXACT ||
+                        distance > MAX_CHECK_COUNT_CUT && (ttStored & TT_TYPE) != TT_TYPE_EXACT) {
                     array[i] = zobrist;
                     array[i + 1] = ttValue;
                     return;
@@ -107,25 +100,28 @@ public class TranspositionTable {
             } else if (array[i] == 0) {
                 array[i] = zobrist;
                 array[i + 1] = ttValue;
-                entryCounts[arrayIndex]++;
-                return;
-            } else if (i > 10 && (array[i + 1] & TT_TYPE) != TT_TYPE_EXACT) {
-                array[i] = zobrist;
-                array[i + 1] = ttValue;
                 return;
             } else {
                 final int distance = (i + checked) >> 1;
                 final long ttStored = array[i + 1];
                 // if it's too old or we've tried at least 20 and it's not an exact match then overwrite it
                 final long ttAge = (ttStored & TT_AGE) >> TT_SHIFT_AGE;
-                if ((ttAge < age - 15 + (distance >> 1)) || distance > 10 && (ttStored & TT_TYPE) != TT_TYPE_EXACT ||
-                        distance > 20) {
+                if ((ttAge < age - 15 + (distance >> 1)) || distance >= MAX_CHECK_COUNT_EXACT ||
+                        distance > MAX_CHECK_COUNT_CUT && (ttStored & TT_TYPE) != TT_TYPE_EXACT) {
                     array[i] = zobrist;
                     array[i + 1] = ttValue;
                     return;
                 }
             }
         }
+    }
+
+    private long[] getArraySegment(final long zobrist) {
+        int arrayIndex = (int) (zobrist % arrays.length);
+        if (arrayIndex < 0) {
+            arrayIndex += arrays.length;
+        }
+        return arrays[arrayIndex];
     }
 
     private int hash(final long zobrist) {
@@ -136,10 +132,5 @@ public class TranspositionTable {
         for (long[] array : arrays) {
             Arrays.fill(array, 0);
         }
-        Arrays.fill(entryCounts, 0);
-    }
-
-    public int[] getEntryCounts() {
-        return entryCounts;
     }
 }

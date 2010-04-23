@@ -305,7 +305,6 @@ public final class Evaluation {
         final int signum = (side << 1) - 1;
         final int move = signum * UP;
         final int[] pieces = boardObj.getPieces(side, PAWN);
-        final int[] kingIndex = new int[] {boardObj.getKing(BLACK), boardObj.getKing(WHITE)};
         for (int i = pieces[0]; i > 0; i--) {
             int pawn = pieces[i];
             for (int delta: DELTA_PAWN_ATTACK[side]) {
@@ -594,14 +593,14 @@ public final class Evaluation {
             if (highestWhiteBit >= Long.highestOneBit(prevFileBlack) &&
                     highestWhiteBit > Long.highestOneBit(midFileBlack) &&
                     highestWhiteBit >= Long.highestOneBit(nextFileBlack)) {
-                score += BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfTrailingZeros(highestWhiteBit) / 8);
+                score += BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfLeadingZeros(highestWhiteBit) / 8);
             }
 
             final long lowestBlackBit = Long.lowestOneBit(midFileBlack);
             if (lowestBlackBit != 0 && lowestBlackBit <= Long.lowestOneBit(prevFileWhite) &&
                     lowestBlackBit < Long.lowestOneBit(midFileWhite) &&
                     lowestBlackBit <= Long.lowestOneBit(nextFileWhite)) {
-                score -= BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfLeadingZeros(lowestBlackBit) / 8);
+                score -= BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfTrailingZeros(lowestBlackBit) / 8);
             }
 
             prevFileWhite = midFileWhite;
@@ -611,10 +610,21 @@ public final class Evaluation {
         }
         if (prevFileWhite == 0L && midFileWhite > 0L) {
             score += PENALTY_ISOLATED_PAWN;
-            // TODO check PASSED PAWN
         }
         if (prevFileBlack == 0L && midFileBlack > 0L) {
             score -= PENALTY_ISOLATED_PAWN;
+        }
+        
+        final long highestWhiteBit = Long.highestOneBit(midFileWhite);
+        if (highestWhiteBit >= Long.highestOneBit(prevFileBlack) &&
+                highestWhiteBit > Long.highestOneBit(midFileBlack)) {
+            score += BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfLeadingZeros(highestWhiteBit) / 8);
+        }
+
+        final long lowestBlackBit = Long.lowestOneBit(midFileBlack);
+        if (lowestBlackBit != 0 && lowestBlackBit <= Long.lowestOneBit(prevFileWhite) &&
+                lowestBlackBit < Long.lowestOneBit(midFileWhite)) {
+            score -= BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfTrailingZeros(lowestBlackBit) / 8);
         }
 
         final int pawnShield = pawnShield(board, WHITE, pawnMask[WHITE]) - pawnShield(board, BLACK, pawnMask[BLACK]);

@@ -52,4 +52,43 @@ public class EvaluationTest extends TestCase {
         board.move(StringUtils.fromSimple("e7e5"));
         assertEquals(0, new Evaluation().computePositionalBonus(board));
     }
+
+    public void testIsolatedPawnOnFileA() {
+        final Board board = StringUtils.fromFen("4k3/pppppppp/8/8/8/P7/8/4K3 w - - 0 1");
+        assertEquals(Evaluation.PENALTY_ISOLATED_PAWN - Evaluation.VAL_PIECE_COUNTS[PAWN][7],
+            new Evaluation().pawnEval(board));
+    }
+
+    public void testIsolatedPawnOnFileB() {
+        final Board board = StringUtils.fromFen("4k3/pppppppp/8/8/8/1P6/8/4K3 w - - 0 1");
+        assertEquals(Evaluation.PENALTY_ISOLATED_PAWN - Evaluation.VAL_PIECE_COUNTS[PAWN][7],
+            new Evaluation().pawnEval(board));
+    }
+
+    public void testIsolatedPawnOnFileH() {
+        final Board board = StringUtils.fromFen("4k3/pppppppp/8/8/8/7P/8/4K3 w - - 0 1");
+        assertEquals(Evaluation.PENALTY_ISOLATED_PAWN - Evaluation.VAL_PIECE_COUNTS[PAWN][7],
+            new Evaluation().pawnEval(board));
+    }
+
+    public void testPassedPawnOnFileA() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/8/P7/8/4K3 w - - 0 1");
+        assertEquals(Evaluation.BONUS_PASSED_PAWN_PER_SQUARE * 5 + Evaluation.PENALTY_ISOLATED_PAWN +
+                Evaluation.VAL_PIECE_COUNTS[PAWN][1] - Evaluation.VAL_PIECE_COUNTS[PAWN][0],
+            new Evaluation().pawnEval(board));
+    }
+
+    public void testPassedPawnOnFileB() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/8/1P6/8/4K3 w - - 0 1");
+        assertEquals(Evaluation.BONUS_PASSED_PAWN_PER_SQUARE * 5 + Evaluation.PENALTY_ISOLATED_PAWN +
+                Evaluation.VAL_PIECE_COUNTS[PAWN][1] - Evaluation.VAL_PIECE_COUNTS[PAWN][0],
+            new Evaluation().pawnEval(board));
+    }
+
+    public void testPassedPawnOnFileH() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/8/7P/8/4K3 w - - 0 1");
+        assertEquals(Evaluation.BONUS_PASSED_PAWN_PER_SQUARE * 5 + Evaluation.PENALTY_ISOLATED_PAWN +
+                Evaluation.VAL_PIECE_COUNTS[PAWN][1] - Evaluation.VAL_PIECE_COUNTS[PAWN][0],
+            new Evaluation().pawnEval(board));
+    }
 }

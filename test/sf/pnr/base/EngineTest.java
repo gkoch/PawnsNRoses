@@ -309,6 +309,17 @@ public class EngineTest extends TestCase {
         assertTrue(Integer.toString(score), score < -VAL_QUEEN * 0.7 && score > -VAL_QUEEN * 1.3);
     }
 
+    public void testConsistency() {
+        final Board board = fromFen("6qk/7p/p1pp1Q2/4p3/4P1b1/8/2P3PP/6NK b - - 6 32");
+        final long result1 = engine.search(board, 8, 0);
+        final int score1 = Engine.getValueFromSearchResult(result1);
+        final int move = Engine.getMoveFromSearchResult(result1);
+        assertEquals(StringUtils.fromSimple("g8g7"), move);
+        board.move(move);
+        final int score2 = Engine.getValueFromSearchResult(engine.search(board, 7, 0));
+        assertTrue(score1 + " vs " + score2, Math.abs(Math.abs(score2) - Math.abs(score1)) < 50);
+    }
+
     public void notestScore() {
         final Board board = fromFen("r1b1k2r/ppp1qppp/2npp3/3P4/2P1n3/2B2NP1/PP2PP1P/2RQKB1R b Kkq - 0 9");
         engine.setBestMoveListener(new BestMoveListener() {

@@ -95,6 +95,7 @@ public final class Engine {
                 result = negascoutRoot(board, depth << SHIFT_PLY, beta, INITIAL_BETA);
                 value = getValueFromSearchResult(result);
             }
+            assert cancelled || getMoveFromSearchResult(result) != 0;
             if (cancelled) {
                 final int move = getMoveFromSearchResult(result);
                 if (move != 0) {
@@ -105,7 +106,8 @@ public final class Engine {
             searchResult = result;
             if (listener != null) {
                 listener.bestMoveChanged(depth, getMoveFromSearchResult(result), value,
-                    System.currentTimeMillis() - searchStartTime, getBestLine(board), nodeCount);
+                    System.currentTimeMillis() - searchStartTime,
+                    getBestLine(board, getMoveFromSearchResult(searchResult)), nodeCount);
             }
             if (value > VAL_MATE - 200) {
                 break;
@@ -114,6 +116,7 @@ public final class Engine {
                 break;
             }
         }
+        assert getMoveFromSearchResult(searchResult) != 0;
         return searchResult;
     }
 
@@ -130,21 +133,25 @@ public final class Engine {
         final long zobristKey = board.getZobristKey();
         final long ttValue = transpositionTable.read(zobristKey);
         final int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
+        int bestMove = 0;
         if (ttValue != 0) {
             final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
             final long ttType = ttValue & TT_TYPE;
             if (ttType == TT_TYPE_EXACT) {
                 final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
                 if (ttDepth >= (depth >> SHIFT_PLY)) {
+                    assert ttMove != 0;
                     return getSearchResult(ttMove, value);
                 }
             } else if (ttType == TT_TYPE_ALPHA_CUT || ttType == TT_TYPE_BETA_CUT) {
                 final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
                 if (ttDepth >= (depth >> SHIFT_PLY)) {
-                    alpha = value;
-                    if (alpha > VAL_MATE - 200) {
-                        return getSearchResult(ttMove, alpha);
+                    if (value > VAL_MATE - 200) {
+                        assert ttMove != 0;
+                        return getSearchResult(ttMove, value);
                     }
+                    alpha = value;
+                    bestMove = ttMove;
                 }
             }
         }
@@ -154,7 +161,6 @@ public final class Engine {
         final boolean inCheck = attacksKing(board, 1 - toMove);
 
         moveGenerator.pushFrame();
-        int bestMove = 0;
         int moveCount = 0;
         for (SearchStage searchStage: searchStages) {
             final boolean quiescenceChild =
@@ -191,7 +197,7 @@ public final class Engine {
                 if (cancelled) {
                     board.takeBack(undo);
                     moveGenerator.popFrame();
-                    return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                    return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
                 }
 
                 // the other player has a better option, beta cut off
@@ -201,6 +207,7 @@ public final class Engine {
                     assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
                     transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, depth, searchStage, move);
+                    assert move != 0;
                     return getSearchResult(move, a);
                 }
                 if (a >= b && (searchStage != SearchStage.TRANS_TABLE) ) {
@@ -209,7 +216,7 @@ public final class Engine {
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                        return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
                     }
                     if (a < beta && a > alpha) {
                         transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
@@ -220,6 +227,7 @@ public final class Engine {
                         assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                         addMoveToHistoryTable(board, depth, searchStage, move);
+                        assert move != 0;
                         return getSearchResult(move, a);
                     }
                 }
@@ -246,12 +254,12 @@ public final class Engine {
         moveGenerator.popFrame();
         if (!hasLegalMove) {
             if (inCheck) {
-                return ((long) -Evaluation.VAL_MATE)& 0xFFFFFFFFL;
+                return ((long) -Evaluation.VAL_MATE) & 0xFFFFFFFFL;
             } else {
                 return 0;
             }
         }
-        if (bestMove != 0) {
+        if (bestMove != 0 && bestMove != ttMove) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
         }
         return getSearchResult(bestMove, alpha);
@@ -651,7 +659,7 @@ public final class Engine {
             timeEllapsed = 10;
         }
         final long timeLeft = searchEndTime - currentTime;
-        long nodesToProcessUntilNextCheck = (long) (timeLeft * nodeCount / timeEllapsed * 0.5);
+        long nodesToProcessUntilNextCheck = (timeLeft * nodeCount / timeEllapsed) >> 1;
         if (nodesToProcessUntilNextCheck < 200) {
             nodesToProcessUntilNextCheck = 200;
         }
@@ -801,12 +809,20 @@ public final class Engine {
     }
 
     public int[] getBestLine(final Board board) {
+        return getBestLine(board, 0);
+    }
+
+    public int[] getBestLine(final Board board, final int defaultMove) {
         long zobristKey = board.getZobristKey();
         long ttValue = transpositionTable.read(zobristKey);
         final int depth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
         int move = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
         if (move == 0) {
-            throw new IllegalStateException("Failed to extract valid first move");
+            if (defaultMove == 0) {
+                throw new IllegalStateException("Failed to extract valid first move");
+            } else {
+                return new int[] {defaultMove};
+            }
         }
         final int[] line = new int[depth];
         final long[] undos = new long[depth];

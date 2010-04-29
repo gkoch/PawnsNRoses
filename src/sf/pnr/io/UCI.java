@@ -15,7 +15,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +26,7 @@ public class UCI {
     private static final int CANCEL_THRESHOLD = 50;
     private static final Pattern POSITION_PATTERN = Pattern.compile(
         "(([1-8/pnbrqkPNBRQK]+ [wb] [KQkq-]+ [-a-h1-8]+ [0-9]+ [0-9]+)|startpos)( moves( [a-h][1-8][a-h][1-8][nbrq]?)+)");
+    private static boolean verbose = false;
 
     private enum State {START, UCI_RECEIVED, SEARCHING, SEARCHING_PONDER}
 
@@ -183,15 +183,24 @@ public class UCI {
         future = THREAD_POOL.submit(new Callable<String>() {
             @Override
             public String call() throws Exception {
-                final ThreadPoolExecutor executor = (ThreadPoolExecutor) THREAD_POOL;
-                if (state == State.SEARCHING_PONDER) {
-                    out.println("bestmove ponder");
-                    return "ponder";
-                } else {
-                    final int move = chess.move();
-                    final String moveStr = StringUtils.toLong(move);
-                    out.println("bestmove " + moveStr);
-                    return moveStr;
+                try {
+                    if (state == State.SEARCHING_PONDER) {
+                        out.println("bestmove ponder");
+                        return "ponder";
+                    } else {
+                        final int move = chess.move();
+                        final String moveStr = StringUtils.toLong(move);
+                        out.println("bestmove " + moveStr);
+                        return moveStr;
+                    }
+                } catch (Exception e) {
+                    out.println("info string " + e.getMessage());
+                    e.printStackTrace(out);
+                    throw e;
+                } catch (Error e) {
+                    out.println("info string " + e.getMessage());
+                    e.printStackTrace(out);
+                    throw e;
                 }
             }
         });
@@ -219,6 +228,9 @@ public class UCI {
 
     private void ensureReady() throws InterruptedException, ExecutionException {
         if (future != null) {
+            if (verbose) {
+                out.print("info string cancelling game");
+            }
             chess.cancel();
             future.get();
             future = null;

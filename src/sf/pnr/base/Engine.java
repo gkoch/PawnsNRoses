@@ -18,7 +18,7 @@ public final class Engine {
     private static final int VAL_CHECK_BONUS = 500 << SHIFT_MOVE_VALUE;
     private static final int VAL_BLOCKED_CHECK_BONUS = 100 << SHIFT_MOVE_VALUE;
     private static final int VAL_FUTILITY_THRESHOLD = 400;
-    private static final int VAL_DEEP_FUTILITY_THRESHOLD = 700;
+    private static final int VAL_DEEP_FUTILITY_THRESHOLD = 600;
     private static final int LATE_MOVE_REDUCTION_MIN_DEPTH = 3 << SHIFT_PLY;
     private static final int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
     private int searchDepth;

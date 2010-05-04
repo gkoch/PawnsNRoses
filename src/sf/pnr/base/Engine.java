@@ -12,7 +12,7 @@ public final class Engine {
 
     public static final int INITIAL_ALPHA = -Evaluation.VAL_MATE - 1;
     public static final int INITIAL_BETA = Evaluation.VAL_MATE + 1;
-    public static final int ASPIRATION_WINDOW = 50;
+    public static final int ASPIRATION_WINDOW = 100;
 
     private static final int[] NO_MOVE_ARRAY = new int[] {0};
     private static final int VAL_CHECK_BONUS = 500 << SHIFT_MOVE_VALUE;

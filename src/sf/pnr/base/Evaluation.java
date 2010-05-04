@@ -369,6 +369,7 @@ public final class Evaluation {
         final int opponentKing = boardObj.getKing(1 - side);
         final int[] board = boardObj.getBoard();
         int score = 0;
+        int distance = 0;
         final int[] pieces = boardObj.getPieces(side, type);
         for (int i = pieces[0]; i > 0; i--) {
             final int piecePos = pieces[i];
@@ -383,9 +384,9 @@ public final class Evaluation {
                     }
                 }
             }
-            score += distanceBonus[distance(piecePos, opponentKing)] * boardObj.getStage() / STAGE_MAX;
+            distance += distanceBonus[distance(piecePos, opponentKing)];
         }
-        return score;
+        return score + distance * boardObj.getStage() / STAGE_MAX;
     }
 
     private int computeMobilityBonusKing(final Board boardObj, final int side) {
@@ -445,29 +446,6 @@ public final class Evaluation {
         return !(bishopOnWhite && bishopOnBlack);
     }
 
-    private int pawnShield(final Board board, final int toMove, final long pawnMask) {
-        int shieldScore = 0;
-        final int kingIndexCurrentPlayer = board.getKing(toMove);
-        final int kingIndex64CurrentPlayer = convert0x88To64(kingIndexCurrentPlayer);
-        final long kingMaskCurrentPlayer = 1L << kingIndex64CurrentPlayer;
-        if ((PAWN_SHIELD_KING_SIDE_KING[toMove] & kingMaskCurrentPlayer) > 0) {
-            for (long shieldMask: PAWN_SHIELD_KING_SIDE[toMove]) {
-                if ((pawnMask & shieldMask) == shieldMask) {
-                    shieldScore = BONUS_PAWN_SHIELD;
-                    break;
-                }
-            }
-        } else if ((PAWN_SHIELD_QUEEN_SIDE_KING[toMove] & kingMaskCurrentPlayer) > 0) {
-            for (long shieldMask: PAWN_SHIELD_QUEEN_SIDE[toMove]) {
-                if ((pawnMask & shieldMask) == shieldMask) {
-                    shieldScore = BONUS_PAWN_SHIELD;
-                    break;
-                }
-            }
-        }
-        return shieldScore;
-    }
-
     public int pawnEval(final Board board) {
         final int stage = board.getStage();
         final long zobristPawn = board.getZobristPawn();
@@ -489,11 +467,13 @@ public final class Evaluation {
         final int whiteKing = board.getKing(WHITE);
         final int whiteKingFile = getFile(whiteKing);
         final int whiteKingRank = getRank(whiteKing);
-        final long whiteKingMask = 1L << convert0x88To64(whiteKing);
+        final int whiteKing64 = convert0x88To64(whiteKing);
+        final long whiteKingMask = 1L << whiteKing64;
         final int blackKing = board.getKing(BLACK);
         final int blackKingFile = getFile(blackKing);
         final int blackKingRank = getRank(blackKing);
-        final long blackKingMask = 1L << convert0x88To64(blackKing);
+        final int blackKing64 = convert0x88To64(blackKing);
+        final long blackKingMask = 1L << blackKing64;
         final boolean pawnStorm = (whiteKingFile <= FILE_D && blackKingFile >= FILE_E) ||
             (whiteKingFile >= FILE_E && blackKingFile <= FILE_D);
 
@@ -627,7 +607,37 @@ public final class Evaluation {
             score -= BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfTrailingZeros(lowestBlackBit) / 8);
         }
 
-        final int pawnShield = pawnShield(board, WHITE, pawnMask[WHITE]) - pawnShield(board, BLACK, pawnMask[BLACK]);
+        int pawnShield = 0;
+        if ((PAWN_SHIELD_KING_SIDE_KING[WHITE] & whiteKingMask) > 0) {
+            for (long shieldMask : PAWN_SHIELD_KING_SIDE[WHITE]) {
+                if ((pawnMask[WHITE] & shieldMask) == shieldMask) {
+                    pawnShield = BONUS_PAWN_SHIELD;
+                    break;
+                }
+            }
+        } else if ((PAWN_SHIELD_QUEEN_SIDE_KING[WHITE] & whiteKingMask) > 0) {
+            for (long shieldMask : PAWN_SHIELD_QUEEN_SIDE[WHITE]) {
+                if ((pawnMask[WHITE] & shieldMask) == shieldMask) {
+                    pawnShield = BONUS_PAWN_SHIELD;
+                    break;
+                }
+            }
+        }
+        if ((PAWN_SHIELD_KING_SIDE_KING[BLACK] & blackKingMask) > 0) {
+            for (long shieldMask: PAWN_SHIELD_KING_SIDE[BLACK]) {
+                if ((pawnMask[BLACK] & shieldMask) == shieldMask) {
+                    pawnShield -= BONUS_PAWN_SHIELD;
+                    break;
+                }
+            }
+        } else if ((PAWN_SHIELD_QUEEN_SIDE_KING[BLACK] & blackKingMask) > 0) {
+            for (long shieldMask: PAWN_SHIELD_QUEEN_SIDE[BLACK]) {
+                if ((pawnMask[BLACK] & shieldMask) == shieldMask) {
+                    pawnShield -= BONUS_PAWN_SHIELD;
+                    break;
+                }
+            }
+        }
         score += pawnShield * (STAGE_MAX - stage) / STAGE_MAX;
 
         return score;

@@ -95,7 +95,7 @@ public final class Engine {
                 result = negascoutRoot(board, depth << SHIFT_PLY, beta, INITIAL_BETA);
                 value = getValueFromSearchResult(result);
             }
-            assert cancelled || getMoveFromSearchResult(result) != 0;
+            assert cancelled || value == 0 || getMoveFromSearchResult(result) != 0;
             if (cancelled) {
                 final int move = getMoveFromSearchResult(result);
                 if (move != 0) {
@@ -116,7 +116,7 @@ public final class Engine {
                 break;
             }
         }
-        assert getMoveFromSearchResult(searchResult) != 0;
+        assert getMoveFromSearchResult(searchResult) != 0 || getValueFromSearchResult(searchResult) == 0;
         return searchResult;
     }
 

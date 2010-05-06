@@ -34,7 +34,7 @@ public class XBoard {
     public XBoard(final BufferedReader in, final PrintStream out) {
         this.in = in;
         this.out = out;
-        chess = new PawnsNRoses(null, 4); // TODO: fixme
+        chess = new PawnsNRoses(null); // TODO: fixme
         chess.setBestMoveListener(new BestMoveListener() {
             @Override
             public void bestMoveChanged(final int depth, final int bestMove, final int value, final long time,

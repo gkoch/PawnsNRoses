@@ -20,12 +20,12 @@ public class PawnsNRoses {
     private int depth;
     private int time;
 
-    public PawnsNRoses(final File polyglotBook, final int transpositionTableSize) {
+    public PawnsNRoses(final File polyglotBook) {
         polyglot = new Polyglot(polyglotBook);
         useBook = polyglotBook != null && polyglotBook.exists();
         board = new Board();
         board.restart();
-        engine = new Engine(new TranspositionTable(transpositionTableSize * 1024 * 1024));
+        engine = new Engine();
         depth = 0;
         time = 0;
     }

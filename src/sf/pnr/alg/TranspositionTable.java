@@ -1,12 +1,14 @@
 package sf.pnr.alg;
 
+import sf.pnr.base.Configuration;
+
 import java.util.Arrays;
 
 import static sf.pnr.base.Utils.BASE_INFO;
 
 /**
  */
-public class TranspositionTable {
+public final class TranspositionTable {
     private static final int ARRAY_SIZE_SHIFT = 20;
     private static final int ARRAY_SIZE = 1 << ARRAY_SIZE_SHIFT;
     private static final int ARRAY_LENGHT = ARRAY_SIZE >> 3;
@@ -32,7 +34,8 @@ public class TranspositionTable {
 
     private final long[][] arrays;
 
-    public TranspositionTable(final int size) {
+    public TranspositionTable() {
+        final int size = Configuration.getInstance().getTranspositionTableSizeInMB() * 1024 * 1024;
         final int arrayCount = size >> ARRAY_SIZE_SHIFT;
         arrays = new long[arrayCount][ARRAY_LENGHT];
     }

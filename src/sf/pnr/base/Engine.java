@@ -41,8 +41,8 @@ public final class Engine {
     private BestMoveListener listener;
     private int age;
 
-    public Engine(final TranspositionTable transpositionTable) {
-        this.transpositionTable = transpositionTable;
+    public Engine() {
+        transpositionTable = new TranspositionTable();
         history = new int[14][64][64];
     }
 

@@ -24,7 +24,7 @@ public class SearchTask implements EpdProcessorTask {
         this.timeToSolve = timeToSolve;
         this.stopAtFirstFailure = stopAtFirstFailure;
         this.debugPrintInterval = debugPrintInterval;
-        engine = new Engine(new TranspositionTable(1024 * 1024));
+        engine = new Engine();
     }
 
     @Override

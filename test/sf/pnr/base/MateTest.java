@@ -42,7 +42,7 @@ public class MateTest extends TestCase {
 
     private static class MateTask implements EpdProcessorTask {
 
-        private final Engine engine = new Engine(new TranspositionTable(1 * 1024 * 1024));
+        private final Engine engine = new Engine();
         private final long maxNodeCount;
         private long totalNodeCount = 0;
         private long testCount = 0;

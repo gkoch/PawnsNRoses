@@ -2,6 +2,7 @@ package sf.pnr.io;
 
 import sf.pnr.base.BestMoveListener;
 import sf.pnr.base.Board;
+import sf.pnr.base.Configuration;
 import sf.pnr.base.StringUtils;
 
 import java.io.BufferedReader;
@@ -37,10 +38,10 @@ public class UCI {
     private Future<String> future;
     private volatile State state = State.START;
 
-    public UCI(final BufferedReader in, final PrintStream out, final File book, final int transpTableSize) {
+    public UCI(final BufferedReader in, final PrintStream out, final File book) {
         this.in = in;
         this.out = out;
-        chess = new PawnsNRoses(book, transpTableSize);
+        chess = new PawnsNRoses(book);
         debugListener = new DebugBestMoveListener(out);
         debugListener.setDebug(true);
         chess.setBestMoveListener(debugListener);
@@ -57,11 +58,15 @@ public class UCI {
         final String bookPath = System.getProperty("polyglot.book");
         final File book = bookPath != null? new File(bookPath): null;
 
-        final String transpTableSizeStr = System.getProperty("transposition.table.size", "4");
+        final String transpTableSizeStr = System.getProperty("transposition.table.size", "24");
         final int transpTableSize = Integer.parseInt(transpTableSizeStr);
+        final String evalHashTableSizeStr = System.getProperty("eval.hashtable.size", "8");
+        final int evalHashTableSize = Integer.parseInt(evalHashTableSizeStr);
+        final Configuration config = Configuration.getInstance();
+        config.setTranspositionTableSizeInMB(transpTableSize);
+        config.setTranspositionTableSizeInMB(evalHashTableSize);
 
-        final UCI protocol =
-            new UCI(new BufferedReader(new InputStreamReader(System.in)), outputStream, book, transpTableSize);
+        final UCI protocol = new UCI(new BufferedReader(new InputStreamReader(System.in)), outputStream, book);
         protocol.run();
     }
 

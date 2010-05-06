@@ -1,5 +1,6 @@
 package sf.pnr.base;
 
+import sf.pnr.alg.EvalHashTable;
 import sf.pnr.alg.PawnHashTable;
 
 import java.util.Random;
@@ -200,12 +201,18 @@ public final class Evaluation {
 
     private boolean random;
     private PawnHashTable pawnHashTable = new PawnHashTable();
+    private EvalHashTable evalHashTable = new EvalHashTable();
 
     public int evaluate(final Board board) {
         final int state = board.getState();
         final int halfMoves = (state & HALF_MOVES) >> SHIFT_HALF_MOVES;
         if (halfMoves >= 50) {
             return VAL_DRAW;
+        }
+        final long zobrist = board.getZobristKey();
+        final int value = evalHashTable.read(zobrist);
+        if (value != 0) {
+            return value + VAL_MIN;
         }
         if (drawByInsufficientMaterial(board)) {
             return VAL_DRAW;
@@ -217,6 +224,7 @@ public final class Evaluation {
         if (random) {
             score += RND.nextInt(20);
         }
+        evalHashTable.set(zobrist, score - VAL_MIN);
         return score;
     }
 

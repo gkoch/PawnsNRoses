@@ -6,11 +6,14 @@ public class SelfPlayTest {
     private static final int TIME_TO_MOVE = 6000;
 
     public static void main(final String[] args) {
+        final Configuration config = Configuration.getInstance();
+        config.setTranspositionTableSizeInMB(128);
+        config.setEvalHashTableSizeInMB(8);
         while (true) {
             final Board board = new Board();
             board.restart();
-            final Engine white = new Engine(new TranspositionTable(128 * 1024 * 1024));
-            final Engine black = new Engine(new TranspositionTable(128 * 1024 * 1024));
+            final Engine white = new Engine();
+            final Engine black = new Engine();
             final Engine[] engines = new Engine[] {black, white};
             while (!isDraw(board) && !isMate(board)) {
                 System.out.print("FEN: " + StringUtils.toFen(board));

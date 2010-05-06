@@ -12,7 +12,7 @@ import static sf.pnr.base.Utils.*;
  */
 public class EngineTest extends TestCase {
 
-    private final Engine engine = new Engine(new TranspositionTable(1024 * 1024));
+    private final Engine engine = new Engine();
 
     @Override
     protected void setUp() throws Exception {

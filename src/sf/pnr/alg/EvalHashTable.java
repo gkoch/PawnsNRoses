@@ -7,8 +7,7 @@ import java.util.Arrays;
 /**
  */
 public final class EvalHashTable {
-    private static final int MAX_CHECK_COUNT = 20;
-    private static final int MAX_CHECK_INDEX = 3 * MAX_CHECK_COUNT;
+    private static final int MAX_CHECK_INDEX = 3 * 20;
 
     private final int[] array;
 
@@ -50,36 +49,28 @@ public final class EvalHashTable {
         final int zobristHigh = (int) (zobrist >> 32);
         final int zobristLow = (int) (zobrist & 0xFFFFFFFFL);
 
+        final int toCheck1 = startIndex + MAX_CHECK_INDEX;
         for (int i = startIndex; i < array.length; i += 3) {
-            if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
-                array[i + 2] = value;
-                return;
-            } else if (array[i] == 0) {
+            if (array[i] == 0) {
                 array[i] = zobristHigh;
                 array[i + 1] = zobristLow;
                 array[i + 2] = value;
                 return;
-            } else {
-                final int distance = (i - startIndex) / 3;
-                if (distance >= MAX_CHECK_COUNT) {
-                    array[i] = zobristHigh;
-                    array[i + 1] = zobristLow;
-                    array[i + 2] = value;
-                    return;
-                }
+            } else if (i >= toCheck1) {
+                array[i] = zobristHigh;
+                array[i + 1] = zobristLow;
+                array[i + 2] = value;
+                return;
             }
         }
-        final int toCheck = MAX_CHECK_INDEX - (array.length - startIndex);
+        final int toCheck2 = MAX_CHECK_INDEX - (array.length - startIndex);
         for (int i = 0; i < startIndex; i += 3) {
-            if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
-                array[i + 2] = value;
-                return;
-            } else if (array[i] == 0) {
+            if (array[i] == 0) {
                 array[i] = zobristHigh;
                 array[i + 1] = zobristLow;
                 array[i + 2] = value;
                 return;
-            } else if (i >= toCheck) {
+            } else if (i >= toCheck2) {
                 array[i] = zobristHigh;
                 array[i + 1] = zobristLow;
                 array[i + 2] = value;

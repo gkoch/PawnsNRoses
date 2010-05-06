@@ -41,6 +41,8 @@ public final class Evaluation {
     private static final int[][] VAL_POSITION_BONUS_OPENING = new int[7][128];
     private static final int[][] VAL_POSITION_BONUS_ENDGAME = new int[7][128];
 
+    private static final int[] SHIFT_POSITION_BONUS = new int[]{0, 8};
+
     public static final int PENALTY_DOUBLE_PAWN = -20;
     public static final int PENALTY_TRIPLE_PAWN = -30;
     public static final int PENALTY_ISOLATED_PAWN = -30;
@@ -209,15 +211,18 @@ public final class Evaluation {
         if (halfMoves >= 50) {
             return VAL_DRAW;
         }
-        final long zobrist = board.getZobristKey();
+        final int toMove = state & WHITE_TO_MOVE;
+        final long zobrist = board.getZobristKey() ^ ZOBRIST_TO_MOVE[toMove];
         final int value = evalHashTable.read(zobrist);
+        final int signum = (toMove << 1) - 1;
         if (value != 0) {
-            return value + VAL_MIN;
+            return (value + VAL_MIN) * signum;
         }
         if (drawByInsufficientMaterial(board)) {
             return VAL_DRAW;
         }
-        int score = computeMaterialValueNoPawn(board);
+        int score = board.getMaterialValueAsWhite() - VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] +
+            VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
         score += computePositionalBonus(board);
         score += computeMobilityBonus(board);
         score += pawnEval(board);
@@ -225,28 +230,23 @@ public final class Evaluation {
             score += RND.nextInt(20);
         }
         evalHashTable.set(zobrist, score - VAL_MIN);
-        return score;
+        return score * signum;
     }
 
-    public static int computeMaterialValue(final Board board) {
-        final int state = board.getState();
-        final int toMove = state & WHITE_TO_MOVE;
-        return computeMaterialValueNoPawn(board) + VAL_PIECE_COUNTS[PAWN][board.getPieces(toMove, PAWN)[0]] -
-            VAL_PIECE_COUNTS[PAWN][board.getPieces(1 - toMove, PAWN)[0]];
+    public static int computeMaterialValueAsWhite(final Board board) {
+        return computeMaterialValueNoPawn(board) + VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] -
+            VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
     }
 
     private static int computeMaterialValueNoPawn(final Board board) {
-        final int state = board.getState();
-        final int toMove = state & WHITE_TO_MOVE;
-        final int opponent = 1 - toMove;
-        int score = VAL_PIECE_COUNTS[KNIGHT][board.getPieces(toMove, KNIGHT)[0]] -
-            VAL_PIECE_COUNTS[KNIGHT][board.getPieces(opponent, KNIGHT)[0]];
-        score += VAL_PIECE_COUNTS[BISHOP][board.getPieces(toMove, BISHOP)[0]] -
-            VAL_PIECE_COUNTS[BISHOP][board.getPieces(opponent, BISHOP)[0]];
-        score += VAL_PIECE_COUNTS[ROOK][board.getPieces(toMove, ROOK)[0]] -
-            VAL_PIECE_COUNTS[ROOK][board.getPieces(opponent, ROOK)[0]];
-        score += VAL_PIECE_COUNTS[QUEEN][board.getPieces(toMove, QUEEN)[0]] -
-            VAL_PIECE_COUNTS[QUEEN][board.getPieces(opponent, QUEEN)[0]];
+        int score = VAL_PIECE_COUNTS[KNIGHT][board.getPieces(WHITE, KNIGHT)[0]] -
+            VAL_PIECE_COUNTS[KNIGHT][board.getPieces(BLACK, KNIGHT)[0]];
+        score += VAL_PIECE_COUNTS[BISHOP][board.getPieces(WHITE, BISHOP)[0]] -
+            VAL_PIECE_COUNTS[BISHOP][board.getPieces(BLACK, BISHOP)[0]];
+        score += VAL_PIECE_COUNTS[ROOK][board.getPieces(WHITE, ROOK)[0]] -
+            VAL_PIECE_COUNTS[ROOK][board.getPieces(BLACK, ROOK)[0]];
+        score += VAL_PIECE_COUNTS[QUEEN][board.getPieces(WHITE, QUEEN)[0]] -
+            VAL_PIECE_COUNTS[QUEEN][board.getPieces(BLACK, QUEEN)[0]];
         return score;
     }
 
@@ -260,30 +260,24 @@ public final class Evaluation {
     }
 
     public int computePositionalBonus(final Board board) {
-        int bonus = 0;
-        final int toMove = board.getState() & WHITE_TO_MOVE;
-        final int shift = toMove << 3;
-        final int shiftOpponent = 8 - shift;
-        final int opponent = 1 - toMove;
-        final int stage = board.getStage();
+        int typeBonusOpening = 0;
+        int typeBonusEndGame = 0;
         for (int type: TYPES) {
-            int typeBonusOpening = 0;
-            int typeBonusEndGame = 0;
             final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[type];
             final int[] positionalBonusEndGame = VAL_POSITION_BONUS_OPENING[type];
-            final int[] pieces = board.getPieces(toMove, type);
+            final int[] pieces = board.getPieces(WHITE, type);
             for (int i = pieces[0]; i > 0; i--) {
-                typeBonusOpening += positionalBonusOpening[pieces[i] + shift];
-                typeBonusEndGame += positionalBonusEndGame[pieces[i] + shift];
+                typeBonusOpening += positionalBonusOpening[pieces[i] + SHIFT_POSITION_BONUS[WHITE]];
+                typeBonusEndGame += positionalBonusEndGame[pieces[i] + SHIFT_POSITION_BONUS[WHITE]];
             }
-            final int[] piecesOpponent = board.getPieces(opponent, type);
+            final int[] piecesOpponent = board.getPieces(BLACK, type);
             for (int i = piecesOpponent[0]; i > 0; i--) {
-                typeBonusOpening -= positionalBonusOpening[piecesOpponent[i] + shiftOpponent];
-                typeBonusEndGame -= positionalBonusEndGame[piecesOpponent[i] + shiftOpponent];
+                typeBonusOpening -= positionalBonusOpening[piecesOpponent[i] + SHIFT_POSITION_BONUS[BLACK]];
+                typeBonusEndGame -= positionalBonusEndGame[piecesOpponent[i] + SHIFT_POSITION_BONUS[BLACK]];
             }
-            bonus += (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
         }
-        return bonus;
+        final int stage = board.getStage();
+        return (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
     }
 
     public int computePositionalGain(final int absPiece, final int toMove, final int fromIndex, final int toIndex, final int stage) {
@@ -298,12 +292,12 @@ public final class Evaluation {
         int score = computeMobilityBonusPawn(board, WHITE) - computeMobilityBonusPawn(board, BLACK);
         score += computeMobilityBonusKnight(board, WHITE) - computeMobilityBonusKnight(board, BLACK);
         score += computeMobilityBonusSliding(board, WHITE, BISHOP, BONUS_DISTANCE_BISHOP) -
-            computeMobilityBonusSliding(board, WHITE, BISHOP, BONUS_DISTANCE_BISHOP);
+            computeMobilityBonusSliding(board, BLACK, BISHOP, BONUS_DISTANCE_BISHOP);
         score += computeMobilityBonusSliding(board, WHITE, ROOK, BONUS_DISTANCE_ROOK) -
-            computeMobilityBonusSliding(board, WHITE, ROOK, BONUS_DISTANCE_ROOK);
+            computeMobilityBonusSliding(board, BLACK, ROOK, BONUS_DISTANCE_ROOK);
         score += computeMobilityBonusSliding(board, WHITE, QUEEN, BONUS_DISTANCE_QUEEN) -
-            computeMobilityBonusSliding(board, WHITE, QUEEN, BONUS_DISTANCE_QUEEN);
-        score += computeMobilityBonusKing(board, WHITE) - computeMobilityBonusKing(board, WHITE);
+            computeMobilityBonusSliding(board, BLACK, QUEEN, BONUS_DISTANCE_QUEEN);
+        score += computeMobilityBonusKing(board, WHITE) - computeMobilityBonusKing(board, BLACK);
         return score;
     }
 
@@ -462,9 +456,7 @@ public final class Evaluation {
             eval = pawnEval(board, stage);
             pawnHashTable.set(zobristPawn, eval, stage);
         }
-        final int toMove = board.getState() & WHITE_TO_MOVE;
-        final int signum = ((toMove << 1) - 1);
-        return eval * signum;
+        return eval;
     }
 
     public int pawnEval(final Board board, final int stage) {

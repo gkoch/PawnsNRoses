@@ -128,7 +128,7 @@ public final class Board {
 //        System.out.println("Move: " + StringUtils.toSimple(moveBase));
         assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(this));
         assert zobristPawn == (computeZobrist(this, PAWN) ^ computeZobrist(this, KING));
-        assert getMaterialValue() == Evaluation.computeMaterialValue(this):
+        assert getMaterialValueAsWhite() == Evaluation.computeMaterialValueAsWhite(this):
             "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
         assert bitboardAllPieces[WHITE] == BitBoard.computeAllPieces(this, WHITE);
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
@@ -256,7 +256,7 @@ public final class Board {
         assert board[toIndex] != EMPTY;
         assert bitboardAllPieces[WHITE] == BitBoard.computeAllPieces(this, WHITE);
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
-        assert getMaterialValue() == Evaluation.computeMaterialValue(this):
+        assert getMaterialValueAsWhite() == Evaluation.computeMaterialValueAsWhite(this):
             "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
 		return undo;
 	}
@@ -331,8 +331,11 @@ public final class Board {
     }
 
     public int getMaterialValue() {
-        final int signum = ((state & WHITE_TO_MOVE) << 1) - 1;
-        return signum * materialValue[WHITE_TO_MOVE] - signum * materialValue[BLACK_TO_MOVE];
+        return (((state & WHITE_TO_MOVE) << 1) - 1) * getMaterialValueAsWhite();
+    }
+
+    public int getMaterialValueAsWhite() {
+        return materialValue[WHITE_TO_MOVE] - materialValue[BLACK_TO_MOVE];
     }
 
     public int getStage() {
@@ -357,7 +360,7 @@ public final class Board {
         assert pieces[PAWN][0][0] <= 8;
         assert pieces[PAWN][1][0] <= 8;
         assert zobristPawn == (computeZobrist(this, PAWN) ^ computeZobrist(this, KING));
-        assert getMaterialValue() == Evaluation.computeMaterialValue(this);
+        assert getMaterialValueAsWhite() == Evaluation.computeMaterialValueAsWhite(this);
         assert bitboardAllPieces[WHITE] == BitBoard.computeAllPieces(this, WHITE);
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
         repetitionTable.decrement(zobrist);
@@ -431,7 +434,7 @@ public final class Board {
         assert zobristPawn == (computeZobrist(this, PAWN) ^ computeZobrist(this, KING));
         assert pieces[PAWN][0][0] <= 8;
         assert pieces[PAWN][1][0] <= 8;
-        assert getMaterialValue() == Evaluation.computeMaterialValue(this);
+        assert getMaterialValueAsWhite() == Evaluation.computeMaterialValueAsWhite(this);
         assert bitboardAllPieces[WHITE] == BitBoard.computeAllPieces(this, WHITE);
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
 	}

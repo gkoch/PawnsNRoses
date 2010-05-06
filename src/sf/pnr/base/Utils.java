@@ -204,6 +204,7 @@ public class Utils {
     public static final long[] ZOBRIST_CASTLING = new long[16];
     public static final long[] ZOBRIST_EN_PASSANT = new long[9];
     public static final long ZOBRIST_WHITE_TO_MOVE;
+    public static final long[] ZOBRIST_TO_MOVE = new long[2];
 
     public static final boolean[] SLIDING = new boolean[7];
 
@@ -288,6 +289,8 @@ public class Utils {
 
         System.arraycopy(Polyglot.ZOBRIST, 772, ZOBRIST_EN_PASSANT, 1, 8);
         ZOBRIST_WHITE_TO_MOVE = Polyglot.ZOBRIST[780];
+        ZOBRIST_TO_MOVE[BLACK_TO_MOVE] = 0;
+        ZOBRIST_TO_MOVE[WHITE_TO_MOVE] = ZOBRIST_WHITE_TO_MOVE;
 
         Arrays.fill(SLIDING, true);
         SLIDING[PAWN] = false;
@@ -329,7 +332,7 @@ public class Utils {
 
     public static long computeZobristIncremental(final Board board) {
         final int state = board.getState();
-        long zobrist = (state & WHITE_TO_MOVE) == WHITE_TO_MOVE? ZOBRIST_WHITE_TO_MOVE: 0;
+        long zobrist = ZOBRIST_TO_MOVE[state & WHITE_TO_MOVE];
         zobrist ^= computeZobrist(board, KING);
         zobrist ^= computeZobrist(board, QUEEN);
         zobrist ^= computeZobrist(board, ROOK);

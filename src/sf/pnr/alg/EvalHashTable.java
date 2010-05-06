@@ -7,96 +7,48 @@ import java.util.Arrays;
 /**
  */
 public final class EvalHashTable {
-    private static final int MAX_CHECK_COUNT = 20;
-    private static final int MAX_CHECK_INDEX = 3 * MAX_CHECK_COUNT;
+    private static final long VALUE_SHIFT = 1;
+    private static final long VALUE_MASK = 0x1FFFE;
+    private static final long HASH_MASK = 0x1FFFF;
+    private static final long ZOBRIST_MASK = 0xFFFFFFFFFFFFFFFFL ^ VALUE_MASK;
 
-    private final int[] array;
+    private final int sizeInMB;
+    private final long[] array;
 
     public EvalHashTable() {
-        array = new int[Configuration.getInstance().getEvalHashTableSizeInMB() * 1024 * 1024 / 12 * 3];
+        sizeInMB = Configuration.getInstance().getEvalHashTableSizeInMB();
+        array = new long[sizeInMB * 1024 * 1024 / 8];
     }
 
     public int read(final long zobrist) {
         final int hashed = hash(zobrist);
-        final int startIndex = hashed / 3 * 3;
-        final int zobristHigh = (int) (zobrist >> 32);
-        final int zobristLow = (int) (zobrist & 0xFFFFFFFFL);
-
-        for (int i = startIndex; i < array.length; i += 3) {
-            if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
-                return array[i + 2];
-            } else if (array[i] == 0) {
-                return 0;
-            } else if (i > startIndex + MAX_CHECK_INDEX) {
-                return 0;
-            }
+        final long zobristMasked = zobrist & ZOBRIST_MASK;
+        if ((array[hashed] & ZOBRIST_MASK) == zobristMasked) {
+            return (int) ((array[hashed] & VALUE_MASK) >> VALUE_SHIFT);
         }
-        final int toCheck = MAX_CHECK_INDEX - (array.length - startIndex);
-        for (int i = 0; i < startIndex; i += 3) {
-            if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
-                return array[i + 2];
-            } else if (array[i] == 0) {
-                return 0;
-            } else if (i > toCheck) {
-                return 0;
-            }
+        if ((array[hashed + 1] & ZOBRIST_MASK) == zobristMasked) {
+            return (int) ((array[hashed + 1] & VALUE_MASK) >> VALUE_SHIFT);
         }
         return 0;
     }
 
     public void set(final long zobrist, final int value) {
         final int hashed = hash(zobrist);
-        final int startIndex = hashed / 3 * 3;
-        final int zobristHigh = (int) (zobrist >> 32);
-        final int zobristLow = (int) (zobrist & 0xFFFFFFFFL);
-
-        for (int i = startIndex; i < array.length; i += 3) {
-            if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
-                array[i + 2] = value;
-                return;
-            } else if (array[i] == 0) {
-                array[i] = zobristHigh;
-                array[i + 1] = zobristLow;
-                array[i + 2] = value;
-                return;
-            } else {
-                final int distance = (i - startIndex) / 3;
-                if (distance >= MAX_CHECK_COUNT) {
-                    array[i] = zobristHigh;
-                    array[i + 1] = zobristLow;
-                    array[i + 2] = value;
-                    return;
-                }
-            }
-        }
-        final int toCheck = MAX_CHECK_INDEX - (array.length - startIndex);
-        for (int i = 0; i < startIndex; i += 3) {
-            if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
-                array[i + 2] = value;
-                return;
-            } else if (array[i] == 0) {
-                array[i] = zobristHigh;
-                array[i + 1] = zobristLow;
-                array[i + 2] = value;
-                return;
-            } else if (i >= toCheck) {
-                array[i] = zobristHigh;
-                array[i + 1] = zobristLow;
-                array[i + 2] = value;
-                return;
-            }
+        final long zobristMasked = zobrist & ZOBRIST_MASK;
+        if (array[hashed] == 0L) {
+            array[hashed] = zobristMasked | (value << VALUE_SHIFT);
+        } else {
+            array[hashed + 1] = zobristMasked | (value << VALUE_SHIFT);
         }
     }
 
     private int hash(final long zobrist) {
-        int hash = (int) (zobrist % array.length);
-        if (hash < 0) {
-            hash += array.length;
-        }
-        return hash;
+        final long offset = zobrist & HASH_MASK;
+        final long segment = (zobrist & (~HASH_MASK)) % sizeInMB;
+        return (int) (segment * (HASH_MASK + 1) + offset);
     }
 
     public void clear() {
-        Arrays.fill(array, 0);
+        Arrays.fill(array, 0L);
     }
 }

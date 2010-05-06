@@ -7,8 +7,8 @@ import java.util.Arrays;
 /**
  */
 public final class EvalHashTable {
-    private static final long VALUE_SHIFT = 1;
-    private static final long VALUE_MASK = 0x1FFFE;
+    private static final long VALUE_SHIFT = 2;
+    private static final long VALUE_MASK = 0x1FFFC;
     private static final long HASH_MASK = 0x1FFFF;
     private static final long ZOBRIST_MASK = 0xFFFFFFFFFFFFFFFFL ^ VALUE_MASK;
 
@@ -24,10 +24,16 @@ public final class EvalHashTable {
         final int hashed = hash(zobrist);
         final long zobristMasked = zobrist & ZOBRIST_MASK;
         if ((array[hashed] & ZOBRIST_MASK) == zobristMasked) {
-            return (int) ((array[hashed] & VALUE_MASK) >> VALUE_SHIFT);
+            return (int) ((array[hashed] & VALUE_MASK) >> (VALUE_SHIFT - 1));
         }
         if ((array[hashed + 1] & ZOBRIST_MASK) == zobristMasked) {
-            return (int) ((array[hashed + 1] & VALUE_MASK) >> VALUE_SHIFT);
+            return (int) ((array[hashed + 1] & VALUE_MASK) >> (VALUE_SHIFT - 1));
+        }
+        if ((array[hashed + 2] & ZOBRIST_MASK) == zobristMasked) {
+            return (int) ((array[hashed + 2] & VALUE_MASK) >> (VALUE_SHIFT - 1));
+        }
+        if ((array[hashed + 3] & ZOBRIST_MASK) == zobristMasked) {
+            return (int) ((array[hashed + 3] & VALUE_MASK) >> (VALUE_SHIFT - 1));
         }
         return 0;
     }
@@ -36,9 +42,13 @@ public final class EvalHashTable {
         final int hashed = hash(zobrist);
         final long zobristMasked = zobrist & ZOBRIST_MASK;
         if (array[hashed] == 0L) {
-            array[hashed] = zobristMasked | (value << VALUE_SHIFT);
+            array[hashed] = zobristMasked | ((value >> 1) << VALUE_SHIFT);
+        } else if (array[hashed + 1] == 0L) {
+            array[hashed + 1] = zobristMasked | ((value >> 1) << VALUE_SHIFT);
+        } else if (array[hashed + 2] == 0L) {
+            array[hashed + 2] = zobristMasked | ((value >> 1) << VALUE_SHIFT);
         } else {
-            array[hashed + 1] = zobristMasked | (value << VALUE_SHIFT);
+            array[hashed + 3] = zobristMasked | ((value >> 1) << VALUE_SHIFT);
         }
     }
 

@@ -64,7 +64,7 @@ public class UCI {
         final int evalHashTableSize = Integer.parseInt(evalHashTableSizeStr);
         final Configuration config = Configuration.getInstance();
         config.setTranspositionTableSizeInMB(transpTableSize);
-        config.setTranspositionTableSizeInMB(evalHashTableSize);
+        config.setEvalHashTableSizeInMB(evalHashTableSize);
 
         final UCI protocol = new UCI(new BufferedReader(new InputStreamReader(System.in)), outputStream, book);
         protocol.run();

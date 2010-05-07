@@ -17,7 +17,8 @@ public class Utils {
 	public static final int KNIGHT = BISHOP + 1;
 	public static final int PAWN = KNIGHT + 1;
     public static final int[] TYPES = new int[] {KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN};
-	
+    public static final int[] TYPES_NOPAWN = new int[] {KING, QUEEN, ROOK, BISHOP, KNIGHT};
+
 	// state
 	public static final int BLACK_TO_MOVE = 0x00000000;
     public static final int BLACK = BLACK_TO_MOVE;

@@ -29,19 +29,19 @@ public final class Evaluation {
     public static final int[][] VAL_PIECE_COUNTS;
     public static final int[][] VAL_PIECE_INCREMENTS;
 
-    private static final int[] VAL_POSITION_BONUS_PAWN;
-    private static final int[] VAL_POSITION_BONUS_PAWN_ENDGAME;
-    private static final int[] VAL_POSITION_BONUS_KNIGHT;
-    private static final int[] VAL_POSITION_BONUS_BISHOP;
-    private static final int[] VAL_POSITION_BONUS_ROOK;
-    private static final int[] VAL_POSITION_BONUS_QUEEN;
-    private static final int[] VAL_POSITION_BONUS_KING;
-    private static final int[] VAL_POSITION_BONUS_KING_ENDGAME;
+    public static final int[] VAL_POSITION_BONUS_PAWN;
+    public static final int[] VAL_POSITION_BONUS_PAWN_ENDGAME;
+    public static final int[] VAL_POSITION_BONUS_KNIGHT;
+    public static final int[] VAL_POSITION_BONUS_BISHOP;
+    public static final int[] VAL_POSITION_BONUS_ROOK;
+    public static final int[] VAL_POSITION_BONUS_QUEEN;
+    public static final int[] VAL_POSITION_BONUS_KING;
+    public static final int[] VAL_POSITION_BONUS_KING_ENDGAME;
 
     private static final int[][] VAL_POSITION_BONUS_OPENING = new int[7][128];
     private static final int[][] VAL_POSITION_BONUS_ENDGAME = new int[7][128];
 
-    private static final int[] SHIFT_POSITION_BONUS = new int[]{0, 8};
+    public static final int[] SHIFT_POSITION_BONUS = new int[]{0, 8};
 
     public static final int PENALTY_DOUBLE_PAWN = -20;
     public static final int PENALTY_TRIPLE_PAWN = -30;
@@ -223,7 +223,7 @@ public final class Evaluation {
         }
         int score = board.getMaterialValueAsWhite() - VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] +
             VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
-        score += computePositionalBonus(board);
+        score += computePositionalBonusNoPawn(board);
         score += computeMobilityBonus(board);
         score += pawnEval(board);
         if (random) {
@@ -259,10 +259,10 @@ public final class Evaluation {
         return score;
     }
 
-    public int computePositionalBonus(final Board board) {
+    public int computePositionalBonusNoPawn(final Board board) {
         int typeBonusOpening = 0;
         int typeBonusEndGame = 0;
-        for (int type: TYPES) {
+        for (int type: TYPES_NOPAWN) {
             final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[type];
             final int[] positionalBonusEndGame = VAL_POSITION_BONUS_OPENING[type];
             final int[] pieces = board.getPieces(WHITE, type);
@@ -479,7 +479,13 @@ public final class Evaluation {
 
         long[] pawnMask = new long[2];
         long[] pawnAttackMask = new long[2];
+        int typeBonusOpening = 0;
+        int typeBonusEndGame = 0;
+        final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[PAWN];
+        final int[] positionalBonusEndGame = VAL_POSITION_BONUS_OPENING[PAWN];
+
         final int[] pawnsWhite = board.getPieces(WHITE, PAWN);
+        final int shiftPositionBonusWhite = SHIFT_POSITION_BONUS[WHITE];
         int pawnStormBonus = 0;
         for (int i = pawnsWhite[0]; i > 0; i--) {
             final int pawn = pawnsWhite[i];
@@ -503,8 +509,11 @@ public final class Evaluation {
                     }
                 }
             }
+            typeBonusOpening += positionalBonusOpening[pawn + shiftPositionBonusWhite];
+            typeBonusEndGame += positionalBonusEndGame[pawn + shiftPositionBonusWhite];
         }
         final int[] pawnsBlack = board.getPieces(BLACK, PAWN);
+        final int shiftPositionBonusBlack = SHIFT_POSITION_BONUS[BLACK];
         for (int i = pawnsBlack[0]; i > 0; i--) {
             final int pawn = pawnsBlack[i];
             final int pawn64 = convert0x88To64(pawn);
@@ -527,9 +536,11 @@ public final class Evaluation {
                     }
                 }
             }
+            typeBonusOpening -= positionalBonusOpening[pawn + shiftPositionBonusBlack];
+            typeBonusEndGame -= positionalBonusEndGame[pawn + shiftPositionBonusBlack];
         }
         score += pawnStormBonus * stage / STAGE_MAX;
-
+        score += (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
         score += VAL_PIECE_COUNTS[PAWN][pawnsWhite[0]] - VAL_PIECE_COUNTS[PAWN][pawnsBlack[0]];
 
         final long attackedWhitePawns = pawnMask[WHITE] & pawnAttackMask[BLACK];

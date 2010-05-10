@@ -319,7 +319,7 @@ public final class Engine {
         // null-move pruning
         if (depth > (3 << SHIFT_PLY) && !inCheck && allowNull && beta < VAL_MATE - 200 &&
                 board.getOfficerCount(toMove) > 0) {
-            final int r = (depth > (7 << SHIFT_PLY)? 3: 2) << SHIFT_PLY;
+            final int r = (depth > (6 << SHIFT_PLY)? 3: 2) << SHIFT_PLY;
             final int prevState = board.nullMove();
             final int value = -negascout(board, depth - r, -beta, -beta + 1, false, false);
             if (cancelled) {

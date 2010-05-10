@@ -22,7 +22,7 @@ public final class Board {
     private final int[] pieceArrayPos = new int[128];
     private final long[] bitboardAllPieces = new long[2];
     private long zobristIncremental = computeZobristIncremental(this);
-    private long zobrist = zobristIncremental ^ computeZobristNonIncremental(this);
+    private long zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
     private long zobristPawn;
     private final RepetitionTable repetitionTable = new RepetitionTable();
     private final int[] materialValue = new int[2];
@@ -56,7 +56,7 @@ public final class Board {
         pieces[KING][1][0] = 1; pieces[KING][1][1] = E[0];
 
         zobristIncremental = computeZobristIncremental(this);
-        zobrist = zobristIncremental ^ computeZobristNonIncremental(this);
+        zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
         zobristPawn = computeZobrist(this, PAWN) ^ computeZobrist(this, KING);
         repetitionTable.clear();
         repetitionTable.increment(zobrist);
@@ -79,7 +79,7 @@ public final class Board {
 		Arrays.fill(pieces[QUEEN][0], 0); Arrays.fill(pieces[QUEEN][1], 0);
 		Arrays.fill(pieces[KING][0], 0); Arrays.fill(pieces[KING][1], 0);
         zobristIncremental = computeZobristIncremental(this);
-        zobrist = zobristIncremental ^ computeZobristNonIncremental(this);
+        zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
         zobristPawn = computeZobrist(this, PAWN) ^ computeZobrist(this, KING);
         repetitionTable.clear();
         repetitionTable.increment(zobrist);
@@ -113,7 +113,7 @@ public final class Board {
 
     public void recompute() {
         zobristIncremental = computeZobristIncremental(this);
-        zobrist = zobristIncremental ^ computeZobristNonIncremental(this);
+        zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
         zobristPawn = computeZobrist(this, PAWN) ^ computeZobrist(this, KING);
         materialValue[WHITE] = Evaluation.computeMaterialValueOneSide(this, WHITE);
         materialValue[BLACK] = Evaluation.computeMaterialValueOneSide(this, BLACK);
@@ -126,7 +126,7 @@ public final class Board {
     public long move(final int move) {
         final int moveBase = move & BASE_INFO;
 //        System.out.println("Move: " + StringUtils.toSimple(moveBase));
-        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(this));
+        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(state));
         assert zobristPawn == (computeZobrist(this, PAWN) ^ computeZobrist(this, KING));
         assert getMaterialValueAsWhite() == Evaluation.computeMaterialValueAsWhite(this):
             "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
@@ -244,9 +244,9 @@ public final class Board {
             replacePromotedPawn(signum, toIndex, currentPlayer, KNIGHT);
 			break;
 		}
-        zobrist = zobristIncremental ^ computeZobristNonIncremental(this);
+        zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
         repetitionTable.increment(zobrist);
-        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(this));
+        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(state));
         assert zobristPawn == (computeZobrist(this, PAWN) ^ computeZobrist(this, KING));
         assert pieces[PAWN][0][0] <= 8;
         assert pieces[PAWN][1][0] <= 8;
@@ -429,8 +429,8 @@ public final class Board {
                 addToPieceList(currentPlayer ^ WHITE_TO_MOVE, absCaptured, toIndex);
             }
         }
-        zobrist = zobristIncremental ^ computeZobristNonIncremental(this);
-        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(this));
+        zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
+        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(state));
         assert zobristPawn == (computeZobrist(this, PAWN) ^ computeZobrist(this, KING));
         assert pieces[PAWN][0][0] <= 8;
         assert pieces[PAWN][1][0] <= 8;
@@ -450,7 +450,7 @@ public final class Board {
         zobrist ^= ZOBRIST_WHITE_TO_MOVE;
         zobrist ^= ZOBRIST_EN_PASSANT[(state & EN_PASSANT) >> SHIFT_EN_PASSANT];
         state ^= state & EN_PASSANT;
-        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(this));
+        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(state));
         return prevState;
     }
 
@@ -460,7 +460,7 @@ public final class Board {
         zobrist ^= ZOBRIST_WHITE_TO_MOVE;
         zobrist ^= ZOBRIST_EN_PASSANT[(prevState & EN_PASSANT) >> SHIFT_EN_PASSANT];
         state ^= prevState & EN_PASSANT;
-        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(this));
+        assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(state));
     }
 
     public int[] getPieceArrayPositions() {

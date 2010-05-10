@@ -343,8 +343,7 @@ public class Utils {
         return zobrist;
     }
 
-    public static long computeZobristNonIncremental(final Board board) {
-        final int state = board.getState();
+    public static long computeZobristNonIncremental(final int state) {
         long zobrist = ZOBRIST_CASTLING[(state & CASTLING_ALL) >> SHIFT_CASTLING];
         zobrist ^= ZOBRIST_EN_PASSANT[(state & EN_PASSANT) >> SHIFT_EN_PASSANT];
         return zobrist;

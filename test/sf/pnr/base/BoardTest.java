@@ -319,7 +319,6 @@ public class BoardTest extends TestCase {
         for (int i = 0; i < board.length; i++) {
             assertTrue(board[i] != EMPTY && pieceArrayPos[i] != EMPTY || board[i] == EMPTY && pieceArrayPos[i] == EMPTY);
         }
-        assert boardObj.getZobristKey() == (computeZobristIncremental(boardObj) ^ computeZobristNonIncremental(boardObj));
 	}
 
 	private static void checkPieceListConsistency(final Board board, final int piece) {

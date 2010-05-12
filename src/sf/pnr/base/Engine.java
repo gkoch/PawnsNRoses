@@ -185,6 +185,11 @@ public final class Engine {
                     if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
                             ((move & MT_CASTLING) == 0) && !attacksKing(board, toMove)) {
                         a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true);
+                        if (cancelled) {
+                            board.takeBack(undo);
+                            moveGenerator.popFrame();
+                            return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
+                        }
                     }
                     moveCount++;
                 }
@@ -192,34 +197,31 @@ public final class Engine {
                 // evaluate the move
                 if (a > alpha) {
                     a = -negascout(board, depth - PLY, -b, -alpha, quiescenceChild, hasLegalMove);
+                    if (cancelled) {
+                        board.takeBack(undo);
+                        moveGenerator.popFrame();
+                        return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
+                    }
+
+                    // the other player has a better option, beta cut off
+                    if (a >= beta) {
+                        board.takeBack(undo);
+                        moveGenerator.popFrame();
+                        assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
+                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
+                        addMoveToHistoryTable(board, depth, searchStage, move);
+                        assert move != 0;
+                        return getSearchResult(move, a);
+                    }
                 }
 
-                if (cancelled) {
-                    board.takeBack(undo);
-                    moveGenerator.popFrame();
-                    return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
-                }
-
-                // the other player has a better option, beta cut off
-                if (a >= beta) {
-                    board.takeBack(undo);
-                    moveGenerator.popFrame();
-                    assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
-                    transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
-                    addMoveToHistoryTable(board, depth, searchStage, move);
-                    assert move != 0;
-                    return getSearchResult(move, a);
-                }
-                if (a >= b && (searchStage != SearchStage.TRANS_TABLE) ) {
+                if (a >= b) {
                     // null-window was too narrow, try a full search
                     a = -negascout(board, depth - PLY, -beta, -a, quiescenceChild, hasLegalMove);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
                         return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
-                    }
-                    if (a < beta && a > alpha) {
-                        transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     }
                     if (a >= beta) {
                         board.takeBack(undo);
@@ -229,6 +231,9 @@ public final class Engine {
                         addMoveToHistoryTable(board, depth, searchStage, move);
                         assert move != 0;
                         return getSearchResult(move, a);
+                    }
+                    if (a < beta && a > alpha) {
+                        transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     }
                 }
 
@@ -318,7 +323,7 @@ public final class Engine {
 
         // null-move pruning
         if (depth > (3 << SHIFT_PLY) && !inCheck && allowNull && beta < VAL_MATE - 200 &&
-                board.getOfficerCount(toMove) > 0) {
+                board.getMinorMajorPieceCount(toMove) > 0) {
             final int r = (depth > (7 << SHIFT_PLY)? 3: 2) << SHIFT_PLY;
             final int prevState = board.nullMove();
             final int value = -negascout(board, depth - r, -beta, -beta + 1, false, false);
@@ -400,6 +405,11 @@ public final class Engine {
                     if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
                             ((move & MT_CASTLING) == 0) && !opponentInCheck) {
                         a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true);
+                        if (cancelled) {
+                            board.takeBack(undo);
+                            moveGenerator.popFrame();
+                            return alpha;
+                        }
                     }
                     moveCount++;
                 }
@@ -407,34 +417,31 @@ public final class Engine {
                 // evaluate the move
                 if (a > alpha) {
                     a = -negascout(board, depth - PLY, -b, -alpha, startQuiescence, true);
+                    if (cancelled) {
+                        board.takeBack(undo);
+                        moveGenerator.popFrame();
+                        return alpha;
+                    }
+                    // the other player has a better option, beta cut off
+                    if (a >= beta) {
+                        board.takeBack(undo);
+                        moveGenerator.popFrame();
+                        assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
+                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
+                        addMoveToHistoryTable(board, depth, searchStage, move);
+                        return a;
+                    }
                 }
 
-                if (cancelled) {
-                    board.takeBack(undo);
-                    moveGenerator.popFrame();
-                    return alpha;
-                }
                 hasEvaluatedMove = true;
 
-                // the other player has a better option, beta cut off
-                if (a >= beta) {
-                    board.takeBack(undo);
-                    moveGenerator.popFrame();
-                    assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
-                    transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
-                    addMoveToHistoryTable(board, depth, searchStage, move);
-                    return a;
-                }
-                if (a >= b && (searchStage != SearchStage.TRANS_TABLE) ) {
+                if (a >= b) {
                     // null-window was too narrow, try a full search
                     a = -negascout(board, depth - PLY, -beta, -a, startQuiescence, true);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
                         return alpha;
-                    }
-                    if (a < beta && a > alpha && !startQuiescence) {
-                        transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     }
                     if (a >= beta) {
                         board.takeBack(undo);
@@ -443,6 +450,9 @@ public final class Engine {
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                         addMoveToHistoryTable(board, depth, searchStage, move);
                         return a;
+                    }
+                    if (a < beta && a > alpha && !startQuiescence) {
+                        transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     }
                 }
                 board.takeBack(undo);
@@ -523,7 +533,6 @@ public final class Engine {
 
         final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
-        final boolean inCheck = attacksKing(board, 1 - toMove);
 
         moveGenerator.pushFrame();
         boolean hasLegalMove = false;
@@ -552,7 +561,6 @@ public final class Engine {
                 // register that we had a legal move
                 hasLegalMove = true;
 
-                final int toIndex = getMoveToIndex(move);
                 if (!allowToRecurseDown) {
                     board.takeBack(undo);
                     continue;
@@ -576,7 +584,7 @@ public final class Engine {
                     addMoveToHistoryTable(board, 0, searchStage, move);
                     return a;
                 }
-                if (a >= b && (searchStage != SearchStage.TRANS_TABLE) ) {
+                if (a >= b) {
                     // null-window was too narrow, try a full search
                     a = -quiescence(board, -beta, -a);
                     if (cancelled) {
@@ -614,6 +622,7 @@ public final class Engine {
         }
         moveGenerator.popFrame();
         if (!hasLegalMove) {
+            final boolean inCheck = attacksKing(board, 1 - toMove);
             if (inCheck) {
                 return -Evaluation.VAL_MATE;
             } else {

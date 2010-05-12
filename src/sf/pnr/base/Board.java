@@ -591,7 +591,7 @@ public final class Board {
         return SLIDING[absPiece];
     }
 
-    public int getOfficerCount(final int toMove) {
+    public int getMinorMajorPieceCount(final int toMove) {
         return pieces[KNIGHT][toMove][0] + pieces[BISHOP][toMove][0] + pieces[ROOK][toMove][0] + pieces[QUEEN][toMove][0];
     }
 }

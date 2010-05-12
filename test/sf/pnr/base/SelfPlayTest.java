@@ -15,6 +15,8 @@ public class SelfPlayTest {
             final Engine white = new Engine();
             final Engine black = new Engine();
             final Engine[] engines = new Engine[] {black, white};
+            long totalNodeCount = 0;
+            int moveCount = 0;
             while (!isDraw(board) && !isMate(board)) {
                 System.out.print("FEN: " + StringUtils.toFen(board));
                 final Engine engine = engines[board.getState() & Utils.WHITE_TO_MOVE];
@@ -23,8 +25,12 @@ public class SelfPlayTest {
                 final int move = Engine.getMoveFromSearchResult(result);
                 board.move(move);
                 final long endTime = System.currentTimeMillis();
-                System.out.printf(", move: %s, value: %d, time: %d ms\r\n",
-                    StringUtils.toSimple(move), Engine.getValueFromSearchResult(result), endTime - startTime);
+                final long nodeCount = engine.getNodeCount();
+                totalNodeCount += nodeCount;
+                moveCount++;
+                System.out.printf(", move: %s, value: %d, time: %d ms, node count: %d (avg: %.1f)\r\n",
+                    StringUtils.toSimple(move), Engine.getValueFromSearchResult(result), endTime - startTime, nodeCount,
+                    ((double) totalNodeCount) / moveCount);
             }
         }
     }

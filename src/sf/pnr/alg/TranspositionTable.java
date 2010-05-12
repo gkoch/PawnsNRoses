@@ -36,7 +36,7 @@ public final class TranspositionTable {
 
     public TranspositionTable() {
         final int size = Configuration.getInstance().getTranspositionTableSizeInMB() * 1024 * 1024;
-        final int arrayCount = size >> ARRAY_SIZE_SHIFT;
+        final int arrayCount = size >>> ARRAY_SIZE_SHIFT;
         arrays = new long[arrayCount][ARRAY_LENGHT];
     }
 
@@ -86,7 +86,7 @@ public final class TranspositionTable {
                 final int distance = (i - startIndex) >> 1;
                 final long ttStored = array[i + 1];
                 // if it's too old or we've tried at least 20 and it's not an exact match then overwrite it
-                final long ttAge = (ttStored & TT_AGE) >> TT_SHIFT_AGE;
+                final long ttAge = (ttStored & TT_AGE) >>> TT_SHIFT_AGE;
                 if ((ttAge < age - 15 + (distance >> 1)) || distance >= MAX_CHECK_COUNT_EXACT ||
                         distance > MAX_CHECK_COUNT_CUT && (ttStored & TT_TYPE) != TT_TYPE_EXACT) {
                     array[i] = zobrist;
@@ -108,7 +108,7 @@ public final class TranspositionTable {
                 final int distance = (i + checked) >> 1;
                 final long ttStored = array[i + 1];
                 // if it's too old or we've tried at least 20 and it's not an exact match then overwrite it
-                final long ttAge = (ttStored & TT_AGE) >> TT_SHIFT_AGE;
+                final long ttAge = (ttStored & TT_AGE) >>> TT_SHIFT_AGE;
                 if ((ttAge < age - 15 + (distance >> 1)) || distance >= MAX_CHECK_COUNT_EXACT ||
                         distance > MAX_CHECK_COUNT_CUT && (ttStored & TT_TYPE) != TT_TYPE_EXACT) {
                     array[i] = zobrist;

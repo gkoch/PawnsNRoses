@@ -18,7 +18,7 @@ public final class EvalHashTable {
     public int read(final long zobrist) {
         final int hashed = hash(zobrist);
         final int startIndex = hashed / 3 * 3;
-        final int zobristHigh = (int) (zobrist >> 32);
+        final int zobristHigh = (int) (zobrist >>> 32);
         final int zobristLow = (int) (zobrist & 0xFFFFFFFFL);
 
         for (int i = startIndex; i < array.length; i += 3) {
@@ -46,7 +46,7 @@ public final class EvalHashTable {
     public void set(final long zobrist, final int value) {
         final int hashed = hash(zobrist);
         final int startIndex = hashed / 3 * 3;
-        final int zobristHigh = (int) (zobrist >> 32);
+        final int zobristHigh = (int) (zobrist >>> 32);
         final int zobristLow = (int) (zobrist & 0xFFFFFFFFL);
 
         final int toCheck1 = startIndex + MAX_CHECK_INDEX;

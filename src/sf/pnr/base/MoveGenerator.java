@@ -122,7 +122,7 @@ public class MoveGenerator {
     public static void generatePseudoLegalMovesSliding(final Board boardObj, final int[] deltas, final int startingPos,
                                                        final Frame frame) {
         final int[] board = boardObj.getBoard();
-        final int side = board[startingPos] >> 31;
+        final int side = board[startingPos] >>> 31;
         final int[] moves = frame.getMoves();
         int idx = moves[0];
         final int[] winningCaptures = frame.getWinningCaptures();
@@ -133,7 +133,7 @@ public class MoveGenerator {
                 final int attacked = board[pos];
                 if (attacked == EMPTY) {
                     moves[++idx] = (pos << SHIFT_TO) | startingPos;
-                } else if (side != (attacked >> 31)) {
+                } else if (side != (attacked >>> 31)) {
                     final int value = staticExchangeEvaluation(boardObj, startingPos, pos);
                     if (value >= 0) {
                         final int move = (pos << SHIFT_TO) | startingPos | (value << SHIFT_MOVE_VALUE);

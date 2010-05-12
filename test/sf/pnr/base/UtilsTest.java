@@ -41,4 +41,11 @@ public class UtilsTest extends TestCase {
         board = fromFen("rnbqkbnr/p1pppppp/8/8/P6P/R1p5/1P1PPPP1/1NBQKBNR b Kkq - 0 4");
         assertEquals(0x5C3F9B829B279560L, board.getPolyglotZobristKey());
     }
+
+    public void testSide() {
+        final Board board = new Board();
+        board.restart();
+        assertEquals(WHITE, side(board.getBoard()[A[0]]));
+        assertEquals(BLACK, side(board.getBoard()[A[7]]));
+    }
 }

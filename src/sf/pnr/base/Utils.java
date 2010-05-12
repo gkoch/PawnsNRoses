@@ -369,6 +369,6 @@ public class Utils {
     }
 
     public static int side(final int piece) {
-        return piece >> 31;
+        return 1 - (piece >>> 31);
     }
 }

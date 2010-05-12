@@ -223,7 +223,7 @@ public final class Evaluation {
         }
         int score = board.getMaterialValueAsWhite() - VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] +
             VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
-        score += computePositionalBonusNoPawn(board);
+        score += computePositionalBonusNoPawnAsWhite(board);
         score += computeMobilityBonus(board);
         score += pawnEval(board);
         if (random) {
@@ -259,21 +259,21 @@ public final class Evaluation {
         return score;
     }
 
-    public int computePositionalBonusNoPawn(final Board board) {
+    public int computePositionalBonusNoPawnAsWhite(final Board board) {
         int typeBonusOpening = 0;
         int typeBonusEndGame = 0;
         for (int type: TYPES_NOPAWN) {
             final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[type];
             final int[] positionalBonusEndGame = VAL_POSITION_BONUS_OPENING[type];
-            final int[] pieces = board.getPieces(WHITE, type);
-            for (int i = pieces[0]; i > 0; i--) {
-                typeBonusOpening += positionalBonusOpening[pieces[i] + SHIFT_POSITION_BONUS[WHITE]];
-                typeBonusEndGame += positionalBonusEndGame[pieces[i] + SHIFT_POSITION_BONUS[WHITE]];
+            final int[] whites = board.getPieces(WHITE, type);
+            for (int i = whites[0]; i > 0; i--) {
+                typeBonusOpening += positionalBonusOpening[whites[i] + SHIFT_POSITION_BONUS[WHITE]];
+                typeBonusEndGame += positionalBonusEndGame[whites[i] + SHIFT_POSITION_BONUS[WHITE]];
             }
-            final int[] piecesOpponent = board.getPieces(BLACK, type);
-            for (int i = piecesOpponent[0]; i > 0; i--) {
-                typeBonusOpening -= positionalBonusOpening[piecesOpponent[i] + SHIFT_POSITION_BONUS[BLACK]];
-                typeBonusEndGame -= positionalBonusEndGame[piecesOpponent[i] + SHIFT_POSITION_BONUS[BLACK]];
+            final int[] blacks = board.getPieces(BLACK, type);
+            for (int i = blacks[0]; i > 0; i--) {
+                typeBonusOpening -= positionalBonusOpening[blacks[i] + SHIFT_POSITION_BONUS[BLACK]];
+                typeBonusEndGame -= positionalBonusEndGame[blacks[i] + SHIFT_POSITION_BONUS[BLACK]];
             }
         }
         final int stage = board.getStage();
@@ -290,15 +290,16 @@ public final class Evaluation {
 
     public int computeMobilityBonus(final Board board) {
         int score = computeMobilityBonusPawn(board, WHITE) - computeMobilityBonusPawn(board, BLACK);
-        score += computeMobilityBonusKnight(board, WHITE) - computeMobilityBonusKnight(board, BLACK);
-        score += computeMobilityBonusSliding(board, WHITE, BISHOP, BONUS_DISTANCE_BISHOP) -
-            computeMobilityBonusSliding(board, BLACK, BISHOP, BONUS_DISTANCE_BISHOP);
-        score += computeMobilityBonusSliding(board, WHITE, ROOK, BONUS_DISTANCE_ROOK) -
-            computeMobilityBonusSliding(board, BLACK, ROOK, BONUS_DISTANCE_ROOK);
-        score += computeMobilityBonusSliding(board, WHITE, QUEEN, BONUS_DISTANCE_QUEEN) -
-            computeMobilityBonusSliding(board, BLACK, QUEEN, BONUS_DISTANCE_QUEEN);
+        final int[] distance = new int[1];
+        score += computeMobilityBonusKnight(board, WHITE, distance) - computeMobilityBonusKnight(board, BLACK, distance);
+        score += computeMobilityBonusSliding(board, WHITE, BISHOP, BONUS_DISTANCE_BISHOP, distance) -
+            computeMobilityBonusSliding(board, BLACK, BISHOP, BONUS_DISTANCE_BISHOP, distance);
+        score += computeMobilityBonusSliding(board, WHITE, ROOK, BONUS_DISTANCE_ROOK, distance) -
+            computeMobilityBonusSliding(board, BLACK, ROOK, BONUS_DISTANCE_ROOK, distance);
+        score += computeMobilityBonusSliding(board, WHITE, QUEEN, BONUS_DISTANCE_QUEEN, distance) -
+            computeMobilityBonusSliding(board, BLACK, QUEEN, BONUS_DISTANCE_QUEEN, distance);
         score += computeMobilityBonusKing(board, WHITE) - computeMobilityBonusKing(board, BLACK);
-        return score;
+        return score + distance[0] * board.getStage() / STAGE_MAX;
     }
 
     private int computeMobilityBonusPawn(final Board boardObj, final int side) {
@@ -337,16 +338,16 @@ public final class Evaluation {
         return score;
     }
 
-    private int computeMobilityBonusKnight(final Board board, final int side) {
+    private int computeMobilityBonusKnight(final Board board, final int side, final int[] distance) {
         final long piecesMask = board.getBitboard(side);
         final long opponentPiecesMask = board.getBitboard(1 - side);
         final int opponentKing = board.getKing(1 - side);
         final int opponentKing64 = convert0x88To64(opponentKing);
         final long opponentKingMask = 1L << opponentKing64;
         int score = 0;
-        final int[] pieces = board.getPieces(side, KNIGHT);
-        for (int i = pieces[0]; i > 0; i--) {
-            final int knight = pieces[i];
+        final int[] knights = board.getPieces(side, KNIGHT);
+        for (int i = knights[0]; i > 0; i--) {
+            final int knight = knights[i];
             final int knight64 = convert0x88To64(knight);
             final long knightMask = KNIGHT_MOVES[knight64];
             final long defended = knightMask & piecesMask;
@@ -355,7 +356,7 @@ public final class Evaluation {
             score += Long.bitCount(attacked) * BONUS_ATTACK;
             score += Long.bitCount(knightMask ^ defended ^ attacked) * BONUS_MOBILITY;
             score += Long.bitCount(knightMask & opponentKingMask) * BONUS_KING_IN_SIGHT_NON_SLIDING;
-            score += BONUS_DISTANCE_KNIGHT[distance(knight, opponentKing)];
+            distance[0] += BONUS_DISTANCE_KNIGHT[distance(knight, opponentKing)];
         }
         return score;
     }
@@ -367,11 +368,11 @@ public final class Evaluation {
         return distance;
     }
 
-    private int computeMobilityBonusSliding(final Board boardObj, final int side, final int type, final int[] distanceBonus) {
+    private int computeMobilityBonusSliding(final Board boardObj, final int side, final int type,
+                                            final int[] distanceBonus, final int[] distance) {
         final int opponentKing = boardObj.getKing(1 - side);
         final int[] board = boardObj.getBoard();
         int score = 0;
-        int distance = 0;
         final int[] pieces = boardObj.getPieces(side, type);
         for (int i = pieces[0]; i > 0; i--) {
             final int piecePos = pieces[i];
@@ -386,9 +387,9 @@ public final class Evaluation {
                     }
                 }
             }
-            distance += distanceBonus[distance(piecePos, opponentKing)];
+            distance[0] += distanceBonus[distance(piecePos, opponentKing)];
         }
-        return score + distance * boardObj.getStage() / STAGE_MAX;
+        return score;
     }
 
     private int computeMobilityBonusKing(final Board boardObj, final int side) {

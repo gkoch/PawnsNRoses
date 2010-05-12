@@ -19,7 +19,7 @@ public class PawnHashTable {
         final int hashed = hash(zobrist);
         if (zobrist != 0L && array[hashed] == zobrist) {
             final long storedValue = array[hashed + 1];
-            final long storedStage = (storedValue >> STAGE_SHIFT) & STAGE_MASK;
+            final long storedStage = (storedValue >>> STAGE_SHIFT) & STAGE_MASK;
             if (storedStage - stage < STAGE_BEHIND_LIMIT && stage - storedStage < STAGE_IN_FRONT_OF_LIMIT) {
                 return (int) (storedValue & VALUE_MASK) - VALUE_OFFSET;
             }

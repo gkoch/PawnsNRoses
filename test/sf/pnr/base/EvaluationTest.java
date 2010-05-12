@@ -51,13 +51,13 @@ public class EvaluationTest extends TestCase {
     public void testPositionalValuePawn() {
         final Board board = new Board();
         board.restart();
-        assertEquals(0, new Evaluation().computePositionalBonusNoPawn(board));
+        assertEquals(0, new Evaluation().computePositionalBonusNoPawnAsWhite(board));
         assertEquals(40, new Evaluation().computePositionalGain(PAWN, WHITE_TO_MOVE, E[1], E[3], board.getStage()));
         board.move(StringUtils.fromSimple("e2e4"));
-        assertEquals(0, new Evaluation().computePositionalBonusNoPawn(board));
+        assertEquals(0, new Evaluation().computePositionalBonusNoPawnAsWhite(board));
         assertEquals(40, new Evaluation().computePositionalGain(PAWN, BLACK_TO_MOVE, E[6], E[4], board.getStage()));
         board.move(StringUtils.fromSimple("e7e5"));
-        assertEquals(0, new Evaluation().computePositionalBonusNoPawn(board));
+        assertEquals(0, new Evaluation().computePositionalBonusNoPawnAsWhite(board));
     }
 
     public void testIsolatedPawnOnFileA() {

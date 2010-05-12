@@ -365,7 +365,7 @@ public final class Board {
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
         repetitionTable.decrement(zobrist);
         // restore the state and the move info
-		state = (int) (undo >> 32);
+		state = (int) (undo >>> 32);
         final int move = (int) undo;
 //        System.out.println("Undo: " + StringUtils.toSimple(move));
 

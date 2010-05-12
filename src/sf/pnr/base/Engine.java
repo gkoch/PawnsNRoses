@@ -668,7 +668,7 @@ public final class Engine {
             timeEllapsed = 10;
         }
         final long timeLeft = searchEndTime - currentTime;
-        long nodesToProcessUntilNextCheck = (timeLeft * nodeCount / timeEllapsed) >> 1;
+        long nodesToProcessUntilNextCheck = (timeLeft * nodeCount / timeEllapsed) >>> 1;
         if (nodesToProcessUntilNextCheck < 200) {
             nodesToProcessUntilNextCheck = 200;
         }
@@ -741,7 +741,7 @@ public final class Engine {
         int shift = 0;
         int tmp = historyMax;
         while (tmp > 0x00FF) {
-            tmp >>= 1;
+            tmp >>>= 1;
             shift++;
         }
         final int toMove = board.getState() & WHITE_TO_MOVE;
@@ -756,7 +756,7 @@ public final class Engine {
                 final int fromIndex64 = convert0x88To64(fromIndex);
                 final int toIndex64 = convert0x88To64(toIndex);
                 final int piece = board.getBoard()[fromIndex];
-                final int historyValue = history[piece + 7][fromIndex64][toIndex64] >> shift;
+                final int historyValue = history[piece + 7][fromIndex64][toIndex64] >>> shift;
                 final int absPiece = piece * signum;
                 final int checkBonus;
                 final boolean sliding = board.isSliding(absPiece);
@@ -886,7 +886,7 @@ public final class Engine {
     }
 
     public static int getMoveFromSearchResult(final long result) {
-        return (int) (result >> 32);
+        return (int) (result >>> 32);
     }
 
     public static long getSearchResult(final int move, final int value) {

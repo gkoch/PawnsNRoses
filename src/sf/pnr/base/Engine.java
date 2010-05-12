@@ -411,8 +411,8 @@ public final class Engine {
                             return alpha;
                         }
                     }
-                    moveCount++;
                 }
+                moveCount++;
 
                 // evaluate the move
                 if (a > alpha) {

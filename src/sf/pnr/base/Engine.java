@@ -79,7 +79,8 @@ public final class Engine {
                 alpha = INITIAL_ALPHA;
                 beta = INITIAL_BETA;
             }
-            long result = negascoutRoot(board, depth << SHIFT_PLY, alpha, beta);
+            searchDepth = depth << SHIFT_PLY;
+            long result = negascoutRoot(board, searchDepth, alpha, beta);
             if (cancelled) {
                 final int move = getMoveFromSearchResult(result);
                 if (move != 0) {
@@ -89,10 +90,10 @@ public final class Engine {
             }
             value = getValueFromSearchResult(result);
             if (value <= alpha) {
-                result = negascoutRoot(board, depth << SHIFT_PLY, INITIAL_ALPHA, alpha);
+                result = negascoutRoot(board, searchDepth, INITIAL_ALPHA, alpha);
                 value = getValueFromSearchResult(result);
             } else if (value >= beta) {
-                result = negascoutRoot(board, depth << SHIFT_PLY, beta, INITIAL_BETA);
+                result = negascoutRoot(board, searchDepth, beta, INITIAL_BETA);
                 value = getValueFromSearchResult(result);
             }
             assert cancelled || value == 0 || getMoveFromSearchResult(result) != 0;
@@ -121,7 +122,6 @@ public final class Engine {
     }
 
     public long negascoutRoot(final Board board, final int depth, int alpha, final int beta) {
-        searchDepth = depth;
         if (board.getRepetitionCount() == 3 || Evaluation.drawByInsufficientMaterial(board)) {
             // three-fold repetition
             return VAL_DRAW;
@@ -315,7 +315,13 @@ public final class Engine {
                 }
             }
         }
-        final int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
+
+        int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
+        if (ttMove == 0 && depth > 3 * PLY) {
+            // internal iterative deepening
+            final long searchResult = negascoutRoot(board, depth / 2, alpha, beta);
+            ttMove = getMoveFromSearchResult(searchResult);
+        }
 
         final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
@@ -881,6 +887,10 @@ public final class Engine {
         this.listener = listener;
     }
 
+    public void setSearchDepth(final int searchDepth) {
+        this.searchDepth = searchDepth;
+    }
+ 
     public static int getValueFromSearchResult(final long result) {
         return (int) (result & 0xFFFFFFFFL);
     }

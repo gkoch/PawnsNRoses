@@ -63,6 +63,7 @@ public final class Evaluation {
     public static final int[] BONUS_DISTANCE_QUEEN = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
     public static final int BONUS_KING_IN_SIGHT_NON_SLIDING = 5;
     public static final int BONUS_KING_IN_SIGHT_SLIDING = 3;
+    public static final int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN;
 
     public static final int INITIAL_MATERIAL_VALUE;
 
@@ -225,10 +226,24 @@ public final class Evaluation {
             VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
         score += computePositionalBonusNoPawnAsWhite(board);
         score += computeMobilityBonus(board);
-        score += pawnEval(board);
+        final long pawnHashValue = pawnEval(board);
+        score += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
+        if (board.getMaterialValueAsWhite() == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] -
+                VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]]) {
+            final int unstoppablePawnDistWhite = PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, toMove);
+            final int unstoppablePawnDistBlack = PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, toMove);
+            if (unstoppablePawnDistWhite < unstoppablePawnDistBlack) {
+                score += BONUS_UNSTOPPABLE_PAWN;
+            } else if (unstoppablePawnDistWhite > unstoppablePawnDistBlack) {
+                score -= BONUS_UNSTOPPABLE_PAWN;
+            } else if (unstoppablePawnDistWhite == unstoppablePawnDistBlack && unstoppablePawnDistWhite != 7) {
+                score += signum * BONUS_UNSTOPPABLE_PAWN;
+            }
+        }
+
         if (random) {
             score += RND.nextInt(20);
-        }
+        }                                                              
         evalHashTable.set(zobrist, score - VAL_MIN);
         return score * signum;
     }
@@ -449,18 +464,18 @@ public final class Evaluation {
         return !(bishopOnWhite && bishopOnBlack);
     }
 
-    public int pawnEval(final Board board) {
+    public long pawnEval(final Board board) {
         final int stage = board.getStage();
         final long zobristPawn = board.getZobristPawn();
-        int eval = pawnHashTable.get(zobristPawn, stage);
-        if (eval == 0) {
-            eval = pawnEval(board, stage);
-            pawnHashTable.set(zobristPawn, eval, stage);
+        long pawnHashValue = pawnHashTable.get(zobristPawn, stage);
+        if (pawnHashValue == 0) {
+            pawnHashValue = pawnEval(board, stage);
+            pawnHashTable.set(zobristPawn, pawnHashValue);
         }
-        return eval;
+        return pawnHashValue;
     }
 
-    public int pawnEval(final Board board, final int stage) {
+    public long pawnEval(final Board board, final int stage) {
 
         int score = 0;
 
@@ -549,14 +564,23 @@ public final class Evaluation {
         score += (Long.bitCount((attackedWhitePawns ^ pawnAttackMask[WHITE]) & attackedWhitePawns) -
             Long.bitCount((attackedBlackPawns ^ pawnAttackMask[BLACK]) & attackedBlackPawns)) * PENALTY_WEAK_PAWN;
 
+        int unstoppablePawnWhite = 7; // TODO: handle case where the opponent king is between two passed pawns
+        int unstoppablePawnIfNextWhite = 7; // TODO: handle case where the opponent king is between two passed pawns
+        int unstoppablePawnBlack = 7;
+        int unstoppablePawnIfNextBlack = 7;
         long prevFileWhite = 0L;
-        long midFileWhite = 0L;
         long prevFileBlack = 0L;
-        long midFileBlack = 0L;
         for (int i = 0; i < 8; i++) {
             final long fileMask = BITBOARD_FILE[i];
-            final long nextFileWhite = pawnMask[WHITE] & fileMask;
-            final int whiteCount = Long.bitCount(nextFileWhite);
+            final long midFileWhite = pawnMask[WHITE] & fileMask;
+            final int whiteCount = Long.bitCount(midFileWhite);
+            final long midFileBlack = pawnMask[BLACK] & fileMask;
+            final int blackCount = Long.bitCount(midFileBlack);
+            if (blackCount + whiteCount == 0) {
+                prevFileWhite = 0L;
+                prevFileBlack = 0L;
+                continue;
+            }
             if (whiteCount >= 2) {
                 if (whiteCount == 2) {
                     score += PENALTY_DOUBLE_PAWN;
@@ -564,18 +588,26 @@ public final class Evaluation {
                     score += PENALTY_TRIPLE_PAWN;
                 }
             }
-            if (prevFileWhite == 0L && midFileWhite > 0L && nextFileWhite == 0L) {
-                score += PENALTY_ISOLATED_PAWN;
-            }
-
-            final long nextFileBlack = pawnMask[BLACK] & fileMask;
-            final int blackCount = Long.bitCount(nextFileBlack);
             if (blackCount >= 2) {
                 if (blackCount == 2) {
                     score -= PENALTY_DOUBLE_PAWN;
                 } else {
                     score -= PENALTY_TRIPLE_PAWN;
                 }
+            }
+
+            final long nextFileWhite;
+            final long nextFileBlack;
+            if (i < 7) {
+                nextFileWhite = pawnMask[WHITE] & BITBOARD_FILE[i + 1];
+                nextFileBlack = pawnMask[BLACK] & BITBOARD_FILE[i + 1];
+            } else {
+                nextFileWhite = 0L;
+                nextFileBlack = 0L;
+            }
+
+            if (prevFileWhite == 0L && midFileWhite > 0L && nextFileWhite == 0L) {
+                score += PENALTY_ISOLATED_PAWN;
             }
             if (prevFileBlack == 0L && midFileBlack > 0L && nextFileBlack == 0L) {
                 score -= PENALTY_ISOLATED_PAWN;
@@ -585,38 +617,62 @@ public final class Evaluation {
             if (highestWhiteBit >= Long.highestOneBit(prevFileBlack) &&
                     highestWhiteBit > Long.highestOneBit(midFileBlack) &&
                     highestWhiteBit >= Long.highestOneBit(nextFileBlack)) {
-                score += BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfLeadingZeros(highestWhiteBit) / 8);
+                final int promotionDistance = Long.numberOfLeadingZeros(highestWhiteBit) / 8;
+                int realDist = promotionDistance;
+                if (promotionDistance == 6) {
+                    realDist--;
+                }
+                if (whiteKingFile == i) {
+                    realDist++;
+                }
+                final int blackKingDist = Math.abs(blackKingFile - i);
+                if (realDist + 1 < blackKingDist) {
+                    if (realDist < unstoppablePawnWhite) {
+                        unstoppablePawnWhite = realDist;
+                    }
+                    if (realDist < unstoppablePawnIfNextWhite) {
+                        unstoppablePawnIfNextWhite = realDist;
+                    }
+                }
+                if (realDist < blackKingDist) {
+                    if (realDist < unstoppablePawnIfNextWhite) {
+                        unstoppablePawnIfNextWhite = realDist;
+                    }
+                }
+                score += BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
             }
 
             final long lowestBlackBit = Long.lowestOneBit(midFileBlack);
-            if (lowestBlackBit != 0 && lowestBlackBit <= Long.lowestOneBit(prevFileWhite) &&
-                    lowestBlackBit < Long.lowestOneBit(midFileWhite) &&
-                    lowestBlackBit <= Long.lowestOneBit(nextFileWhite)) {
-                score -= BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfTrailingZeros(lowestBlackBit) / 8);
+            if (lowestBlackBit != 0 && (lowestBlackBit <= Long.lowestOneBit(prevFileWhite) || prevFileWhite == 0L) &&
+                    (lowestBlackBit < Long.lowestOneBit(midFileWhite) || midFileWhite == 0L) &&
+                    (lowestBlackBit <= Long.lowestOneBit(nextFileWhite) || nextFileWhite == 0L)) {
+                final int promotionDistance = Long.numberOfTrailingZeros(lowestBlackBit) / 8;
+                int realDist = promotionDistance;
+                if (promotionDistance == 6) {
+                    realDist--;
+                }
+                if (blackKingFile == i) {
+                    realDist++;
+                }
+                final int whiteKingDist = Math.abs(whiteKingFile - i);
+                if (realDist + 1 < whiteKingDist) {
+                    if (realDist < unstoppablePawnBlack) {
+                        unstoppablePawnBlack = realDist;
+                    }
+                    if (realDist < unstoppablePawnIfNextBlack) {
+                        unstoppablePawnIfNextBlack = realDist;
+                    }
+                }
+                if (realDist < whiteKingDist) {
+                    if (realDist < unstoppablePawnIfNextBlack) {
+                        unstoppablePawnIfNextBlack = realDist;
+                    }
+                }
+                score -= BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
             }
 
             prevFileWhite = midFileWhite;
-            midFileWhite = nextFileWhite;
             prevFileBlack = midFileBlack;
-            midFileBlack = nextFileBlack;
-        }
-        if (prevFileWhite == 0L && midFileWhite > 0L) {
-            score += PENALTY_ISOLATED_PAWN;
-        }
-        if (prevFileBlack == 0L && midFileBlack > 0L) {
-            score -= PENALTY_ISOLATED_PAWN;
-        }
-        
-        final long highestWhiteBit = Long.highestOneBit(midFileWhite);
-        if (highestWhiteBit >= Long.highestOneBit(prevFileBlack) &&
-                highestWhiteBit > Long.highestOneBit(midFileBlack)) {
-            score += BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfLeadingZeros(highestWhiteBit) / 8);
-        }
-
-        final long lowestBlackBit = Long.lowestOneBit(midFileBlack);
-        if (lowestBlackBit != 0 && lowestBlackBit <= Long.lowestOneBit(prevFileWhite) &&
-                lowestBlackBit < Long.lowestOneBit(midFileWhite)) {
-            score -= BONUS_PASSED_PAWN_PER_SQUARE * (Long.numberOfTrailingZeros(lowestBlackBit) / 8);
         }
 
         int pawnShield = 0;
@@ -652,7 +708,8 @@ public final class Evaluation {
         }
         score += pawnShield * (STAGE_MAX - stage) / STAGE_MAX;
 
-        return score;
+        return PawnHashTable.getPawnHashValue(score, stage, unstoppablePawnWhite, unstoppablePawnIfNextWhite,
+            unstoppablePawnBlack, unstoppablePawnIfNextBlack);
     }
 
     public void setRandom(final boolean random) {

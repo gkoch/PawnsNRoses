@@ -625,7 +625,7 @@ public final class Evaluation {
                 if (whiteKingFile == i) {
                     realDist++;
                 }
-                final int blackKingDist = Math.abs(blackKingFile - i);
+                final int blackKingDist = Math.max(Math.abs(blackKingFile - i), 7 - blackKingRank);
                 if (realDist + 1 < blackKingDist) {
                     if (realDist < unstoppablePawnWhite) {
                         unstoppablePawnWhite = realDist;
@@ -654,7 +654,7 @@ public final class Evaluation {
                 if (blackKingFile == i) {
                     realDist++;
                 }
-                final int whiteKingDist = Math.abs(whiteKingFile - i);
+                final int whiteKingDist = Math.max(Math.abs(whiteKingFile - i), whiteKingRank);
                 if (realDist + 1 < whiteKingDist) {
                     if (realDist < unstoppablePawnBlack) {
                         unstoppablePawnBlack = realDist;

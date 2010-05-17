@@ -21,6 +21,10 @@ public final class Engine {
     private static final int VAL_DEEP_FUTILITY_THRESHOLD = 675;
     private static final int LATE_MOVE_REDUCTION_MIN_DEPTH = 3 << SHIFT_PLY;
     private static final int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
+
+    private static final int DEPTH_EXT_CHECK = PLY;
+    private static final int DEPTH_EXT_7TH_RANK_PAWN = PLY >> 1;
+
     private int searchDepth;
 
     private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
@@ -399,7 +403,7 @@ public final class Engine {
                 // register that we had a legal move
                 hasLegalMove = true;
 
-                final boolean opponentInCheck = attacksKing(board, toMove);
+                final boolean opponentInCheck = attacksKing(board, toMove); // TODO: limit search to current move!
                 if (!allowToRecurseDown && !opponentInCheck) {
                     board.takeBack(undo);
                     if (nodeCount >= nodeCountAtNextTimeCheck) {
@@ -426,9 +430,23 @@ public final class Engine {
                     moveCount++;
                 }
 
+                int depthExt = 0;
+                if (opponentInCheck) {
+                    depthExt += DEPTH_EXT_CHECK;
+                }
+                final int toIndex = getMoveToIndex(move);
+                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
+                    final int piece = board.getBoard()[toIndex];
+                    final int signum = (toMove << 1) - 1;
+                    final int absPiece = signum * piece;
+                    if (absPiece == PAWN) {
+                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
+                    }
+                }
+
                 // evaluate the move
                 if (a > alpha) {
-                    a = -negascout(board, depth - PLY, -b, -alpha, startQuiescence, true);
+                    a = -negascout(board, depth - PLY + depthExt, -b, -alpha, startQuiescence, true);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
@@ -449,7 +467,7 @@ public final class Engine {
 
                 if (a >= b) {
                     // null-window was too narrow, try a full search
-                    a = -negascout(board, depth - PLY, -beta, -a, startQuiescence, true);
+                    a = -negascout(board, depth - PLY + depthExt, -beta, -a, startQuiescence, true);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();

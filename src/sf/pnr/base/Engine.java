@@ -201,8 +201,8 @@ public final class Engine {
                             return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
                         }
                     }
-                    moveCount++;
                 }
+                moveCount++;
 
                 // evaluate the move
                 if (a > alpha) {
@@ -427,8 +427,8 @@ public final class Engine {
                             return alpha;
                         }
                     }
-                    moveCount++;
                 }
+                moveCount++;
 
                 int depthExt = 0;
                 if (opponentInCheck) {

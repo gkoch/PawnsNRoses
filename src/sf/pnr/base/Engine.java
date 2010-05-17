@@ -132,7 +132,7 @@ public final class Engine {
 
         final long zobristKey = board.getZobristKey();
         final long ttValue = transpositionTable.read(zobristKey);
-        final int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
+        int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
         int bestMove = 0;
         if (ttValue != 0) {
             final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
@@ -154,6 +154,12 @@ public final class Engine {
                     bestMove = ttMove;
                 }
             }
+        }
+
+        if (ttMove == 0 && depth > 3 * PLY) {
+            // internal iterative deepening
+            final long searchResult = negascoutRoot(board, depth / 2, alpha, beta);
+            ttMove = getMoveFromSearchResult(searchResult);
         }
 
         final int state = board.getState();
@@ -316,13 +322,6 @@ public final class Engine {
             }
         }
 
-        int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        if (ttMove == 0 && depth > 3 * PLY) {
-            // internal iterative deepening
-            final long searchResult = negascoutRoot(board, depth / 2, alpha, beta);
-            ttMove = getMoveFromSearchResult(searchResult);
-        }
-
         final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
         final boolean inCheck = attacksKing(board, 1 - toMove);
@@ -346,6 +345,13 @@ public final class Engine {
             // TODO: mate threat detection
 //            final int value2 = -negascout(board, depth - r, -VAL_MATE / 2, -VAL_MATE, false, false);
             board.nullMove(prevState);
+        }
+
+        int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
+        if (ttMove == 0 && depth > 3 * PLY) {
+            // internal iterative deepening
+            final long searchResult = negascoutRoot(board, depth / 2, alpha, beta);
+            ttMove = getMoveFromSearchResult(searchResult);
         }
 
         // futility pruning

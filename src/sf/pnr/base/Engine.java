@@ -403,7 +403,7 @@ public final class Engine {
                 // register that we had a legal move
                 hasLegalMove = true;
 
-                final boolean opponentInCheck = attacksKing(board, toMove); // TODO: limit search to current move!
+                final boolean opponentInCheck = attacksKingAfterMove(board, toMove, move);
                 if (!allowToRecurseDown && !opponentInCheck) {
                     board.takeBack(undo);
                     if (nodeCount >= nodeCountAtNextTimeCheck) {
@@ -430,19 +430,19 @@ public final class Engine {
                 }
                 moveCount++;
 
-                int depthExt = 0;
-                if (opponentInCheck) {
-                    depthExt += DEPTH_EXT_CHECK;
-                }
-                final int toIndex = getMoveToIndex(move);
-                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
-                    final int piece = board.getBoard()[toIndex];
-                    final int signum = (toMove << 1) - 1;
-                    final int absPiece = signum * piece;
-                    if (absPiece == PAWN) {
-                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
-                    }
-                }
+                final int depthExt = 0;
+//                if (opponentInCheck) {
+//                    depthExt += DEPTH_EXT_CHECK;
+//                }
+//                final int toIndex = getMoveToIndex(move);
+//                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
+//                    final int piece = board.getBoard()[toIndex];
+//                    final int signum = (toMove << 1) - 1;
+//                    final int absPiece = signum * piece;
+//                    if (absPiece == PAWN) {
+//                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
+//                    }
+//                }
 
                 // evaluate the move
                 if (a > alpha) {
@@ -710,6 +710,50 @@ public final class Engine {
         final int kingIndex = board.getKing(1 - side);
         assert Math.abs(board.getBoard()[kingIndex]) == KING;
         return board.isAttacked(kingIndex, side);
+    }
+
+    public static boolean attacksKingAfterMove(final Board board, final int side, final int move) {
+        final int kingIndex = board.getKing(1 - side);
+        final int fromIndex = getMoveFromIndex(move);
+        final int[] boardArray = board.getBoard();
+        final int signum = (side << 1) - 1;
+        final int toIndex = getMoveToIndex(move);
+        final int piece = boardArray[toIndex];
+        final int absPiece = signum * piece;
+        if (absPiece == KING) {
+            return false;
+        }
+        assert absPiece != EMPTY && absPiece != KING: absPiece;
+        if (board.isAttackedBySliding(kingIndex, ATTACK_Q, fromIndex)) {
+            // search for discovered check
+            final int attackValue = ATTACK_ARRAY[fromIndex - kingIndex + 120];
+            final int attackBits = attackValue & ATTACK_Q;
+            assert attackBits != 0;
+            final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
+            int testIndex = fromIndex + delta;
+            while ((testIndex & 0x88) == 0 && boardArray[testIndex] == EMPTY) {
+                testIndex += delta;
+            }
+            if ((testIndex & 0x88) == 0 && boardArray[testIndex] * signum < 0) return true;
+        }
+        switch (absPiece) {
+            case PAWN:
+                final int[] deltas = DELTA_PAWN_ATTACK[side];
+                for (int delta: deltas) {
+                    if (toIndex + delta == kingIndex) {
+                        return true;
+                    }
+                }
+                return false;
+            case KNIGHT:
+                return ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_N) == ATTACK_N);
+            case BISHOP:
+            case ROOK:
+            case QUEEN:
+                return board.isAttackedBySliding(kingIndex, ATTACK_BITS[absPiece], toIndex);
+        }
+        assert false;
+        return false;
     }
 
     private int[] getMoves(final SearchStage searchStage, final Board board, final int ttMove, final int depth) {

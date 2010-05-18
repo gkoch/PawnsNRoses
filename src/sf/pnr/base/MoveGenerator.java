@@ -212,7 +212,7 @@ public class MoveGenerator {
         final int[] pawns = boardObj.getPieces(toMove, PAWN);
         final int pawnCount = pawns[0];
         assert pawnCount <= 8;
-        final int[] deltas = getDeltasPawnAttack(toMove);
+        final int[] deltas = DELTA_PAWN_ATTACK[toMove];
         int capturesIdx = captures[0];
         for (int i = 1; i <= pawnCount; i++) {
             final int fromIndex = pawns[i];

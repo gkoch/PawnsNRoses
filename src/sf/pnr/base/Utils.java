@@ -10,12 +10,12 @@ public class Utils {
 
     // pieces
 	public static final int EMPTY = 0;
-	public static final int KING = EMPTY + 1;
-	public static final int QUEEN = KING + 1;
-	public static final int ROOK = QUEEN + 1;
-	public static final int BISHOP = ROOK + 1;
-	public static final int KNIGHT = BISHOP + 1;
-	public static final int PAWN = KNIGHT + 1;
+	public static final int KING = 1;
+	public static final int QUEEN = 2;
+	public static final int ROOK = 3;
+	public static final int BISHOP = 4;
+	public static final int KNIGHT = 5;
+	public static final int PAWN = 6;
     public static final int[] TYPES = new int[] {KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN};
     public static final int[] TYPES_NOPAWN = new int[] {KING, QUEEN, ROOK, BISHOP, KNIGHT};
 
@@ -323,11 +323,7 @@ public class Utils {
         return (rank << 4) + file;
     }
 
-    public static int[] getDeltasPawnAttack(final int side) {
-		return DELTA_PAWN_ATTACK[side];
-	}
-
-	public static boolean isSliding(final int piece) {
+    public static boolean isSliding(final int piece) {
 		return piece == QUEEN || piece == ROOK || piece == BISHOP;
 	}
 

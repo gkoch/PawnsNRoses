@@ -15,7 +15,6 @@ public final class Evaluation {
     public static final int VAL_DRAW = 0;
     public static final int VAL_MATE = 20000;
     public static final int VAL_MIN = -30000;
-    public static final int VAL_MAX =  30000;
 
     public static final int VAL_PAWN = 100;
     public static final int VAL_KNIGHT = 325;
@@ -566,7 +565,7 @@ public final class Evaluation {
             Long.bitCount((attackedBlackPawns ^ pawnAttackMask[BLACK]) & attackedBlackPawns)) * PENALTY_WEAK_PAWN;
 
         int unstoppablePawnWhite = 7; // TODO: handle case where the opponent king is between two passed pawns
-        int unstoppablePawnIfNextWhite = 7; // TODO: handle case where the opponent king is between two passed pawns
+        int unstoppablePawnIfNextWhite = 7;
         int unstoppablePawnBlack = 7;
         int unstoppablePawnIfNextBlack = 7;
         long prevFileWhite = 0L;
@@ -614,62 +613,60 @@ public final class Evaluation {
                 score -= PENALTY_ISOLATED_PAWN;
             }
 
-            final long highestWhiteBit = Long.highestOneBit(midFileWhite);
-            if (highestWhiteBit >= Long.highestOneBit(prevFileBlack) &&
-                    highestWhiteBit > Long.highestOneBit(midFileBlack) &&
-                    highestWhiteBit >= Long.highestOneBit(nextFileBlack)) {
-                final int promotionDistance = Long.numberOfLeadingZeros(highestWhiteBit) / 8;
-                int realDist = promotionDistance;
-                if (promotionDistance == 6) {
-                    realDist--;
-                }
-                if (whiteKingFile == i) {
-                    realDist++;
-                }
-                final int blackKingDist = Math.max(Math.abs(blackKingFile - i), 7 - blackKingRank);
-                if (realDist + 1 < blackKingDist) {
-                    if (realDist < unstoppablePawnWhite) {
-                        unstoppablePawnWhite = realDist;
+            if (midFileWhite > 0) {
+                final int promotionDistance = Long.numberOfLeadingZeros(midFileWhite) / 8;
+                if ((pawnMask[BLACK] & BITBOARD_FILE_WITH_NEIGHBOURS[i] & BITBOARD_RANKS_ABOVE[7 - promotionDistance]) == 0) {
+                    int realDist = promotionDistance;
+                    if (promotionDistance == 6) {
+                        realDist--;
                     }
-                    if (realDist < unstoppablePawnIfNextWhite) {
-                        unstoppablePawnIfNextWhite = realDist;
+                    if (whiteKingFile == i) {
+                        realDist++;
                     }
-                }
-                if (realDist < blackKingDist) {
-                    if (realDist < unstoppablePawnIfNextWhite) {
-                        unstoppablePawnIfNextWhite = realDist;
+                    final int blackKingDist = Math.max(Math.abs(blackKingFile - i), 7 - blackKingRank);
+                    if (realDist + 1 < blackKingDist) {
+                        if (realDist < unstoppablePawnWhite) {
+                            unstoppablePawnWhite = realDist;
+                        }
+                        if (realDist < unstoppablePawnIfNextWhite) {
+                            unstoppablePawnIfNextWhite = realDist;
+                        }
                     }
+                    if (realDist < blackKingDist) {
+                        if (realDist < unstoppablePawnIfNextWhite) {
+                            unstoppablePawnIfNextWhite = realDist;
+                        }
+                    }
+                    score += BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
                 }
-                score += BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
             }
 
-            final long lowestBlackBit = Long.lowestOneBit(midFileBlack);
-            if (lowestBlackBit != 0 && (lowestBlackBit <= Long.lowestOneBit(prevFileWhite) || prevFileWhite == 0L) &&
-                    (lowestBlackBit < Long.lowestOneBit(midFileWhite) || midFileWhite == 0L) &&
-                    (lowestBlackBit <= Long.lowestOneBit(nextFileWhite) || nextFileWhite == 0L)) {
-                final int promotionDistance = Long.numberOfTrailingZeros(lowestBlackBit) / 8;
-                int realDist = promotionDistance;
-                if (promotionDistance == 6) {
-                    realDist--;
-                }
-                if (blackKingFile == i) {
-                    realDist++;
-                }
-                final int whiteKingDist = Math.max(Math.abs(whiteKingFile - i), whiteKingRank);
-                if (realDist + 1 < whiteKingDist) {
-                    if (realDist < unstoppablePawnBlack) {
-                        unstoppablePawnBlack = realDist;
+            if (midFileBlack > 0) {
+                final int promotionDistance = Long.numberOfTrailingZeros(midFileBlack) / 8;
+                if ((pawnMask[WHITE] & BITBOARD_FILE_WITH_NEIGHBOURS[i] & BITBOARD_RANKS_BELOW[promotionDistance]) == 0) {
+                    int realDist = promotionDistance;
+                    if (promotionDistance == 6) {
+                        realDist--;
                     }
-                    if (realDist < unstoppablePawnIfNextBlack) {
-                        unstoppablePawnIfNextBlack = realDist;
+                    if (blackKingFile == i) {
+                        realDist++;
                     }
-                }
-                if (realDist < whiteKingDist) {
-                    if (realDist < unstoppablePawnIfNextBlack) {
-                        unstoppablePawnIfNextBlack = realDist;
+                    final int whiteKingDist = Math.max(Math.abs(whiteKingFile - i), whiteKingRank);
+                    if (realDist + 1 < whiteKingDist) {
+                        if (realDist < unstoppablePawnBlack) {
+                            unstoppablePawnBlack = realDist;
+                        }
+                        if (realDist < unstoppablePawnIfNextBlack) {
+                            unstoppablePawnIfNextBlack = realDist;
+                        }
                     }
+                    if (realDist < whiteKingDist) {
+                        if (realDist < unstoppablePawnIfNextBlack) {
+                            unstoppablePawnIfNextBlack = realDist;
+                        }
+                    }
+                    score -= BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
                 }
-                score -= BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
             }
 
             prevFileWhite = midFileWhite;

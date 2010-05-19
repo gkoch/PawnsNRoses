@@ -201,8 +201,8 @@ public final class Engine {
                             return moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
                         }
                     }
+                    moveCount++;
                 }
-                moveCount++;
 
                 // evaluate the move
                 if (a > alpha) {
@@ -340,8 +340,7 @@ public final class Engine {
                 board.nullMove(prevState);
                 return alpha;
             }
-// TODO:    if (value >= beta) {
-            if (value > beta) {
+            if (value >= beta) {
                 board.nullMove(prevState);
                 transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, 0, depth >> SHIFT_PLY, value - VAL_MIN, age);
                 return beta;
@@ -427,8 +426,8 @@ public final class Engine {
                             return alpha;
                         }
                     }
+                    moveCount++;
                 }
-                moveCount++;
 
                 int depthExt = 0;
                 if (opponentInCheck) {

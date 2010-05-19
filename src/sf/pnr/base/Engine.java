@@ -430,19 +430,19 @@ public final class Engine {
                 }
                 moveCount++;
 
-                final int depthExt = 0;
-//                if (opponentInCheck) {
-//                    depthExt += DEPTH_EXT_CHECK;
-//                }
-//                final int toIndex = getMoveToIndex(move);
-//                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
-//                    final int piece = board.getBoard()[toIndex];
-//                    final int signum = (toMove << 1) - 1;
-//                    final int absPiece = signum * piece;
-//                    if (absPiece == PAWN) {
-//                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
-//                    }
-//                }
+                int depthExt = 0;
+                if (opponentInCheck) {
+                    depthExt += DEPTH_EXT_CHECK;
+                }
+                final int toIndex = getMoveToIndex(move);
+                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
+                    final int piece = board.getBoard()[toIndex];
+                    final int signum = (toMove << 1) - 1;
+                    final int absPiece = signum * piece;
+                    if (absPiece == PAWN) {
+                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
+                    }
+                }
 
                 // evaluate the move
                 if (a > alpha) {
@@ -723,19 +723,8 @@ public final class Engine {
         if (absPiece == KING) {
             return false;
         }
-        assert absPiece != EMPTY && absPiece != KING: absPiece;
-        if (board.isAttackedBySliding(kingIndex, ATTACK_Q, fromIndex)) {
-            // search for discovered check
-            final int attackValue = ATTACK_ARRAY[fromIndex - kingIndex + 120];
-            final int attackBits = attackValue & ATTACK_Q;
-            assert attackBits != 0;
-            final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
-            int testIndex = fromIndex + delta;
-            while ((testIndex & 0x88) == 0 && boardArray[testIndex] == EMPTY) {
-                testIndex += delta;
-            }
-            if ((testIndex & 0x88) == 0 && boardArray[testIndex] * signum < 0) return true;
-        }
+        assert absPiece != EMPTY;
+        if (isDiscoveredCheck(board, kingIndex, fromIndex, signum)) return true;
         switch (absPiece) {
             case PAWN:
                 final int[] deltas = DELTA_PAWN_ATTACK[side];
@@ -753,6 +742,23 @@ public final class Engine {
                 return board.isAttackedBySliding(kingIndex, ATTACK_BITS[absPiece], toIndex);
         }
         assert false;
+        return false;
+    }
+
+    public static boolean isDiscoveredCheck(final Board board, final int kingIndex, final int fromIndex, final int signum) {
+        if (board.isAttackedBySliding(kingIndex, ATTACK_Q, fromIndex)) {
+            // search for discovered check
+            final int[] boardArray = board.getBoard();
+            final int attackValue = ATTACK_ARRAY[fromIndex - kingIndex + 120];
+            final int attackBits = attackValue & ATTACK_Q;
+            assert attackBits != 0;
+            final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
+            int testIndex = fromIndex + delta;
+            while ((testIndex & 0x88) == 0 && boardArray[testIndex] == EMPTY) {
+                testIndex += delta;
+            }
+            if ((testIndex & 0x88) == 0 && boardArray[testIndex] * signum > 0) return true;
+        }
         return false;
     }
 
@@ -813,10 +819,10 @@ public final class Engine {
 
     private void addMoveValuesAndRemoveTTMove(final int[] moves, final Board board, final int ttMove, final int[] killers) {
         int shift = 0;
-        int tmp = historyMax;
-        while (tmp > 0x00FF) {
-            tmp >>>= 1;
-            shift++;
+        final int leadingZeros = Integer.numberOfLeadingZeros(historyMax);
+        if (leadingZeros < 24) {
+            // normalise history counts
+            shift = 24 - leadingZeros;
         }
         final int toMove = board.getState() & WHITE_TO_MOVE;
         final int kingIndex = board.getKing(1 - toMove);
@@ -832,7 +838,7 @@ public final class Engine {
                 final int piece = board.getBoard()[fromIndex];
                 final int historyValue = history[piece + 7][fromIndex64][toIndex64] >>> shift;
                 final int absPiece = piece * signum;
-                final int checkBonus;
+                int checkBonus = 0;
                 final boolean sliding = board.isSliding(absPiece);
                 if (sliding && ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_BITS[absPiece]) > 0)) {
                     if (board.isAttackedBySliding(kingIndex, ATTACK_BITS[absPiece], toIndex)) {
@@ -845,15 +851,16 @@ public final class Engine {
                 } else if (absPiece == PAWN) {
                     final int rowUp = toIndex + signum * UP;
                     checkBonus = ((rowUp - 1) == kingIndex || (rowUp + 1) == kingIndex)? VAL_CHECK_BONUS: 0;
-                } else {
-                    checkBonus = 0;
                 }
-                final int positionalGain = evaluation.computePositionalGain(absPiece, toMove, fromIndex, toIndex, stage);
+                if (checkBonus < VAL_CHECK_BONUS && isDiscoveredCheck(board, kingIndex, fromIndex, signum)) {
+                    checkBonus = VAL_CHECK_BONUS;
+                }
+                final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromIndex, toIndex, stage);
                 final int valPositional;
                 if (positionalGain < 0) {
                     valPositional = 0;
                 } else {
-                    valPositional = positionalGain << SHIFT_MOVE_VALUE_EXT;
+                    valPositional = (positionalGain >> 2) << SHIFT_MOVE_VALUE;
                 }
                 moves[i] = (historyValue << SHIFT_MOVE_VALUE) + move + checkBonus + valPositional;
             } else {

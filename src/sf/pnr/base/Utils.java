@@ -64,8 +64,7 @@ public class Utils {
     public static final int SHIFT_TO = 7;
 	public static final int SHIFT_MOVE_TYPE = 14;
 	public static final int SHIFT_CAPTURED = 17;
-	public static final int SHIFT_MOVE_VALUE = 20;
-	public static final int SHIFT_MOVE_VALUE_EXT = SHIFT_CAPTURED;
+	public static final int SHIFT_MOVE_VALUE = 17;
 	public static final int MT_NORMAL = 0 << SHIFT_MOVE_TYPE;
 	public static final int MT_CASTLING_KINGSIDE = 1 << SHIFT_MOVE_TYPE;
 	public static final int MT_CASTLING_QUEENSIDE = 2 << SHIFT_MOVE_TYPE;

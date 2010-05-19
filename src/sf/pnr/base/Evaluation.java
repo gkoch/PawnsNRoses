@@ -295,7 +295,8 @@ public final class Evaluation {
         return (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
     }
 
-    public int computePositionalGain(final int absPiece, final int toMove, final int fromIndex, final int toIndex, final int stage) {
+    public static int computePositionalGain(final int absPiece, final int toMove, final int fromIndex, final int toIndex,
+                                            final int stage) {
         final int shift = toMove << 3;
         final int[] typeBonusOpening = VAL_POSITION_BONUS_OPENING[absPiece];
         final int[] typeBonusEndGame = VAL_POSITION_BONUS_ENDGAME[absPiece];

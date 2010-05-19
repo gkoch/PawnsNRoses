@@ -83,6 +83,12 @@ public class EngineTest extends TestCase {
         assertTrue(toSimple(bestLine), MoveGeneratorTest.containsMove(bestLine, fromSimple("e5g3")));
     }
 
+    public void testIsDiscoveredCheck() {
+        final Board board = fromFen("1k2r1nr/p1p2ppp/PpQ5/4b3/8/3P1P2/1PPN2PP/4K1NR b - - 0 1");
+        board.move(StringUtils.fromSimple("e5b2"));
+        assertTrue(Engine.isDiscoveredCheck(board, E[0], E[4], -1));
+    }
+
     public void testMateIn5Ply() {
         final Board board = fromFen("k1K5/1p6/1P6/8/8/p7/N7/8 w - - 0 1");
         final int searchDepth = (5 + 1) << SHIFT_PLY;

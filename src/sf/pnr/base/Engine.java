@@ -114,7 +114,7 @@ public final class Engine {
                     System.currentTimeMillis() - searchStartTime,
                     getBestLine(board, getMoveFromSearchResult(searchResult)), nodeCount);
             }
-            if (value > VAL_MATE - 200) {
+            if (value > VAL_MATE_THRESHOLD) {
                 break;
             }
             if ((System.currentTimeMillis() - searchStartTime) > (searchEndTime - searchStartTime) * 0.9) {
@@ -150,7 +150,7 @@ public final class Engine {
             } else if (ttType == TT_TYPE_ALPHA_CUT || ttType == TT_TYPE_BETA_CUT) {
                 final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
                 if (ttDepth >= (depth >> SHIFT_PLY)) {
-                    if (value > VAL_MATE - 200) {
+                    if (value > VAL_MATE_THRESHOLD) {
                         assert ttMove != 0;
                         return getSearchResult(ttMove, value);
                     }
@@ -255,14 +255,14 @@ public final class Engine {
                     bestMove = move;
                     alpha = a;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
-                    if (alpha > VAL_MATE - 200) {
+                    if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
                 }
 
                 b = alpha + 1;
             }
-            if (alpha > VAL_MATE - 200) {
+            if (alpha > VAL_MATE_THRESHOLD) {
                 break;
             }
         }
@@ -315,11 +315,11 @@ public final class Engine {
                     assert ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE) != 0;
                     return (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
                 }
-            } else if (ttType == TT_TYPE_ALPHA_CUT || ttType == TT_TYPE_BETA_CUT) {
+            } else {
                 final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
                 if (ttDepth >= (depth >> SHIFT_PLY)) {
                     alpha = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-                    if (alpha > VAL_MATE - 200) {
+                    if (alpha > VAL_MATE_THRESHOLD) {
                         return alpha;
                     }
                 }
@@ -331,7 +331,7 @@ public final class Engine {
         final boolean inCheck = attacksKing(board, 1 - toMove);
 
         // null-move pruning
-        if (depth > (3 << SHIFT_PLY) && !inCheck && allowNull && beta < VAL_MATE - 200 &&
+        if (depth > (3 << SHIFT_PLY) && !inCheck && allowNull && beta < VAL_MATE_THRESHOLD &&
                 board.getMinorMajorPieceCount(toMove) > 0) {
             final int r = (depth > (6 << SHIFT_PLY)? 3: 2) << SHIFT_PLY;
             final int prevState = board.nullMove();
@@ -358,16 +358,11 @@ public final class Engine {
         }
 
         // futility pruning
-        final boolean futility;
+        final int futility;
         if (depth < (3 << SHIFT_PLY) && !inCheck) {
-            final int value = board.getMaterialValue();
-            if (depth < (2 << SHIFT_PLY)) {
-                futility = value < alpha - VAL_FUTILITY_THRESHOLD;
-            } else {
-                futility = value < alpha - VAL_DEEP_FUTILITY_THRESHOLD;
-            }
+            futility = depth <= PLY ? VAL_FUTILITY_THRESHOLD : VAL_DEEP_FUTILITY_THRESHOLD;
         } else {
-            futility = false;
+            futility = 0;
         }
 
         moveGenerator.pushFrame();
@@ -380,10 +375,6 @@ public final class Engine {
             final boolean startQuiescence =
                 depth < (2 << SHIFT_PLY) && (searchStage == SearchStage.CAPTURES_WINNING ||
                     searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING);
-            final boolean allowToRecurseDown = !futility ||
-                (searchStage == SearchStage.TRANS_TABLE || searchStage == SearchStage.CAPTURES_WINNING ||
-                    searchStage == SearchStage.PROMOTION);
-
             final int[] moves = getMoves(searchStage, board, ttMove, depth);
             for (int i = moves[0]; i > 0; i--) {
                 final int move = moves[i];
@@ -403,16 +394,34 @@ public final class Engine {
                 hasLegalMove = true;
 
                 final boolean opponentInCheck = attacksKingAfterMove(board, toMove, move);
-                if (!allowToRecurseDown && !opponentInCheck) {
-                    board.takeBack(undo);
-                    if (nodeCount >= nodeCountAtNextTimeCheck) {
-                        calculateNextTimeCheck();
-                        if (cancelled) {
-                            moveGenerator.popFrame();
-                            return alpha;
-                        }
+                int depthExt = 0;
+                if (opponentInCheck) {
+                    depthExt += DEPTH_EXT_CHECK;
+                }
+                final int toIndex = getMoveToIndex(move);
+                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
+                    final int piece = board.getBoard()[toIndex];
+                    final int signum = (toMove << 1) - 1;
+                    final int absPiece = signum * piece;
+                    if (absPiece == PAWN) {
+                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
                     }
-                    break;
+                }
+
+                if (depthExt == 0 && futility > 0 && moveCount > 0) {
+                    // TODO: change condition if moveCount is increased for important moves as well
+                    final int value = board.getMaterialValue();
+                    if (value < alpha - futility) {
+                        board.takeBack(undo);
+                        if (nodeCount >= nodeCountAtNextTimeCheck) {
+                            calculateNextTimeCheck();
+                            if (cancelled) {
+                                moveGenerator.popFrame();
+                                return alpha;
+                            }
+                        }
+                        break;
+                    }
                 }
 
                 int a = alpha + 1;
@@ -427,20 +436,6 @@ public final class Engine {
                         }
                     }
                     moveCount++;
-                }
-
-                int depthExt = 0;
-                if (opponentInCheck) {
-                    depthExt += DEPTH_EXT_CHECK;
-                }
-                final int toIndex = getMoveToIndex(move);
-                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
-                    final int piece = board.getBoard()[toIndex];
-                    final int signum = (toMove << 1) - 1;
-                    final int absPiece = signum * piece;
-                    if (absPiece == PAWN) {
-                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
-                    }
                 }
 
                 // evaluate the move
@@ -480,7 +475,7 @@ public final class Engine {
                         addMoveToHistoryTable(board, depth, searchStage, move);
                         return a;
                     }
-                    if (a < beta && a > alpha && !startQuiescence) {
+                    if (a < beta && a > alpha) {
                         transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     }
                 }
@@ -489,14 +484,14 @@ public final class Engine {
                     bestMove = move;
                     alpha = a;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
-                    if (alpha > VAL_MATE - 200) {
+                    if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
                 }
 
                 b = alpha + 1;
             }
-            if (hasLegalMove && alpha > VAL_MATE - 200) {
+            if (hasLegalMove && alpha > VAL_MATE_THRESHOLD) {
                 break;
             }
         }
@@ -554,7 +549,7 @@ public final class Engine {
                 return (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
             } else if (ttType == TT_TYPE_ALPHA_CUT || ttType == TT_TYPE_BETA_CUT) {
                 alpha = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-                if (alpha > VAL_MATE - 200) {
+                if (alpha > VAL_MATE_THRESHOLD) {
                     return alpha;
                 }
             }
@@ -638,14 +633,14 @@ public final class Engine {
                     bestMove = move;
                     alpha = a;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, 0, a - VAL_MIN, age);
-                    if (alpha > VAL_MATE - 200) {
+                    if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
                 }
 
                 b = alpha + 1;
             }
-            if (hasLegalMove && alpha > VAL_MATE - 200) {
+            if (hasLegalMove && alpha > VAL_MATE_THRESHOLD) {
                 break;
             }
         }

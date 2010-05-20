@@ -14,6 +14,7 @@ public final class Evaluation {
 
     public static final int VAL_DRAW = 0;
     public static final int VAL_MATE = 20000;
+    public static final int VAL_MATE_THRESHOLD = VAL_MATE - 200;
     public static final int VAL_MIN = -30000;
 
     public static final int VAL_PAWN = 100;

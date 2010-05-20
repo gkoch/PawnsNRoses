@@ -32,13 +32,13 @@ public class EngineTest extends TestCase {
         assertTrue(Integer.toString(score), score > VAL_ROOK * 0.9 && score < VAL_ROOK * 1.1);
         // MATE
         score = Engine.getValueFromSearchResult(engine.search(fromFen("5rk1/5Npp/8/3Q4/8/8/8/7K w - - 0 1"), 6, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         // QUEEN
         score = Engine.getValueFromSearchResult(engine.search(fromFen("2k5/8/8/8/p7/8/8/4K3 b - - 0 1"), 5, 0));
         assertTrue(Integer.toString(score), score > VAL_QUEEN * 0.7 && score < VAL_QUEEN * 1.3);
         // MATE
         score = Engine.getValueFromSearchResult(engine.search(fromFen("8/8/8/8/8/8/R7/R3K2k w Q - 0 1"), 5, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         // -QUEEN
         score = Engine.getValueFromSearchResult(engine.search(fromFen("7k/8/8/8/R2K3q/8/8/8 w - - 0 1"), 5, 0));
         assertTrue(Integer.toString(score), score < -VAL_QUEEN * 0.7 && score > -VAL_QUEEN * 1.3);
@@ -47,14 +47,14 @@ public class EngineTest extends TestCase {
     public void testTranspTable() {
         final Board board = fromFen("5rk1/5Npp/8/3Q4/8/8/8/7K w - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 6, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testTranspTable2() {
         final Board board = fromFen("1b1k4/2NP4/1P1K4/4P3/8/8/8/8 w - - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals(fromSimple("e5e6"), bestLine[0]);
         assertEquals(fromSimple("e5e6"), Engine.getMoveFromSearchResult(result));
@@ -63,7 +63,7 @@ public class EngineTest extends TestCase {
     public void testNodeCountCheck() {
         final Board board = fromFen("3rk2r/pp1n1pb1/q1pBpn1p/8/2PP4/3Q1N2/PP3PPP/R3R1K1 w - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 5, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         assertTrue("Too many nodes processed: " + engine.getNodeCount(), engine.getNodeCount() < 100000);
     }
 
@@ -72,13 +72,13 @@ public class EngineTest extends TestCase {
         final int searchDepth = 4 << SHIFT_PLY;
         engine.setSearchDepth(searchDepth);
         final int score = (int)(engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA) & 0xFFFFFFFFL);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testDiscoveredCheck() {
         final Board board = fromFen("1k2r1nr/p1p2ppp/PpQ5/4b3/8/3P1P2/1PPN2PP/4K1NR b - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 4 + 1, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertTrue(toSimple(bestLine), MoveGeneratorTest.containsMove(bestLine, fromSimple("e5g3")));
     }
@@ -94,37 +94,37 @@ public class EngineTest extends TestCase {
         final int searchDepth = (5 + 1) << SHIFT_PLY;
         engine.setSearchDepth(searchDepth);
         final int score = (int)(engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA) & 0xFFFFFFFFL);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testMateIn5Ply2() {
         final Board board = fromFen("5k2/p4r2/Ppp3r1/8/7p/7K/1P1Qn2P/8 b - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 6, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testMateIn11() {
         final Board board = fromFen("7k/8/6P1/6K1/8/8/8/8 w - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 11 + 1, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testMateIn5() {
         final Board board = fromFen("r1b4k/ppqp3p/2n1pPp1/7Q/8/8/PPP2PPP/R4RK1 w - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 5 + 1, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testMateIn8() {
         final Board board = fromFen("8/8/8/3B4/4b2p/3N1p1p/5K1p/7k w - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 8 + 1, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testMateWithPromotion() {
         final Board board = fromFen("6k1/3P2pp/1p6/6r1/P7/1P2q3/5RPP/6K1 w - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 3 + 1, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertTrue(toSimple(bestLine), MoveGeneratorTest.containsMove(bestLine, fromSimple("d7d8Q")) ||
             MoveGeneratorTest.containsMove(bestLine, fromSimple("d7d8R")));
@@ -133,7 +133,7 @@ public class EngineTest extends TestCase {
     public void testMateWithOpponentPromotion() {
         final Board board = fromFen("k1K5/1p6/1P6/8/1N6/8/p7/8 w - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 4 + 1, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertTrue(toSimple(bestLine), MoveGeneratorTest.containsMove(bestLine, fromSimple("b4d5")));
     }
@@ -160,7 +160,7 @@ public class EngineTest extends TestCase {
         final Board board = fromFen("1bkr4/1b2R3/8/8/2qp4/8/6BP/7K w - - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.9);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals(1, bestLine.length);
         assertEquals("Bxb7#", toShort(board, bestLine[0]));
@@ -179,7 +179,7 @@ public class EngineTest extends TestCase {
         final Board board = fromFen("1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.9);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals(1, bestLine.length);
         assertEquals("Rd8#", toShort(board, bestLine[0]));
@@ -191,7 +191,7 @@ public class EngineTest extends TestCase {
         final int searchDepth = 6 << SHIFT_PLY;
         engine.setSearchDepth(searchDepth);
         final int score = (int)(engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA) & 0xFFFFFFFFL);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.9);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals("Rh8+", toShort(board, bestLine[0]));
     }
@@ -209,12 +209,12 @@ public class EngineTest extends TestCase {
         engine.setSearchDepth(searchDepth);
         final int score = (int)(engine.negascoutRoot(fromFen("1b1k4/2NP4/1P1K4/4P3/8/8/8/8 w - - 0 1"), searchDepth,
             INITIAL_ALPHA, INITIAL_BETA));
-        assertTrue(Integer.toString(score), score > VAL_MATE - 200);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testQueenMate() {
         final int score = getValueFromSearchResult(engine.search(fromFen("8/8/8/8/7p/5Qbk/8/5K2 w - - 0 1"), 5, 0));
-        assertTrue(Integer.toString(score), score > VAL_MATE - 200);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testRookSacWithPinnedQueenTimeLimit() {
@@ -232,7 +232,7 @@ public class EngineTest extends TestCase {
         final int searchDepth = 6 << SHIFT_PLY;
         engine.setSearchDepth(searchDepth);
         final int score = (int)(engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA) & 0xFFFFFFFFL);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 
     public void testMateIn2WithTwoRooks() {
@@ -240,7 +240,7 @@ public class EngineTest extends TestCase {
         final int searchDepth = 4 << SHIFT_PLY;
         engine.setSearchDepth(searchDepth);
         final int score = (int)(engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA) & 0xFFFFFFFFL);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
 //
 //    public void testPassedPawnBestMove() {
@@ -262,7 +262,7 @@ public class EngineTest extends TestCase {
         final Board board = fromFen("8/8/8/8/6p1/5PK1/8/3q1Qbk w - - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals("Qg2#", toShort(board, bestLine[0]));
         assertEquals("Qg2#", toShort(board, Engine.getMoveFromSearchResult(result)));
@@ -272,7 +272,7 @@ public class EngineTest extends TestCase {
         final Board board = fromFen("6rk/4rpp1/p2qpN1p/1p4Q1/4pP2/P5R1/1PP3PP/5R1K w - - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals("Qxh6+", toShort(board, bestLine[0]));
         assertEquals("Qxh6+", toShort(board, Engine.getMoveFromSearchResult(result)));
@@ -282,7 +282,7 @@ public class EngineTest extends TestCase {
         final Board board = fromFen("4b1k1/8/5PP1/4B3/8/1pp5/2q5/K6R w - - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals("Rh8+", toShort(board, bestLine[0]));
         assertEquals("Rh8+", toShort(board, Engine.getMoveFromSearchResult(result)));
@@ -292,7 +292,7 @@ public class EngineTest extends TestCase {
         final Board board = fromFen("8/8/8/8/8/7K/2p4p/2R2Rrk w - - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals("Rfe1", toShort(board, bestLine[0]));
         assertEquals("Rfe1", toShort(board, Engine.getMoveFromSearchResult(result)));
@@ -302,7 +302,7 @@ public class EngineTest extends TestCase {
         final Board board = fromFen("3K1k2/5P2/5RPb/8/8/8/8/5Q2 w - - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals("Qh3", toShort(board, bestLine[0]));
         assertEquals("Qh3", toShort(board, Engine.getMoveFromSearchResult(result)));
@@ -312,7 +312,7 @@ public class EngineTest extends TestCase {
         final Board board = fromFen("8/8/8/8/N1K5/k1N5/p7/R2q4 w - - 0 1");
         final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
-        assertTrue(Integer.toString(score), score > VAL_MATE * 0.7);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
         assertEquals("Rxa2#", toShort(board, bestLine[0]));
         assertEquals("Rxa2#", toShort(board, Engine.getMoveFromSearchResult(result)));

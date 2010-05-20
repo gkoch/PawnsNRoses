@@ -68,7 +68,7 @@ public class MateTest extends TestCase {
             engine.clear();
             long result = engine.search(board, depth + 1, 0);
             final int value = Engine.getValueFromSearchResult(result);
-            if (value <= Evaluation.VAL_MATE * 0.7) {
+            if (value <= Evaluation.VAL_MATE_THRESHOLD) {
                 final String fen = StringUtils.toFen(board);
                 System.out.println("Failed to find mate at the expected depth, retrying with one ply more. FEN: " + fen);
                 final long engineNodeCount = engine.getNodeCount();
@@ -79,7 +79,7 @@ public class MateTest extends TestCase {
                 engine.clear();
                 result = engine.search(board, depth + 2, 0);
                 final int value2 = Engine.getValueFromSearchResult(result);
-                Assert.assertTrue(fen + ": " + value2, value2 > Evaluation.VAL_MATE * 0.7);
+                Assert.assertTrue(fen + ": " + value2, value2 > Evaluation.VAL_MATE_THRESHOLD);
             }
 
             final int[] bestLine = engine.getBestLine(board);

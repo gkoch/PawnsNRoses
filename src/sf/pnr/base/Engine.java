@@ -19,6 +19,7 @@ public final class Engine {
     private static final int VAL_BLOCKED_CHECK_BONUS = 100 << SHIFT_MOVE_VALUE;
     private static final int VAL_FUTILITY_THRESHOLD = 400;
     private static final int VAL_DEEP_FUTILITY_THRESHOLD = 675;
+    private static final int VAL_RAZORING_THRESHOLD = 400;
     private static final int LATE_MOVE_REDUCTION_MIN_DEPTH = 3 << SHIFT_PLY;
     private static final int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
 
@@ -408,19 +409,24 @@ public final class Engine {
                     }
                 }
 
-                if (depthExt == 0 && futility > 0 && moveCount > 0) {
+                if (depthExt == 0 && moveCount > 0) {
                     // TODO: change condition if moveCount is increased for important moves as well
                     final int value = board.getMaterialValue();
-                    if (value < alpha - futility) {
-                        board.takeBack(undo);
-                        if (nodeCount >= nodeCountAtNextTimeCheck) {
-                            calculateNextTimeCheck();
-                            if (cancelled) {
-                                moveGenerator.popFrame();
-                                return alpha;
-                            }
+                    if (futility > 0) {
+                        if (value < alpha - futility) {
+                            board.takeBack(undo);
+                            break;
                         }
-                        break;
+                    } else if (depth <= (3 << SHIFT_PLY) && value < beta - VAL_RAZORING_THRESHOLD && beta > alpha + 1) {
+                        final int qscore = -quiescence(board, -b, -alpha);
+                        if (cancelled) {
+                            moveGenerator.popFrame();
+                            return alpha;
+                        }
+                        if (qscore < b) {
+                            board.takeBack(undo);
+                            break;
+                        }
                     }
                 }
 

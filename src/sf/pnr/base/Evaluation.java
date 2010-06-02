@@ -63,7 +63,7 @@ public final class Evaluation {
     public static final int[] BONUS_DISTANCE_QUEEN = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
     public static final int BONUS_KING_IN_SIGHT_NON_SLIDING = 5;
     public static final int BONUS_KING_IN_SIGHT_SLIDING = 3;
-    public static final int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN;
+    public static final int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN - 125;
 
     public static final int INITIAL_MATERIAL_VALUE;
 
@@ -222,8 +222,7 @@ public final class Evaluation {
         if (drawByInsufficientMaterial(board)) {
             return VAL_DRAW;
         }
-        int score = board.getMaterialValueAsWhite() - VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] +
-            VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
+        int score = board.getMaterialValueAsWhite();
         score += computePositionalBonusNoPawnAsWhite(board);
         score += computeMobilityBonus(board);
         final long pawnHashValue = pawnEval(board);
@@ -249,11 +248,6 @@ public final class Evaluation {
     }
 
     public static int computeMaterialValueAsWhite(final Board board) {
-        return computeMaterialValueNoPawn(board) + VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] -
-            VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
-    }
-
-    private static int computeMaterialValueNoPawn(final Board board) {
         int score = VAL_PIECE_COUNTS[KNIGHT][board.getPieces(WHITE, KNIGHT)[0]] -
             VAL_PIECE_COUNTS[KNIGHT][board.getPieces(BLACK, KNIGHT)[0]];
         score += VAL_PIECE_COUNTS[BISHOP][board.getPieces(WHITE, BISHOP)[0]] -
@@ -262,7 +256,8 @@ public final class Evaluation {
             VAL_PIECE_COUNTS[ROOK][board.getPieces(BLACK, ROOK)[0]];
         score += VAL_PIECE_COUNTS[QUEEN][board.getPieces(WHITE, QUEEN)[0]] -
             VAL_PIECE_COUNTS[QUEEN][board.getPieces(BLACK, QUEEN)[0]];
-        return score;
+        return score + VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] -
+            VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
     }
 
     public static int computeMaterialValueOneSide(final Board board, final int side) {
@@ -558,7 +553,6 @@ public final class Evaluation {
         }
         score += pawnStormBonus * stage / STAGE_MAX;
         score += (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
-        score += VAL_PIECE_COUNTS[PAWN][pawnsWhite[0]] - VAL_PIECE_COUNTS[PAWN][pawnsBlack[0]];
 
         final long attackedWhitePawns = pawnMask[WHITE] & pawnAttackMask[BLACK];
         final long attackedBlackPawns = pawnMask[BLACK] & pawnAttackMask[WHITE];

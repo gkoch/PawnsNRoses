@@ -1,7 +1,5 @@
 package sf.pnr.base;
 
-import sf.pnr.alg.TranspositionTable;
-
 import java.util.Map;
 
 /**
@@ -63,8 +61,8 @@ public class SearchTask implements EpdProcessorTask {
             final String[] bestMoves = commands.get("bm").split("/");
             final String engineBestMove = StringUtils.toShort(board, bestLine[0]);
             if (!StringUtils.containsString(bestMoves, engineBestMove)) {
-//                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, best moves: %s\r\n",
-//                    testCount, StringUtils.toFen(board), engineBestMove, Arrays.toString(bestMoves));
+//                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, best moves: %s, commands: %s\r\n",
+//                    testCount, StringUtils.toFen(board), engineBestMove, Arrays.toString(bestMoves), commands);
                 passed = false;
             }
         } else if (commands.containsKey("am")) {
@@ -72,8 +70,8 @@ public class SearchTask implements EpdProcessorTask {
             final String[] avoidMoves = commands.get("am").split("/");
             final String engineBestMove = StringUtils.toShort(board, bestLine[0]);
             if (StringUtils.containsString(avoidMoves, engineBestMove)) {
-//                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, avoid moves: %s\r\n",
-//                    testCount, StringUtils.toFen(board), engineBestMove, Arrays.toString(avoidMoves));
+//                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, avoid moves: %s, commands: %s\r\n",
+//                    testCount, StringUtils.toFen(board), engineBestMove, Arrays.toString(avoidMoves), commands);
                 passed = false;
 
             }

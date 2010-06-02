@@ -70,9 +70,10 @@ public class MateTest extends TestCase {
             final int value = Engine.getValueFromSearchResult(result);
             if (value <= Evaluation.VAL_MATE_THRESHOLD) {
                 final String fen = StringUtils.toFen(board);
-                System.out.println("Failed to find mate at the expected depth, retrying with one ply more. FEN: " + fen);
+                System.out.printf("Failed to find mate at the expected depth (%d), retrying with one ply more. FEN: %s\r\n",
+                    depth + 1, fen);
                 final long engineNodeCount = engine.getNodeCount();
-                if (expectedNodeCount * 500 < engineNodeCount) {
+                if (expectedNodeCount * 10 < engineNodeCount) {
                     System.out.println(StringUtils.toFen(board) + ": " + engineNodeCount + " vs " + expectedNodeCount);
                 }
                 totalNodeCount += engineNodeCount;

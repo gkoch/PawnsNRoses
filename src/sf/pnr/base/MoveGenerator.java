@@ -504,6 +504,29 @@ public class MoveGenerator {
         }
     }
 
+    public static boolean isCapture(final Board board, final int move) {
+        final int toIndex = getMoveToIndex(move);
+        final int[] boardArray = board.getBoard();
+        final int attacked = boardArray[toIndex];
+        if (attacked != EMPTY) {
+            return true;
+        }
+        final int fromIndex = getMoveFromIndex(move);
+        final int piece = boardArray[fromIndex];
+        final int signum = Integer.signum(piece);
+        return piece * signum == PAWN && getFile(fromIndex) != getFile(toIndex);
+    }
+
+    public static boolean isPromotion(final Board board, final int move) {
+        final int fromIndex = getMoveFromIndex(move);
+        final int piece = board.getBoard()[fromIndex];
+        if (piece == PAWN || piece == -PAWN) {
+            final int rank = getRank(getMoveToIndex(move));
+            return rank == 0 || rank == 7;
+        }
+        return false;
+    }
+
     public static final class Frame implements Reinitialiseable {
         private final int[] moves;
         private final int[] winningCaptures;

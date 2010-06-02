@@ -229,7 +229,7 @@ public class BoardTest extends TestCase {
 
     public void testCastlingUndoQueenSide() {
         final Board board = fromFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
-        playAndUndo(board, fromSimple("e1c1") + MT_CASTLING_QUEENSIDE);
+        playAndUndo(board, fromSimple("e1c1") | MT_CASTLING_QUEENSIDE);
     }
 
     public void testCastlingUndoKingSide() {
@@ -261,6 +261,61 @@ public class BoardTest extends TestCase {
         final Board board = fromFen("r3qk1r/ppp1n2p/3p1p2/8/4P3/1B1P4/PpP3PP/R1B1K2R b KQ - 1 2");
         play(board, fromSimple("b2a1N"));
         assertEquals(CASTLING_WHITE_KINGSIDE, board.getState() & CASTLING_ALL);
+    }
+
+    public void testIsDiscoveredCheckKingMove() {
+        final Board board = fromFen("8/8/8/8/2b4p/5p1p/7p/4NK1k w - - 2 3");
+        assertFalse(board.isDiscoveredCheck(board.getKing(BLACK), board.getKing(WHITE), 1));
+    }
+
+    public void testIsCheckingMovePawn() {
+        final Board board = fromFen("1k6/8/P7/8/8/8/8/4K3 w - - 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("a6a7")));
+    }
+
+    public void testIsCheckingMoveKingMove() {
+        final Board board = fromFen("3k4/8/8/8/8/8/8/R3K3 w Q - 0 1");
+        assertFalse(board.isCheckingMove(StringUtils.fromSimple("e1f1")));
+    }
+
+    public void testIsCheckingMoveRookBehindPawn() {
+        final Board board = fromFen("k7/8/8/8/8/P7/R7/K7 w - - 0 1");
+        assertFalse(board.isCheckingMove(StringUtils.fromSimple("a3a4")));
+    }
+
+    public void testIsCheckingMoveCastlingQueenSide() {
+        final Board board = fromFen("3k4/8/8/8/8/8/8/R3K3 w Q - 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("e1c1") | MT_CASTLING_QUEENSIDE));
+    }
+
+    public void testIsCheckingMoveCastlingKingSide() {
+        final Board board = fromFen("5k2/8/8/8/8/8/8/4K2R w K - 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("e1g1") | MT_CASTLING_KINGSIDE));
+    }
+
+    public void testIsCheckingMoveCastling2() {
+        final Board board = fromFen("8/8/8/8/8/8/8/R3K2k w Q - 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("e1c1") | MT_CASTLING_QUEENSIDE));
+    }
+
+    public void testIsCheckingMoveEnPassantBishop() {
+        final Board board = fromFen("b7/8/8/8/4Pp2/8/8/4k2K w - e3 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("f4e3") | MT_EN_PASSANT));
+    }
+
+    public void testIsCheckingMoveEnPassantRook() {
+        final Board board = fromFen("8/8/8/8/r3Pp1K/8/8/4k3 b - e3 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("f4e3") | MT_EN_PASSANT));
+    }
+
+    public void testIsCheckingMovePromotionQueen() {
+        final Board board = fromFen("4k3/P7/8/8/8/8/8/4K3 w - - 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("a7a8Q")));
+    }
+
+    public void testIsCheckingMovePromotionKnight() {
+        final Board board = fromFen("8/P1k5/8/8/8/8/8/4K3 w - - 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("a7a8N")));
     }
 
     public void testPawnCountAfterOpeningMove() {

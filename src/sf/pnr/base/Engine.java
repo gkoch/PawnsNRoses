@@ -15,8 +15,7 @@ public final class Engine {
     public static final int ASPIRATION_WINDOW = 50;
 
     private static final int[] NO_MOVE_ARRAY = new int[] {0};
-    private static final int VAL_CHECK_BONUS = 500 << SHIFT_MOVE_VALUE;
-    private static final int VAL_BLOCKED_CHECK_BONUS = 100 << SHIFT_MOVE_VALUE;
+    private static final int VAL_CHECK_BONUS = 500;
     private static final int VAL_FUTILITY_THRESHOLD = 400;
     private static final int VAL_DEEP_FUTILITY_THRESHOLD = 675;
     private static final int VAL_RAZORING_THRESHOLD = 400;
@@ -169,15 +168,19 @@ public final class Engine {
 
         final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
-        final boolean inCheck = attacksKing(board, 1 - toMove);
+        final boolean inCheck = board.attacksKing(1 - toMove);
 
         moveGenerator.pushFrame();
         int moveCount = 0;
         for (SearchStage searchStage: searchStages) {
-            final boolean quiescenceChild =
-                depth < (2 << SHIFT_PLY) && (searchStage == SearchStage.CAPTURES_WINNING ||
-                    searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING);
+            final boolean highPriorityStage =
+                searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
             final int[] moves = getMoves(searchStage, board, ttMove, depth);
+            final boolean startQuiescence =
+                depth < (2 << SHIFT_PLY) && (searchStage == SearchStage.CAPTURES_WINNING ||
+                    searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING ||
+                    searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
+                        (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
             for (int i = moves[0]; i > 0; i--) {
                 final int move = moves[i];
                 assert (move & BASE_INFO) != 0;
@@ -186,15 +189,15 @@ public final class Engine {
                 final long undo = board.move(move);
 
                 // check if the king remained in check
-                if (attacksKing(board, 1 - toMove)) {
+                if (board.attacksKing(1 - toMove)) {
                     board.takeBack(undo);
                     continue;
                 }
 
                 int a = alpha + 1;
-                if (searchStage == SearchStage.NORMAL || searchStage == SearchStage.CAPTURES_LOOSING) {
+                if (!highPriorityStage) {
                     if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
-                            ((move & MT_CASTLING) == 0) && !attacksKing(board, toMove)) {
+                            ((move & MT_CASTLING) == 0) && !board.attacksKing(toMove)) {
                         a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true);
                         if (cancelled) {
                             board.takeBack(undo);
@@ -207,7 +210,7 @@ public final class Engine {
 
                 // evaluate the move
                 if (a > alpha) {
-                    a = -negascout(board, depth - PLY, -b, -alpha, quiescenceChild, hasLegalMove);
+                    a = -negascout(board, depth - PLY, -b, -alpha, startQuiescence, hasLegalMove);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
@@ -228,7 +231,7 @@ public final class Engine {
 
                 if (a >= b) {
                     // null-window was too narrow, try a full search
-                    a = -negascout(board, depth - PLY, -beta, -a, quiescenceChild, hasLegalMove);
+                    a = -negascout(board, depth - PLY, -beta, -a, startQuiescence, hasLegalMove);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
@@ -329,7 +332,7 @@ public final class Engine {
 
         final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
-        final boolean inCheck = attacksKing(board, 1 - toMove);
+        final boolean inCheck = board.attacksKing(1 - toMove);
 
         // null-move pruning
         if (depth > (3 << SHIFT_PLY) && !inCheck && allowNull && beta < VAL_MATE_THRESHOLD &&
@@ -373,20 +376,24 @@ public final class Engine {
         int bestMove = 0;
         int moveCount = 0;
         for (SearchStage searchStage: searchStages) {
+            final boolean highPriorityStage =
+                searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
+            final int[] moves = getMoves(searchStage, board, ttMove, depth);
             final boolean startQuiescence =
                 depth < (2 << SHIFT_PLY) && (searchStage == SearchStage.CAPTURES_WINNING ||
-                    searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING);
-            final int[] moves = getMoves(searchStage, board, ttMove, depth);
+                    searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING ||
+                    searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
+                        (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
             for (int i = moves[0]; i > 0; i--) {
                 final int move = moves[i];
-
                 assert (move & BASE_INFO) != 0;
 
                 // make the move
                 final long undo = board.move(move);
 
                 // check if the king remained in check
-                if (attacksKing(board, 1 - toMove)) {
+                // TODO instead: check if isCheck is true and if the current move avoids the check
+                if (board.attacksKing(1 - toMove)) {
                     board.takeBack(undo);
                     continue;
                 }
@@ -394,7 +401,7 @@ public final class Engine {
                 // register that we had a legal move
                 hasLegalMove = true;
 
-                final boolean opponentInCheck = attacksKingAfterMove(board, toMove, move);
+                final boolean opponentInCheck = (move & CHECKING) > 0;
                 int depthExt = 0;
                 if (opponentInCheck) {
                     depthExt += DEPTH_EXT_CHECK;
@@ -409,8 +416,7 @@ public final class Engine {
                     }
                 }
 
-                if (depthExt == 0 && moveCount > 0 && futility > 0) {
-                    // TODO: change condition if moveCount is increased for important moves as well
+                if (depthExt == 0 && futility > 0 && !highPriorityStage) {
                     final int value = board.getMaterialValue();
                     if (value < alpha - futility) {
                         board.takeBack(undo);
@@ -419,7 +425,7 @@ public final class Engine {
                 }
 
                 int a = alpha + 1;
-                if (searchStage == SearchStage.NORMAL || searchStage == SearchStage.CAPTURES_LOOSING) {
+                if (!highPriorityStage) {
                     if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
                             ((move & MT_CASTLING) == 0) && !opponentInCheck) {
                         a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true);
@@ -433,7 +439,7 @@ public final class Engine {
                 }
 
                 // evaluate the move
-                if (a > alpha) {
+                if (a > alpha && b >= -VAL_MATE_THRESHOLD) {
                     a = -negascout(board, depth - PLY + depthExt, -b, -alpha, startQuiescence, true);
                     if (cancelled) {
                         board.takeBack(undo);
@@ -450,8 +456,6 @@ public final class Engine {
                         return a;
                     }
                 }
-
-                hasEvaluatedMove = true;
 
                 if (a >= b) {
                     // null-window was too narrow, try a full search
@@ -473,6 +477,7 @@ public final class Engine {
                         transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     }
                 }
+                hasEvaluatedMove = true;
                 board.takeBack(undo);
                 if (a > alpha) {
                     bestMove = move;
@@ -514,15 +519,7 @@ public final class Engine {
 
     public int quiescence(final Board board, int alpha, int beta) {
         nodeCount++;
-        final int eval = evaluation.evaluate(board);
-        if (eval > alpha) {
-            alpha = eval;
-            if (alpha >= beta) {
-                return beta;
-            }
-        }
-        if (board.getRepetitionCount() == 3 || Evaluation.drawByInsufficientMaterial(board)) {
-            // three-fold repetition
+        if (Evaluation.drawByInsufficientMaterial(board)) {
             return VAL_DRAW;
         }
 
@@ -554,6 +551,7 @@ public final class Engine {
 
         moveGenerator.pushFrame();
         boolean hasLegalMove = false;
+        boolean hasEvaluatedMove = false;
         int b = beta;
         int bestMove = 0;
         for (SearchStage searchStage: searchStages) {
@@ -571,7 +569,7 @@ public final class Engine {
                 final long undo = board.move(move);
 
                 // check if the king remained in check
-                if (attacksKing(board, 1 - toMove)) {
+                if (board.attacksKing(1 - toMove)) {
                     board.takeBack(undo);
                     continue;
                 }
@@ -586,6 +584,7 @@ public final class Engine {
 
                 // evaluate the move
                 int a = -quiescence(board, -b, -alpha);
+                hasEvaluatedMove = true;
 
                 if (cancelled) {
                     board.takeBack(undo);
@@ -640,16 +639,22 @@ public final class Engine {
         }
         moveGenerator.popFrame();
         if (!hasLegalMove) {
-            final boolean inCheck = attacksKing(board, 1 - toMove);
+            final boolean inCheck = board.attacksKing(1 - toMove);
             if (inCheck) {
                 return -Evaluation.VAL_MATE;
-            } else {
-                return 0;
             }
         }
 
         if (bestMove != 0) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, 0, alpha - VAL_MIN, age);
+        } else if (!hasEvaluatedMove) {
+            final int eval = evaluation.evaluate(board);
+            if (eval > alpha) {
+                alpha = eval;
+                if (alpha >= beta) {
+                    alpha = beta;
+                }
+            }
         }
         return alpha;
     }
@@ -694,62 +699,6 @@ public final class Engine {
         lastCheckTime = currentTime;
     }
 
-    public static boolean attacksKing(final Board board, final int side) {
-        final int kingIndex = board.getKing(1 - side);
-        assert Math.abs(board.getBoard()[kingIndex]) == KING;
-        return board.isAttacked(kingIndex, side);
-    }
-
-    public static boolean attacksKingAfterMove(final Board board, final int side, final int move) {
-        final int kingIndex = board.getKing(1 - side);
-        final int fromIndex = getMoveFromIndex(move);
-        final int[] boardArray = board.getBoard();
-        final int signum = (side << 1) - 1;
-        final int toIndex = getMoveToIndex(move);
-        final int piece = boardArray[toIndex];
-        final int absPiece = signum * piece;
-        if (absPiece == KING) {
-            return false;
-        }
-        assert absPiece != EMPTY;
-        if (isDiscoveredCheck(board, kingIndex, fromIndex, signum)) return true;
-        switch (absPiece) {
-            case PAWN:
-                final int[] deltas = DELTA_PAWN_ATTACK[side];
-                for (int delta: deltas) {
-                    if (toIndex + delta == kingIndex) {
-                        return true;
-                    }
-                }
-                return false;
-            case KNIGHT:
-                return ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_N) == ATTACK_N);
-            case BISHOP:
-            case ROOK:
-            case QUEEN:
-                return board.isAttackedBySliding(kingIndex, ATTACK_BITS[absPiece], toIndex);
-        }
-        assert false;
-        return false;
-    }
-
-    public static boolean isDiscoveredCheck(final Board board, final int kingIndex, final int fromIndex, final int signum) {
-        if (board.isAttackedBySliding(kingIndex, ATTACK_Q, fromIndex)) {
-            // search for discovered check
-            final int[] boardArray = board.getBoard();
-            final int attackValue = ATTACK_ARRAY[fromIndex - kingIndex + 120];
-            final int attackBits = attackValue & ATTACK_Q;
-            assert attackBits != 0;
-            final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
-            int testIndex = fromIndex + delta;
-            while ((testIndex & 0x88) == 0 && boardArray[testIndex] == EMPTY) {
-                testIndex += delta;
-            }
-            if ((testIndex & 0x88) == 0 && boardArray[testIndex] * signum > 0) return true;
-        }
-        return false;
-    }
-
     private int[] getMoves(final SearchStage searchStage, final Board board, final int ttMove, final int depth) {
         final int[] moves;
         switch (searchStage) {
@@ -757,7 +706,11 @@ public final class Engine {
                 if (ttMove > 0 && (ttMove & BASE_INFO) > 0) {
                     moves = new int[2];
                     moves[0] = 1;
-                    moves[1] = ttMove;
+                    if (board.isCheckingMove(ttMove)) {
+                        moves[1] = ttMove | CHECKING;
+                    } else {
+                        moves[1] = ttMove;
+                    }
                 } else {
                     moves = NO_MOVE_ARRAY;
                 }
@@ -813,7 +766,6 @@ public final class Engine {
             shift = 24 - leadingZeros;
         }
         final int toMove = board.getState() & WHITE_TO_MOVE;
-        final int kingIndex = board.getKing(1 - toMove);
         final int signum = (toMove << 1) - 1;
         final int stage = board.getStage();
         for (int i = moves[0]; i > 0; i--) {
@@ -826,31 +778,23 @@ public final class Engine {
                 final int piece = board.getBoard()[fromIndex];
                 final int historyValue = history[piece + 7][fromIndex64][toIndex64] >>> shift;
                 final int absPiece = piece * signum;
-                int checkBonus = 0;
-                final boolean sliding = board.isSliding(absPiece);
-                if (sliding && ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_BITS[absPiece]) > 0)) {
-                    if (board.isAttackedBySliding(kingIndex, ATTACK_BITS[absPiece], toIndex)) {
-                        checkBonus = VAL_CHECK_BONUS;
-                    } else {
-                        checkBonus = VAL_BLOCKED_CHECK_BONUS;
-                    }
-                } else if (absPiece == KNIGHT && (ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_N) == ATTACK_N) {
-                    checkBonus = VAL_CHECK_BONUS;
-                } else if (absPiece == PAWN) {
-                    final int rowUp = toIndex + signum * UP;
-                    checkBonus = ((rowUp - 1) == kingIndex || (rowUp + 1) == kingIndex)? VAL_CHECK_BONUS: 0;
-                }
-                if (checkBonus < VAL_CHECK_BONUS && isDiscoveredCheck(board, kingIndex, fromIndex, signum)) {
-                    checkBonus = VAL_CHECK_BONUS;
-                }
                 final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromIndex, toIndex, stage);
                 final int valPositional;
                 if (positionalGain < 0) {
                     valPositional = 0;
                 } else {
-                    valPositional = (positionalGain >> 2) << SHIFT_MOVE_VALUE;
+                    valPositional = (positionalGain >> 2);
                 }
-                moves[i] = (historyValue << SHIFT_MOVE_VALUE) + move + checkBonus + valPositional;
+                final int checkBonus;
+                final int checkingBit;
+                if (board.isCheckingMove(move)) {
+                    checkBonus = VAL_CHECK_BONUS;
+                    checkingBit = CHECKING;
+                } else {
+                    checkBonus = 0;
+                    checkingBit = 0;
+                }
+                moves[i] = move | checkingBit | ((historyValue + checkBonus + valPositional) << SHIFT_MOVE_VALUE);
             } else {
                 moves[i] = moves[moves[0]];
                 moves[0]--;

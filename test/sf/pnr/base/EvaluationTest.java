@@ -25,6 +25,13 @@ public class EvaluationTest extends TestCase {
         assertFalse(Evaluation.drawByInsufficientMaterial(board));
     }
 
+    public void testUnstoppablePawn() {
+        final Board board = StringUtils.fromFen("2k5/8/8/8/8/8/p7/4K3 b - - 0 1");
+        final int score = new Evaluation().evaluate(board);
+        assertTrue("Score: " + score, score > VAL_QUEEN - 200);
+        assertTrue("Score: " + score, score < VAL_QUEEN + 200);
+    }
+
     public void testPawnEvalBasic() {
         final Board board = new Board();
         board.clear();
@@ -42,7 +49,7 @@ public class EvaluationTest extends TestCase {
         final int positionalBonusBlack = VAL_POSITION_BONUS_PAWN[A[4]] + VAL_POSITION_BONUS_PAWN[A[6]] +
             VAL_POSITION_BONUS_PAWN[E[3]] + VAL_POSITION_BONUS_PAWN[E[4]] + VAL_POSITION_BONUS_PAWN[H[4]] +
             BONUS_PASSED_PAWN_PER_SQUARE * 3;
-        assertEquals(positionalBonusWhite - positionalBonusBlack + 30,
+        assertEquals(positionalBonusWhite - positionalBonusBlack - 2 * PENALTY_DOUBLE_PAWN - 3 * PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(new Evaluation().pawnEval(board)));
     }
 
@@ -70,7 +77,7 @@ public class EvaluationTest extends TestCase {
         for (int i = 0; i < 8; i++) {
             positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getIndex(i, 6)];
         }
-        assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN - VAL_PIECE_COUNTS[PAWN][7],
+        assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(new Evaluation().pawnEval(board)));
     }
 
@@ -81,7 +88,7 @@ public class EvaluationTest extends TestCase {
         for (int i = 0; i < 8; i++) {
             positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getIndex(i, 6)];
         }
-        assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN - VAL_PIECE_COUNTS[PAWN][7],
+        assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(new Evaluation().pawnEval(board)));
     }
 
@@ -92,35 +99,35 @@ public class EvaluationTest extends TestCase {
         for (int i = 0; i < 8; i++) {
             positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getIndex(i, 6)];
         }
-        assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN - VAL_PIECE_COUNTS[PAWN][7],
+        assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(new Evaluation().pawnEval(board)));
     }
 
     public void testPassedPawnOnFileA() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/P7/8/4K3 w - - 0 1");
         assertEquals(VAL_POSITION_BONUS_PAWN[A[2] + SHIFT_POSITION_BONUS[WHITE]] + BONUS_PASSED_PAWN_PER_SQUARE +
-            PENALTY_ISOLATED_PAWN + VAL_PIECE_COUNTS[PAWN][1] - VAL_PIECE_COUNTS[PAWN][0],
+            PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(new Evaluation().pawnEval(board)));
     }
 
     public void testPassedPawnOnFileB() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/1P6/8/4K3 w - - 0 1");
         assertEquals(VAL_POSITION_BONUS_PAWN[B[2] + SHIFT_POSITION_BONUS[WHITE]] + BONUS_PASSED_PAWN_PER_SQUARE +
-            PENALTY_ISOLATED_PAWN + VAL_PIECE_COUNTS[PAWN][1] - VAL_PIECE_COUNTS[PAWN][0],
+            PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(new Evaluation().pawnEval(board)));
     }
 
     public void testPassedPawnOnB4() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/1P6/8/8/4K3 w - - 0 1");
         assertEquals(VAL_POSITION_BONUS_PAWN[B[3] + SHIFT_POSITION_BONUS[WHITE]] + BONUS_PASSED_PAWN_PER_SQUARE * 2 +
-            PENALTY_ISOLATED_PAWN + VAL_PIECE_COUNTS[PAWN][1] - VAL_PIECE_COUNTS[PAWN][0],
+            PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(new Evaluation().pawnEval(board)));
     }
 
     public void testPassedPawnOnFileH() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/7P/8/4K3 w - - 0 1");
         assertEquals(VAL_POSITION_BONUS_PAWN[H[2] + SHIFT_POSITION_BONUS[WHITE]] + BONUS_PASSED_PAWN_PER_SQUARE +
-            PENALTY_ISOLATED_PAWN + VAL_PIECE_COUNTS[PAWN][1] - VAL_PIECE_COUNTS[PAWN][0],
+            PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(new Evaluation().pawnEval(board)));
     }
 

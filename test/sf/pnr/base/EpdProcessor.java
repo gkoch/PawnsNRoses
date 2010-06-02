@@ -59,15 +59,15 @@ public class EpdProcessor {
                         }
                         commands.put(command, parameter);
                     }
+                    fenCount++;
                     try {
                         task.run(fileName, board, commands);
                     } catch (Exception e) {
                         throw new UndeclaredThrowableException(e, "Task failed on FEN: " + fen);
                     } catch (Error e) {
-                        System.out.println("Task failed on FEN: " + fen);
+                        System.out.printf("Task failed on FEN #%d: %s\r\n", fenCount, fen);
                         throw e;
                     }
-                    fenCount++;
                 }
             } finally {
                 reader.close();

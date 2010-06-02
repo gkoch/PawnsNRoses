@@ -195,27 +195,16 @@ public final class Board {
 			state &= CLEAR_CASTLING[fromIndex];
 			break;
 		case MT_CASTLING_KINGSIDE:
-            {
-                assert fromIndex < 0x10 || fromIndex >= 0x70; assert getRank(fromIndex) == getRank(toIndex);
-                assert captured == EMPTY; assert getFile(fromIndex) == 4; assert getFile(toIndex) == 6;
-                assert board[toIndex] * board[fromIndex + 3] == KING * ROOK;
-                final int rookFromIndex = toIndex + 1;
-                final int rookToIndex = fromIndex + 1;
-                movePiece(ROOK, currentPlayer, rookFromIndex, rookToIndex);
-                state &= (fromIndex < 8)? (CLEAR_CASTLING_WHITE_KINGSIDE & CLEAR_CASTLING_WHITE_QUEENSIDE):
-                    (CLEAR_CASTLING_BLACK_KINGSIDE & CLEAR_CASTLING_BLACK_QUEENSIDE);
-            }
-			break;
 		case MT_CASTLING_QUEENSIDE:
             {
-                assert fromIndex == E[0] || fromIndex == E[7]; assert getRank(fromIndex) == getRank(toIndex);
-                assert captured == EMPTY; assert getFile(fromIndex) == 4; assert getFile(toIndex) == 2;
-                assert board[toIndex] * board[toIndex - 2] == KING * ROOK:
-                    "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
-                assert board[toIndex - 1] == EMPTY:
-                    "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
-                final int rookToIndex = fromIndex - 1;
-                final int rookFromIndex = toIndex & 0xF0;
+                assert getRank(fromIndex) == getRank(toIndex);
+                assert captured == EMPTY;
+                assert Math.abs(board[toIndex]) == KING;
+                final int rookFromIndex =
+                    toIndex + CASTLING_TO_ROOK_FROM_DELTA[(moveType & MT_CASTLING) >> SHIFT_MOVE_TYPE];
+                final int rookToIndex =
+                    toIndex + CASTLING_TO_ROOK_TO_DELTA[(moveType & MT_CASTLING) >> SHIFT_MOVE_TYPE];
+                assert Math.abs(board[rookFromIndex]) == ROOK;
                 movePiece(ROOK, currentPlayer, rookFromIndex, rookToIndex);
                 state &= (fromIndex < 8)? (CLEAR_CASTLING_WHITE_KINGSIDE & CLEAR_CASTLING_WHITE_QUEENSIDE):
                     (CLEAR_CASTLING_BLACK_KINGSIDE & CLEAR_CASTLING_BLACK_QUEENSIDE);
@@ -227,22 +216,13 @@ public final class Board {
 			assert piece == PAWN || piece == -PAWN;
             board[captureIndex] = EMPTY;
 			break;
-		case MT_PROMOTION_QUEEN:
-			assert piece == PAWN || piece == -PAWN;
-            replacePromotedPawn(signum, toIndex, currentPlayer, QUEEN);
-			break;
-		case MT_PROMOTION_ROOK:
-			assert piece == PAWN || piece == -PAWN;
-            replacePromotedPawn(signum, toIndex, currentPlayer, ROOK);
-			break;
-		case MT_PROMOTION_BISHOP:
-			assert piece == PAWN || piece == -PAWN;
-            replacePromotedPawn(signum, toIndex, currentPlayer, BISHOP);
-			break;
-		case MT_PROMOTION_KNIGHT:
-			assert piece == PAWN || piece == -PAWN;
-            replacePromotedPawn(signum, toIndex, currentPlayer, KNIGHT);
-			break;
+        case MT_PROMOTION_KNIGHT:
+        case MT_PROMOTION_BISHOP:
+        case MT_PROMOTION_ROOK:
+        case MT_PROMOTION_QUEEN:
+            assert piece == PAWN || piece == -PAWN;
+            replacePromotedPawn(signum, toIndex, currentPlayer, PROMOTION_TO_PIECE[moveType >> SHIFT_MOVE_TYPE]);
+            break;
 		}
         zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
         repetitionTable.increment(zobrist);
@@ -593,5 +573,89 @@ public final class Board {
 
     public int getMinorMajorPieceCount(final int toMove) {
         return pieces[KNIGHT][toMove][0] + pieces[BISHOP][toMove][0] + pieces[ROOK][toMove][0] + pieces[QUEEN][toMove][0];
+    }
+
+    public boolean attacksKing(final int side) {
+        final int kingIndex = pieces[KING][1 - side][1];
+        return isAttacked(kingIndex, side);
+    }
+
+    public boolean isCheckingMove(final int move) {
+        final int toMove = state & WHITE_TO_MOVE;
+        final int fromIndex = getMoveFromIndex(move);
+        final int signum = (toMove << 1) - 1;
+        final int piece = board[fromIndex];
+        final int absPiece = signum * piece;
+        assert absPiece != EMPTY;
+        final int kingIndex = pieces[KING][1 - toMove][1];
+        // if it we are moving on the line to the opponent king and it's not castling then it's not a checking move
+        // (assuming that we start from a legal position)
+        final int toIndex = getMoveToIndex(move);
+        if (((move & MT_CASTLING) == 0) && (ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_Q & ATTACK_ARRAY[kingIndex - fromIndex + 120]) > 0) {
+            return false;
+        }
+
+        if (isDiscoveredCheck(kingIndex, fromIndex, signum)) {
+            return true;
+        }
+        switch (absPiece) {
+            case PAWN:
+                final int toRank = getRank(toIndex);
+                if (toRank > 0 && toRank < 7) {
+                    final int[] deltas = DELTA_PAWN_ATTACK[toMove];
+                    for (int delta: deltas) {
+                        if (toIndex + delta == kingIndex) {
+                            return true;
+                        }
+                    }
+                } else {
+                    // it's a promotion
+                    final int promotedTo = PROMOTION_TO_PIECE[(move & MOVE_TYPE) >> SHIFT_MOVE_TYPE];
+                    assert promotedTo == KNIGHT || promotedTo == BISHOP || promotedTo == ROOK || promotedTo == QUEEN;
+                    if (promotedTo == KNIGHT) {
+                        return ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_N) == ATTACK_N);
+                    } else {
+                        return isAttackedBySliding(kingIndex, ATTACK_BITS[promotedTo], toIndex);
+                    }
+                }
+                return false;
+            case KNIGHT:
+                return ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_N) == ATTACK_N);
+            case BISHOP:
+            case ROOK:
+            case QUEEN:
+                return isAttackedBySliding(kingIndex, ATTACK_BITS[absPiece], toIndex);
+            case KING:
+                if ((move & MT_CASTLING) > 0) {
+                    if ((move & MT_CASTLING_QUEENSIDE) > 0) {
+                        return isAttackedBySliding(kingIndex, ATTACK_R, toIndex + 1);
+                    } else {
+                        return isAttackedBySliding(kingIndex, ATTACK_R, toIndex - 1);
+                    }
+                }
+                return false;
+        }
+        return false;
+    }
+
+    public boolean isDiscoveredCheck(final int kingIndex, final int fromIndex, final int signum) {
+        if (isAttackedBySliding(kingIndex, ATTACK_Q, fromIndex)) {
+            // search for discovered check
+            final int attackValue = ATTACK_ARRAY[fromIndex - kingIndex + 120];
+            final int attackBits = attackValue & ATTACK_Q;
+            assert attackBits != 0;
+            final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
+            int testIndex = fromIndex + delta;
+            while ((testIndex & 0x88) == 0 && board[testIndex] == EMPTY) {
+                testIndex += delta;
+            }
+            if ((testIndex & 0x88) == 0) {
+                final int absAttacker = board[testIndex] * signum;
+                if (absAttacker > 0) {
+                    return SLIDING[absAttacker] && (ATTACK_BITS[absAttacker] & attackBits) > 0;
+                }
+            }
+        }
+        return false;
     }
 }

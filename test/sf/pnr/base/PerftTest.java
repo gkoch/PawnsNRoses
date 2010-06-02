@@ -152,7 +152,7 @@ public class PerftTest extends TestCase {
                 }
                 final int state = board.getState();
                 final int toMove = state & WHITE_TO_MOVE;
-                if (!Engine.attacksKing(board, toMove)) {
+                if (!board.attacksKing(toMove)) {
                     moveCount += perft(board, depth - 1, moveGenerator, checkConsistency, printFen);
                 }
                 board.takeBack(undo);

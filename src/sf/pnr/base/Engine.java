@@ -409,24 +409,12 @@ public final class Engine {
                     }
                 }
 
-                if (depthExt == 0 && moveCount > 0) {
+                if (depthExt == 0 && moveCount > 0 && futility > 0) {
                     // TODO: change condition if moveCount is increased for important moves as well
                     final int value = board.getMaterialValue();
-                    if (futility > 0) {
-                        if (value < alpha - futility) {
-                            board.takeBack(undo);
-                            break;
-                        }
-                    } else if (depth <= (3 << SHIFT_PLY) && value < beta - VAL_RAZORING_THRESHOLD && beta > alpha + 1) {
-                        final int qscore = -quiescence(board, -b, -alpha);
-                        if (cancelled) {
-                            moveGenerator.popFrame();
-                            return alpha;
-                        }
-                        if (qscore < b) {
-                            board.takeBack(undo);
-                            break;
-                        }
+                    if (value < alpha - futility) {
+                        board.takeBack(undo);
+                        break;
                     }
                 }
 

@@ -101,9 +101,6 @@ public class MateTest extends TestCase {
             totalNodeCount += engineNodeCount;
             totalExpectedNodeCount += expectedNodeCount;
             testCount++;
-            if (testCount % 1000 == 0) {
-                System.out.printf("Processed %d FENs\r\n", testCount);
-            }
         }
 
         private boolean containsString(final String[] strings, final String str) {

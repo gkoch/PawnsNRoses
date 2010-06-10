@@ -68,6 +68,9 @@ public class EpdProcessor {
                         System.out.printf("Task failed on FEN #%d: %s\r\n", fenCount, fen);
                         throw e;
                     }
+                    if (fenCount % 1000 == 0) {
+                        System.out.printf("Processed %d FENs\r\n", fenCount);
+                    }
                 }
             } finally {
                 reader.close();

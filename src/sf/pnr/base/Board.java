@@ -158,9 +158,7 @@ public final class Board {
 		final int currentPlayer = state & WHITE_TO_MOVE;		
 		state ^= WHITE_TO_MOVE;
 		final int nextPlayer = state & WHITE_TO_MOVE;
-		if (nextPlayer == WHITE_TO_MOVE) {
-			state += UNIT_FULL_MOVES;
-		}
+		state += nextPlayer * UNIT_FULL_MOVES;
         zobristIncremental ^= ZOBRIST_WHITE_TO_MOVE;
         assert zobristIncremental == computeZobristIncremental(this);
 		state &= CLEAR_EN_PASSANT;
@@ -588,10 +586,12 @@ public final class Board {
         final int absPiece = signum * piece;
         assert absPiece != EMPTY;
         final int kingIndex = pieces[KING][1 - toMove][1];
-        // if it we are moving on the line to the opponent king and it's not castling then it's not a checking move
-        // (assuming that we start from a legal position)
         final int toIndex = getMoveToIndex(move);
-        if (((move & MT_CASTLING) == 0) && (ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_Q & ATTACK_ARRAY[kingIndex - fromIndex + 120]) > 0) {
+        final int attacked = board[toIndex];
+        // if it we are moving on the line to the opponent king and it's not castling or capturing
+        // then it's not a checking move (assuming that we start from a legal position)
+        if (attacked == EMPTY && ((move & MT_CASTLING) == 0) &&
+                (ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_Q & ATTACK_ARRAY[kingIndex - fromIndex + 120]) > 0) {
             return false;
         }
 

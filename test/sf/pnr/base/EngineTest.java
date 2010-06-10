@@ -69,8 +69,7 @@ public class EngineTest extends TestCase {
     public void testMateIn1Ply() {
         final Board board = fromFen("r3qk1r/ppp1n2p/3p1p2/8/4P3/1BpP4/PPP3PP/R1B1K2R w KQ - 0 1");
         final int searchDepth = 4 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
@@ -92,8 +91,7 @@ public class EngineTest extends TestCase {
     public void testMateIn5Ply() {
         final Board board = fromFen("k1K5/1p6/1P6/8/8/p7/N7/8 w - - 0 1");
         final int searchDepth = (5 + 1) << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
@@ -131,6 +129,13 @@ public class EngineTest extends TestCase {
             MoveGeneratorTest.containsMove(bestLine, fromSimple("d7d8R")));
     }
 
+    public void testMateWithPromotion2() {
+        final Board board = fromFen("k2r4/3N4/K1P5/8/7b/8/8/8 w - - 0 1");
+        final long result = engine.search(board, 3, 0);
+        final int score = Engine.getValueFromSearchResult(result);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
+    }
+
     public void testMateWithOpponentPromotion() {
         final Board board = fromFen("k1K5/1p6/1P6/8/1N6/8/p7/8 w - - 0 1");
         final int score = Engine.getValueFromSearchResult(engine.search(board, 4 + 1, 0));
@@ -142,8 +147,7 @@ public class EngineTest extends TestCase {
     public void testPromotion() {
         final Board board = fromFen("2k5/8/8/8/8/8/p7/4K3 b - - 0 1");
         final int searchDepth = 6 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_QUEEN * 0.9 && score < VAL_QUEEN * 1.1);
     }
@@ -151,8 +155,7 @@ public class EngineTest extends TestCase {
     public void testPromotionAt1Ply() {
         final Board board = fromFen("2k5/8/8/8/8/8/p7/4K3 b - - 0 1");
         final int searchDepth = 1 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_QUEEN * 0.9 && score < VAL_QUEEN * 1.1);
         final int[] bestLine = engine.getBestLine(board);
@@ -189,11 +192,26 @@ public class EngineTest extends TestCase {
         assertEquals("Rd8#", toShort(board, Engine.getMoveFromSearchResult(result)));
     }
 
+    public void testBestMove1() {
+        final Board board = fromFen("1r2r1k1/2pq1pb1/4b1pp/nPQnp3/P2pP3/1p1P1NPP/1B3PBK/1R2RN2 b - e3 0 1");
+        final long result = engine.search(board, 0, 50);
+        final int[] bestLine = engine.getBestLine(board, Engine.getMoveFromSearchResult(result));
+        assertEquals("Nb7", toShort(board, bestLine[0]));
+        assertEquals("Nb7", toShort(board, Engine.getMoveFromSearchResult(result)));
+    }
+
+    public void testBestMove2() {
+        final Board board = fromFen("2rqnrk1/p5pp/bp2pp2/n1ppP3/2PP4/P1PBBP1N/4Q1PP/2R2RK1 w - d6 0 1");
+        final long result = engine.search(board, 0, 50);
+        final int[] bestLine = engine.getBestLine(board, Engine.getMoveFromSearchResult(result));
+        assertEquals("Nf4", toShort(board, bestLine[0]));
+        assertEquals("Nf4", toShort(board, Engine.getMoveFromSearchResult(result)));
+    }
+
     public void testDiscoveredMate() {
         final Board board = fromFen("1r1rb1k1/2p3p1/p2q1pN1/3PpP2/Pp1bP3/1B5R/1P4PP/2B4K w - - 0 1");
         final int searchDepth = 6 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int[] bestLine = engine.getBestLine(board);
@@ -203,8 +221,7 @@ public class EngineTest extends TestCase {
     public void testRookSacWithPinnedQueen() {
         final Board board = fromFen("k7/8/8/8/q7/8/8/1R3R1K w - - 0 1");
         final int searchDepth = 3 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_ROOK * 0.9 && score < VAL_ROOK * 1.1);
     }
@@ -212,8 +229,7 @@ public class EngineTest extends TestCase {
     public void testMateWithoutCapture() {
         final Board board = fromFen("1b1k4/2NP4/1P1K4/4P3/8/8/8/8 w - - 0 1");
         final int searchDepth = 5 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
@@ -236,8 +252,7 @@ public class EngineTest extends TestCase {
     public void testMateWithQueenSac1() {
         final Board board = fromFen("5rk1/5Npp/8/3Q4/8/8/8/7K w - - 0 1");
         final int searchDepth = 6 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
@@ -245,8 +260,7 @@ public class EngineTest extends TestCase {
     public void testMateWithQueenSac2() {
         final Board board = fromFen("8/p7/8/q2p4/6B1/4KN2/6k1/2Q2n2 w - - 0 1");
         final int searchDepth = 3 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int move = Engine.getMoveFromSearchResult(result);
@@ -256,8 +270,15 @@ public class EngineTest extends TestCase {
     public void testMateWithQueenSac3() {
         final Board board = fromFen("4Qrk1/pp2nppp/8/7q/8/8/PP4PP/3R3K w - - 0 1");
         final int searchDepth = 3 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
+        final int score = Engine.getValueFromSearchResult(result);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
+    }
+
+    public void testMateWithRookSac() {
+        final Board board = fromFen("8/5KBk/6p1/6Pb/7R/8/8/4q3 w - - 0 1");
+        final int searchDepth = 3 << SHIFT_PLY;
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
@@ -265,8 +286,7 @@ public class EngineTest extends TestCase {
     public void testTranspTableQuiescence() {
         final Board board = fromFen("8/p7/8/q2p4/6B1/4KN1p/6k1/2Q2n2 w - - 0 1");
         final int searchDepth = 1 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
         final int move = Engine.getMoveFromSearchResult(result);
@@ -276,8 +296,7 @@ public class EngineTest extends TestCase {
     public void testMateIn2WithTwoRooks() {
         final Board board = fromFen("8/8/8/8/8/8/R7/R3K2k w Q - 0 1");
         final int searchDepth = 4 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
     }
@@ -354,8 +373,7 @@ public class EngineTest extends TestCase {
     public void testKingInCheck() {
         final Board board = fromFen("7k/8/8/8/R2K3q/8/8/8 w - - 0 1");
         final int searchDepth = 3 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score < -VAL_QUEEN * 0.7 && score > -VAL_QUEEN * 1.3);
     }
@@ -374,8 +392,7 @@ public class EngineTest extends TestCase {
     public void no_testDebugCheckedMoves() {
         final Board board = fromFen("1b5k/7P/p1p2np1/2P2p2/PP3P2/4RQ1R/q2r3P/6K1 w - - 0 1");
         final int searchDepth = 4 << SHIFT_PLY;
-        engine.setSearchDepth(searchDepth);
-        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA);
+        final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int move = Engine.getMoveFromSearchResult(result);
         assertEquals("Re8+", StringUtils.toShort(board, move));
     }

@@ -283,6 +283,11 @@ public class BoardTest extends TestCase {
         assertFalse(board.isCheckingMove(StringUtils.fromSimple("a3a4")));
     }
 
+    public void testIsCheckingMoveRookAttack() {
+        final Board board = fromFen("8/5KBk/6p1/6Pb/7R/8/8/4q3 w - - 0 1");
+        assertTrue(board.isCheckingMove(StringUtils.fromSimple("h4h5")));
+    }
+
     public void testIsCheckingMoveCastlingQueenSide() {
         final Board board = fromFen("3k4/8/8/8/8/8/8/R3K3 w Q - 0 1");
         assertTrue(board.isCheckingMove(StringUtils.fromSimple("e1c1") | MT_CASTLING_QUEENSIDE));

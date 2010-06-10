@@ -56,25 +56,30 @@ public class SearchTask implements EpdProcessorTask {
 
         boolean passed = true;
 //            Assert.assertEquals(Engine.getMoveFromSearchResult(result), bestLine[0]);
-        if (commands.containsKey("bm")) {
-            final int[] bestLine = engine.getBestLine(board);
-            final String[] bestMoves = commands.get("bm").split("/");
-            final String engineBestMove = StringUtils.toShort(board, bestLine[0]);
-            if (!StringUtils.containsString(bestMoves, engineBestMove)) {
-//                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, best moves: %s, commands: %s\r\n",
-//                    testCount, StringUtils.toFen(board), engineBestMove, Arrays.toString(bestMoves), commands);
-                passed = false;
-            }
-        } else if (commands.containsKey("am")) {
-            final int[] bestLine = engine.getBestLine(board);
-            final String[] avoidMoves = commands.get("am").split("/");
-            final String engineBestMove = StringUtils.toShort(board, bestLine[0]);
-            if (StringUtils.containsString(avoidMoves, engineBestMove)) {
-//                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, avoid moves: %s, commands: %s\r\n",
-//                    testCount, StringUtils.toFen(board), engineBestMove, Arrays.toString(avoidMoves), commands);
-                passed = false;
+        try {
+            if (commands.containsKey("bm")) {
+                final int[] bestLine = engine.getBestLine(board, Engine.getMoveFromSearchResult(result));
+                final String[] bestMoves = commands.get("bm").split("/");
+                final String engineBestMove = StringUtils.toShort(board, bestLine[0]);
+                if (!StringUtils.containsString(bestMoves, engineBestMove)) {
+    //                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, best moves: %s, commands: %s\r\n",
+    //                    testCount, StringUtils.toFen(board), engineBestMove, Arrays.toString(bestMoves), commands);
+                    passed = false;
+                }
+            } else if (commands.containsKey("am")) {
+                final int[] bestLine = engine.getBestLine(board, Engine.getMoveFromSearchResult(result));
+                final String[] avoidMoves = commands.get("am").split("/");
+                final String engineBestMove = StringUtils.toShort(board, bestLine[0]);
+                if (StringUtils.containsString(avoidMoves, engineBestMove)) {
+    //                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, avoid moves: %s, commands: %s\r\n",
+    //                    testCount, StringUtils.toFen(board), engineBestMove, Arrays.toString(avoidMoves), commands);
+                    passed = false;
 
+                }
             }
+        } catch (IllegalStateException e) {
+            System.out.printf("Failed to extract best move for FEN: %s\r\n", StringUtils.toFen(board));
+            e.printStackTrace();
         }
 
         passed = additionalChecks(engine, board, result, commands) && passed;

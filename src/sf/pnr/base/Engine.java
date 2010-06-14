@@ -532,6 +532,14 @@ public final class Engine {
 
     public int quiescence(final Board board, int alpha, int beta) {
         nodeCount++;
+        final int eval = evaluation.evaluate(board);
+        if (eval > alpha) {
+            alpha = eval;
+            if (alpha >= beta) {
+                return beta;
+            }
+        }
+
         if (Evaluation.drawByInsufficientMaterial(board)) {
             return VAL_DRAW;
         }
@@ -660,14 +668,6 @@ public final class Engine {
 
         if (bestMove != 0) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, 0, alpha - VAL_MIN, age);
-        } else if (!hasEvaluatedMove) {
-            final int eval = evaluation.evaluate(board);
-            if (eval > alpha) {
-                alpha = eval;
-                if (alpha >= beta) {
-                    alpha = beta;
-                }
-            }
         }
         return alpha;
     }

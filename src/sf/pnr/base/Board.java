@@ -188,12 +188,12 @@ public final class Board {
 		
         movePiece(absPiece, currentPlayer, fromIndex, toIndex);
 
-		switch (moveType) {
-		case MT_NORMAL:
-			state &= CLEAR_CASTLING[fromIndex];
-			break;
-		case MT_CASTLING_KINGSIDE:
-		case MT_CASTLING_QUEENSIDE:
+        switch (moveType) {
+        case MT_NORMAL:
+            state &= CLEAR_CASTLING[fromIndex];
+            break;
+        case MT_CASTLING_KINGSIDE:
+        case MT_CASTLING_QUEENSIDE:
             {
                 assert getRank(fromIndex) == getRank(toIndex);
                 assert captured == EMPTY;
@@ -209,11 +209,11 @@ public final class Board {
             }
             break;
         case MT_EN_PASSANT:
-			assert captured == -piece; assert getRank(fromIndex) == 4 || getRank(fromIndex) == 3;
-			assert getRank(toIndex) == 5 || getRank(toIndex) == 2;
-			assert piece == PAWN || piece == -PAWN;
+            assert captured == -piece; assert getRank(fromIndex) == 4 || getRank(fromIndex) == 3;
+            assert getRank(toIndex) == 5 || getRank(toIndex) == 2;
+            assert piece == PAWN || piece == -PAWN;
             board[captureIndex] = EMPTY;
-			break;
+            break;
         case MT_PROMOTION_KNIGHT:
         case MT_PROMOTION_BISHOP:
         case MT_PROMOTION_ROOK:
@@ -221,7 +221,7 @@ public final class Board {
             assert piece == PAWN || piece == -PAWN;
             replacePromotedPawn(signum, toIndex, currentPlayer, PROMOTION_TO_PIECE[moveType >> SHIFT_MOVE_TYPE]);
             break;
-		}
+        }
         zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
         repetitionTable.increment(zobrist);
         assert zobrist == (computeZobristIncremental(this) ^ computeZobristNonIncremental(state));

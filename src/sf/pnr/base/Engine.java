@@ -134,17 +134,14 @@ public final class Engine {
         final long ttValue = transpositionTable.read(zobristKey);
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
         if (ttValue != 0) {
-            final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-            final long ttType = ttValue & TT_TYPE;
-            if (ttType == TT_TYPE_EXACT) {
-                final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
-                if (ttDepth >= (depth >> SHIFT_PLY)) {
+            final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
+            if (ttDepth >= (depth >> SHIFT_PLY)) {
+                final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
+                final long ttType = ttValue & TT_TYPE;
+                if (ttType == TT_TYPE_EXACT) {
                     assert ttMove != 0;
                     return getSearchResult(ttMove, value);
-                }
-            } else if (ttType == TT_TYPE_ALPHA_CUT || ttType == TT_TYPE_BETA_CUT) {
-                final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
-                if (ttDepth >= (depth >> SHIFT_PLY)) {
+                } else {
                     if (value > VAL_MATE_THRESHOLD) {
                         assert ttMove != 0;
                         return getSearchResult(ttMove, value);
@@ -325,20 +322,18 @@ public final class Engine {
         final long zobristKey = board.getZobristKey();
         final long ttValue = transpositionTable.read(zobristKey);
         if (ttValue != 0) {
-            final long ttType = ttValue & TT_TYPE;
-            if (ttType == TT_TYPE_EXACT) {
-                final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
-                if (ttDepth >= (depth >> SHIFT_PLY)) {
+            final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
+            if (ttDepth >= (depth >> SHIFT_PLY)) {
+                final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
+                final long ttType = ttValue & TT_TYPE;
+                if (ttType == TT_TYPE_EXACT) {
                     assert ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE) != 0;
-                    return (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-                }
-            } else {
-                final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
-                if (ttDepth >= (depth >> SHIFT_PLY)) {
-                    alpha = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-                    if (alpha > VAL_MATE_THRESHOLD) {
-                        return alpha;
+                    return value;
+                } else {
+                    if (value > VAL_MATE_THRESHOLD) {
+                        return value;
                     }
+                    alpha = value;
                 }
             }
         }

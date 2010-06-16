@@ -50,7 +50,7 @@ public class UCI {
     public static void main(final String[] args) throws IOException, ExecutionException, InterruptedException {
         final PrintStream outputStream;
         if (args.length > 0) {
-            outputStream = new PrintStream(new TeeOutputStream(System.out, new FileOutputStream(args[0])));
+            outputStream = new PrintStream(new TeeOutputStream(System.out, new FileOutputStream(args[0], true)));
         } else {
             outputStream = System.out;
         }
@@ -254,8 +254,8 @@ public class UCI {
         public void bestMoveChanged(final int depth, final int bestMove, final int value, final long time,
                                     final int[] bestLine, final long nodes) {
             if (debug) {
-                final String message = String.format("info depth %d currmove %s score cp %d time %d pv %s nodes %d",
-                    depth, StringUtils.toLong(bestMove), value, time, StringUtils.toLong(bestLine, " "), nodes);
+                final String message = String.format("info depth %d currmove %s score cp %d time %d nps %d pv %s nodes %d",
+                    depth, StringUtils.toLong(bestMove), value, time, nodes * 1000 / time, StringUtils.toLong(bestLine, " "), nodes);
                 out.println(message);
             }
         }

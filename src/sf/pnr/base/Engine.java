@@ -133,25 +133,23 @@ public final class Engine {
         final long zobristKey = board.getZobristKey();
         final long ttValue = transpositionTable.read(zobristKey);
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        if (ttValue != 0) {
-            final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
-            if (ttDepth >= (depth >> SHIFT_PLY)) {
-                final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-                final long ttType = ttValue & TT_TYPE;
-                if (ttType == TT_TYPE_EXACT) {
+        final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
+        if (ttValue != 0 && ttDepth >= (depth >> SHIFT_PLY)) {
+            final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
+            final long ttType = ttValue & TT_TYPE;
+            if (ttType == TT_TYPE_EXACT) {
+                assert ttMove != 0;
+                return getSearchResult(ttMove, value);
+            } else {
+                if (value > VAL_MATE_THRESHOLD) {
                     assert ttMove != 0;
                     return getSearchResult(ttMove, value);
-                } else {
-                    if (value > VAL_MATE_THRESHOLD) {
-                        assert ttMove != 0;
-                        return getSearchResult(ttMove, value);
-                    }
-                    alpha = value;
                 }
+                alpha = value;
             }
         }
 
-        if (ttMove == 0 && depth > 3 * PLY) {
+        if (depth > 3 * PLY && (ttMove == 0 || ttDepth < (depth >> (SHIFT_PLY + 1)))) {
             // internal iterative deepening
             final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, 0);
             ttMove = getMoveFromSearchResult(searchResult);
@@ -321,20 +319,18 @@ public final class Engine {
 
         final long zobristKey = board.getZobristKey();
         final long ttValue = transpositionTable.read(zobristKey);
-        if (ttValue != 0) {
-            final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
-            if (ttDepth >= (depth >> SHIFT_PLY)) {
-                final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-                final long ttType = ttValue & TT_TYPE;
-                if (ttType == TT_TYPE_EXACT) {
-                    assert ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE) != 0;
+        final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
+        if (ttValue != 0 && ttDepth >= (depth >> SHIFT_PLY)) {
+            final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
+            final long ttType = ttValue & TT_TYPE;
+            if (ttType == TT_TYPE_EXACT) {
+                assert ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE) != 0;
+                return value;
+            } else {
+                if (value > VAL_MATE_THRESHOLD) {
                     return value;
-                } else {
-                    if (value > VAL_MATE_THRESHOLD) {
-                        return value;
-                    }
-                    alpha = value;
                 }
+                alpha = value;
             }
         }
 
@@ -363,7 +359,7 @@ public final class Engine {
         }
 
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        if (ttMove == 0 && depth > 3 * PLY) {
+        if (depth > 3 * PLY && (ttMove == 0 || ttDepth < (depth >> (SHIFT_PLY + 1)))) {
             // internal iterative deepening
             final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, searchedPly);
             ttMove = getMoveFromSearchResult(searchResult);
@@ -567,7 +563,6 @@ public final class Engine {
 
         moveGenerator.pushFrame();
         boolean hasLegalMove = false;
-        boolean hasEvaluatedMove = false;
         int b = beta;
         int bestMove = 0;
         for (SearchStage searchStage: searchStages) {
@@ -600,7 +595,6 @@ public final class Engine {
 
                 // evaluate the move
                 int a = -quiescence(board, -b, -alpha);
-                hasEvaluatedMove = true;
 
                 if (cancelled) {
                     board.takeBack(undo);

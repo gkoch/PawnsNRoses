@@ -26,7 +26,7 @@ public class UCI {
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private static final int CANCEL_THRESHOLD = 50;
     private static final Pattern POSITION_PATTERN = Pattern.compile(
-        "(([1-8/pnbrqkPNBRQK]+ [wb] [KQkq-]+ [-a-h1-8]+ [0-9]+ [0-9]+)|startpos)( moves( [a-h][1-8][a-h][1-8][nbrq]?)+)");
+        "((fen [1-8/pnbrqkPNBRQK]+ [wb] [KQkq-]+ [-a-h1-8]+ [0-9]+ [0-9]+)|startpos)( moves( [a-h][1-8][a-h][1-8][nbrq]?)+)");
     private static boolean verbose = false;
 
     private enum State {START, UCI_RECEIVED, SEARCHING, SEARCHING_PONDER}
@@ -38,10 +38,10 @@ public class UCI {
     private Future<String> future;
     private volatile State state = State.START;
 
-    public UCI(final BufferedReader in, final PrintStream out, final File book) {
+    public UCI(final BufferedReader in, final PrintStream out) {
         this.in = in;
         this.out = out;
-        chess = new PawnsNRoses(book);
+        chess = new PawnsNRoses();
         debugListener = new DebugBestMoveListener(out);
         debugListener.setDebug(true);
         chess.setBestMoveListener(debugListener);
@@ -55,18 +55,21 @@ public class UCI {
             outputStream = System.out;
         }
 
+        final Configuration config = Configuration.getInstance();
+
         final String bookPath = System.getProperty("polyglot.book");
         final File book = bookPath != null? new File(bookPath): null;
+        config.setOpeningBook(book);
 
         final String transpTableSizeStr = System.getProperty("transposition.table.size", "24");
         final int transpTableSize = Integer.parseInt(transpTableSizeStr);
+        config.setTranspositionTableSizeInMB(transpTableSize);
+
         final String evalHashTableSizeStr = System.getProperty("eval.hashtable.size", "8");
         final int evalHashTableSize = Integer.parseInt(evalHashTableSizeStr);
-        final Configuration config = Configuration.getInstance();
-        config.setTranspositionTableSizeInMB(transpTableSize);
         config.setEvalHashTableSizeInMB(evalHashTableSize);
 
-        final UCI protocol = new UCI(new BufferedReader(new InputStreamReader(System.in)), outputStream, book);
+        final UCI protocol = new UCI(new BufferedReader(new InputStreamReader(System.in)), outputStream);
         protocol.run();
     }
 
@@ -95,11 +98,11 @@ public class UCI {
                 final String position = line.substring(9).trim();
                 final Matcher matcher = POSITION_PATTERN.matcher(position);
                 if (matcher.matches()) {
-                    final String fen = matcher.group(1);
-                    if (fen.equals("startpos")) {
+                    final String type = matcher.group(1);
+                    if (type.equals("startpos")) {
                         chess.restartBoard();
-                    } else {
-                        chess.setBoard(fen);
+                    } else if (type.startsWith("fen")) {
+                        chess.setBoard(type.substring(4));
                     }
                     if (matcher.groupCount() > 2) {
                         final String movesStr = matcher.group(3).substring(6).trim();
@@ -255,7 +258,8 @@ public class UCI {
                                     final int[] bestLine, final long nodes) {
             if (debug) {
                 final String message = String.format("info depth %d currmove %s score cp %d time %d nps %d pv %s nodes %d",
-                    depth, StringUtils.toLong(bestMove), value, time, nodes * 1000 / time, StringUtils.toLong(bestLine, " "), nodes);
+                    depth, StringUtils.toLong(bestMove), value, time, time > 0? nodes * 1000 / time: 0,
+                    StringUtils.toLong(bestLine, " "), nodes);
                 out.println(message);
             }
         }

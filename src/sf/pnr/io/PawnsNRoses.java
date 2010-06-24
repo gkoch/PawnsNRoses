@@ -3,6 +3,7 @@ package sf.pnr.io;
 import sf.pnr.alg.TranspositionTable;
 import sf.pnr.base.BestMoveListener;
 import sf.pnr.base.Board;
+import sf.pnr.base.Configuration;
 import sf.pnr.base.Engine;
 import sf.pnr.base.Polyglot;
 import sf.pnr.base.StringUtils;
@@ -20,7 +21,8 @@ public class PawnsNRoses {
     private int depth;
     private int time;
 
-    public PawnsNRoses(final File polyglotBook) {
+    public PawnsNRoses() {
+        final File polyglotBook = Configuration.getInstance().getOpeningBook();
         polyglot = new Polyglot(polyglotBook);
         useBook = polyglotBook != null && polyglotBook.exists();
         board = new Board();

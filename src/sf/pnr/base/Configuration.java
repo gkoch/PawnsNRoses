@@ -1,5 +1,7 @@
 package sf.pnr.base;
 
+import java.io.File;
+
 public final class Configuration {
     private static final Configuration INSTANCE = new Configuration();
 
@@ -7,10 +9,19 @@ public final class Configuration {
         return INSTANCE;
     }
 
+    private File book;
     private int transpositionTableSizeInMB = 1;
     private int evalHashTableSizeInMB = 1;
 
     private Configuration() {
+    }
+
+    public File getOpeningBook() {
+        return book;
+    }
+
+    public void setOpeningBook(final File book) {
+        this.book = book;
     }
 
     public int getTranspositionTableSizeInMB() {

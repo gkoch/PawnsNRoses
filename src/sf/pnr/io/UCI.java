@@ -9,7 +9,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -21,40 +23,36 @@ import java.util.regex.Pattern;
 
 /**
  */
-public class UCI {
+public class UCI implements UciProcess {
 
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private static final int CANCEL_THRESHOLD = 50;
     private static final Pattern POSITION_PATTERN = Pattern.compile(
-        "((fen [1-8/pnbrqkPNBRQK]+ [wb] [KQkq-]+ [-a-h1-8]+ [0-9]+ [0-9]+)|startpos)( moves( [a-h][1-8][a-h][1-8][nbrq]?)+)");
+        "((fen [1-8/pnbrqkPNBRQK]+ [wb] [KQkq-]+ [-a-h1-8]+ [0-9]+ [0-9]+)|startpos)( moves( [a-h][1-8][a-h][1-8][nbrq]?)+)?");
+
     private static boolean verbose = false;
 
     private enum State {START, UCI_RECEIVED, SEARCHING, SEARCHING_PONDER}
 
     private final BufferedReader in;
+    private final InputStream inputStream;
     private final PrintStream out;
-    private DebugBestMoveListener debugListener;
+    private UciBestMoveListener uciListener;
     private final PawnsNRoses chess;
     private Future<String> future;
     private volatile State state = State.START;
 
-    public UCI(final BufferedReader in, final PrintStream out) {
-        this.in = in;
-        this.out = out;
+    public UCI(final InputStream in, final OutputStream out) {
+        inputStream = in;
+        this.in = new BufferedReader(new InputStreamReader(in));
+        this.out = new PrintStream(out);
         chess = new PawnsNRoses();
-        debugListener = new DebugBestMoveListener(out);
-        debugListener.setDebug(true);
-        chess.setBestMoveListener(debugListener);
+        uciListener = new UciBestMoveListener(this.out);
+        uciListener.setDebug(true);
+        chess.setBestMoveListener(uciListener);
     }
 
     public static void main(final String[] args) throws IOException, ExecutionException, InterruptedException {
-        final PrintStream outputStream;
-        if (args.length > 0) {
-            outputStream = new PrintStream(new TeeOutputStream(System.out, new FileOutputStream(args[0], true)));
-        } else {
-            outputStream = System.out;
-        }
-
         final Configuration config = Configuration.getInstance();
 
         final String bookPath = System.getProperty("polyglot.book");
@@ -69,7 +67,13 @@ public class UCI {
         final int evalHashTableSize = Integer.parseInt(evalHashTableSizeStr);
         config.setEvalHashTableSizeInMB(evalHashTableSize);
 
-        final UCI protocol = new UCI(new BufferedReader(new InputStreamReader(System.in)), outputStream);
+        final OutputStream os;
+        if (args.length > 0) {
+            os = new TeeOutputStream(System.out, new FileOutputStream(args[0], true));
+        } else {
+            os = System.out;
+        }
+        final UCI protocol = new UCI(System.in, os);
         protocol.run();
     }
 
@@ -82,9 +86,10 @@ public class UCI {
                 out.println("id name Pawns N' Roses");
                 out.println("id author George Koch");
                 out.println("uciok");
-                out.printf("info string useBook: %b, book: %s\r\n", chess.useBook(), chess.getBook().getAbsolutePath());
+                out.printf("info string useBook: %b, book: %s\r\n", chess.useBook(),
+                    chess.getBook() != null? chess.getBook().getAbsolutePath(): "-");
             } else if (line.startsWith("debug ")) {
-                debugListener.setDebug("on".equals(line.substring(6).trim()));
+                uciListener.setDebug("on".equals(line.substring(6).trim()));
             } else if ("isready".equals(line)) {
                 ensureReady();
                 print("readyok");
@@ -105,11 +110,14 @@ public class UCI {
                         chess.setBoard(type.substring(4));
                     }
                     if (matcher.groupCount() > 2) {
-                        final String movesStr = matcher.group(3).substring(6).trim();
-                        final String moves[] = movesStr.split(" ");
-                        final Board board = chess.getBoard();
-                        for (String move: moves) {
-                            board.move(StringUtils.fromLong(board, move.trim()));
+                        final String groupStr = matcher.group(3);
+                        if (groupStr != null && groupStr.length() > 0) {
+                            final String movesStr = groupStr.substring(6).trim();
+                            final String moves[] = movesStr.split(" ");
+                            final Board board = chess.getBoard();
+                            for (String move: moves) {
+                                board.move(StringUtils.fromLong(board, move.trim()));
+                            }
                         }
                     }
                 }
@@ -187,7 +195,9 @@ public class UCI {
             searchTime = timeControl.getNextMoveTime();
         }
         chess.setDepth(depth);
-        chess.setTime(Math.max(searchTime - CANCEL_THRESHOLD, 10));
+        if (searchTime != 0) {
+            chess.setTime(Math.max(searchTime - CANCEL_THRESHOLD, 10));
+        }
         future = THREAD_POOL.submit(new Callable<String>() {
             @Override
             public String call() throws Exception {
@@ -245,11 +255,26 @@ public class UCI {
         }
     }
 
-    private static class DebugBestMoveListener implements BestMoveListener {
+    @Override
+    public OutputStream getOutputStream() {
+        return out;
+    }
+
+    @Override
+    public InputStream getInputStream() {
+        return inputStream;
+    }
+
+    @Override
+    public void destroy() {
+        chess.cancel();
+    }
+
+    private static class UciBestMoveListener implements BestMoveListener {
         private final PrintStream out;
         private boolean debug = false;
 
-        public DebugBestMoveListener(final PrintStream out) {
+        public UciBestMoveListener(final PrintStream out) {
             this.out = out;
         }
 

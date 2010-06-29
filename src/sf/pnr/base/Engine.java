@@ -523,16 +523,17 @@ public final class Engine {
 
     public int quiescence(final Board board, int alpha, int beta) {
         nodeCount++;
+
+        if (Evaluation.drawByInsufficientMaterial(board)) {
+            return VAL_DRAW;
+        }
+        
         final int eval = evaluation.evaluate(board);
         if (eval > alpha) {
             alpha = eval;
             if (alpha >= beta) {
                 return beta;
             }
-        }
-
-        if (Evaluation.drawByInsufficientMaterial(board)) {
-            return VAL_DRAW;
         }
 
         // check the time

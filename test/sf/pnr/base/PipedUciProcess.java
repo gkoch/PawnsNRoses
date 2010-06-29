@@ -3,27 +3,23 @@ package sf.pnr.base;
 import sf.pnr.io.UCI;
 import sf.pnr.io.UciProcess;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class
-    PipedUciProcess implements UciProcess {
+public class PipedUciProcess implements UciProcess {
 
     private final PipedOutputStream fromEngineOut;
     private final PipedInputStream toEngineIn;
     private final ExecutorService executor;
 
     public PipedUciProcess() throws IOException {
+        Configuration.getInstance().setTranspositionTableSizeInMB(128);
         final PipedOutputStream toEngineOut = new PipedOutputStream();
         toEngineIn = new PipedInputStream(toEngineOut);
         final PipedInputStream fromEngineIn = new PipedInputStream();

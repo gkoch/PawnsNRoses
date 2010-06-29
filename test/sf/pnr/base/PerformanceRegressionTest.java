@@ -12,12 +12,12 @@ public class PerformanceRegressionTest {
     public static void main(String[] args) throws IOException {
         final String engineDir = System.getProperty("searchTest.engineDir");
         final List<String> testFiles = new ArrayList<String>();
-        testFiles.add("pos.epd");
+//        testFiles.add("pos.epd");
         testFiles.add("best7.epd");
         testFiles.add("wnperm.epd");
         testFiles.add("qtest_easy.epd");
-        final UciRunner pnrV0029 = new UciRunner("Pawns N' Roses v0.029", null,
-            new ExternalUciProcess(new String[]{"\"" + engineDir + "/PawnsNRoses/v0.02x/PawnsNRoses v0.029.bat\""},
+        final UciRunner pnrV0029 = new UciRunner("Pawns N' Roses v0.029b", null,
+            new ExternalUciProcess(new String[]{"\"" + engineDir + "/PawnsNRoses/v0.02x/PawnsNRoses v0.029b.bat\""},
                 new File(engineDir + "/PawnsNRoses/v0.02x/")));
         final UciRunner pnrLatest = new UciRunner("Pawns N' Roses Latest", null, new PipedUciProcess());
         final UciRunner rybka22 = new UciRunner("Rybka 2.2 - 2 cores", null,
@@ -25,7 +25,7 @@ public class PerformanceRegressionTest {
                 new File(engineDir)));
         final UciRunner[] runners = new UciRunner[] {rybka22, pnrLatest, pnrV0029};
         try {
-            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(runners, 6, 0, 5));
+            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(runners, 6, 0, 20));
         } finally {
             for (UciRunner runner : runners) {
                 runner.close();

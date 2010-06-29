@@ -17,6 +17,7 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     private final int[] totalDepth;
     private final long[] totalMoveTime;
     private final int[] failureCount;
+    private final boolean debugStats = false;
 
     public MultiEngineSearchTask(final UciRunner[] runners, final int fixedDepth, final int timeToSolve,
                                  final int debugPrintInterval) {
@@ -67,16 +68,28 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
                 boolean passed = true;
                 try {
                     if (commands.containsKey("bm")) {
-                        final String engineBestMove = runner.getBestMove();
+                        final String engineBestMove =
+                            StringUtils.toShort(board, StringUtils.fromLong(board, runner.getBestMove()));
                         final String[] bestMoves = commands.get("bm").split("/");
                         if (engineBestMove == null || !StringUtils.containsString(bestMoves, engineBestMove)) {
                             passed = false;
+                            if (debugStats) {
+                                System.out.printf(
+                                    "Engine '%s' failed on test '%s'. Best moves: %s, engine recommended: %s\r\n",
+                                    runner.getName(), StringUtils.toFen(board), commands.get("bm"), engineBestMove);
+                            }
                         }
                     } else if (commands.containsKey("am")) {
-                        final String engineBestMove = runner.getBestMove();
+                        final String engineBestMove =
+                            StringUtils.toShort(board, StringUtils.fromLong(board, runner.getBestMove()));
                         final String[] avoidMoves = commands.get("am").split("/");
                         if (engineBestMove == null || StringUtils.containsString(avoidMoves, engineBestMove)) {
                             passed = false;
+                            if (debugStats) {
+                                System.out.printf(
+                                    "Engine '%s' failed on test '%s'. Avoid moves: %s, engine recommended: %s\r\n",
+                                    runner.getName(), StringUtils.toFen(board), commands.get("am"), engineBestMove);
+                            }
                         }
                     }
                 } catch (IllegalStateException e) {
@@ -91,8 +104,10 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
                 totalNodeCount[i] += runner.getNodeCount();
                 totalDepth[i] += runner.getDepth();
                 totalMoveTime[i] += runner.getMoveTime();
-                System.out.printf("%s - nodes: %d, depth: %d, time: %d\r\n",
-                    runner.getName(), runner.getNodeCount(), runner.getDepth(), runner.getMoveTime());
+                if (debugStats) {
+                    System.out.printf("%s - nodes: %d, depth: %d, time: %d\r\n",
+                        runner.getName(), runner.getNodeCount(), runner.getDepth(), runner.getMoveTime());
+                }
             }
         } catch (IOException e) {
             throw new UndeclaredThrowableException(e,

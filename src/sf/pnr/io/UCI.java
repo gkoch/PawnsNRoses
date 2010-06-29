@@ -28,7 +28,7 @@ public class UCI implements UciProcess {
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private static final int CANCEL_THRESHOLD = 50;
     private static final Pattern POSITION_PATTERN = Pattern.compile(
-        "((fen [1-8/pnbrqkPNBRQK]+ [wb] [KQkq-]+ [-a-h1-8]+ [0-9]+ [0-9]+)|startpos)( moves( [a-h][1-8][a-h][1-8][nbrq]?)+)?");
+        "(fen [1-8/pnbrqkPNBRQK]+ [wb] [KQkq-]+ [-a-h1-8]+ [0-9]+ [0-9]+|startpos)( moves( [a-h][1-8][a-h][1-8][nbrq]?)+)?");
 
     private static boolean verbose = false;
 
@@ -45,7 +45,7 @@ public class UCI implements UciProcess {
     public UCI(final InputStream in, final OutputStream out) {
         inputStream = in;
         this.in = new BufferedReader(new InputStreamReader(in));
-        this.out = new PrintStream(out);
+        this.out = new PrintStream(out, true);
         chess = new PawnsNRoses();
         uciListener = new UciBestMoveListener(this.out);
         uciListener.setDebug(true);
@@ -110,7 +110,7 @@ public class UCI implements UciProcess {
                         chess.setBoard(type.substring(4));
                     }
                     if (matcher.groupCount() > 2) {
-                        final String groupStr = matcher.group(3);
+                        final String groupStr = matcher.group(2);
                         if (groupStr != null && groupStr.length() > 0) {
                             final String movesStr = groupStr.substring(6).trim();
                             final String moves[] = movesStr.split(" ");

@@ -17,6 +17,7 @@ public final class Engine {
     private static final int[] NO_MOVE_ARRAY = new int[] {0};
     private static final int VAL_CHECK_BONUS = 500;
     private static final int VAL_BLOCKED_CHECK_BONUS = 100;
+    private static final int VAL_7TH_RANK_PAWN = 300;
     private static final int VAL_FUTILITY_THRESHOLD = 400;
     private static final int VAL_DEEP_FUTILITY_THRESHOLD = 675;
     private static final int VAL_RAZORING_THRESHOLD = 400;
@@ -802,7 +803,14 @@ public final class Engine {
                         checkBonus = 0;
                     }
                 }
-                moves[i] = move | checkingBit | ((historyValue + checkBonus + valPositional) << SHIFT_MOVE_VALUE);
+                final int pawnBonus;
+                if (absPiece == PAWN && (getRank(toIndex) == 1 || getRank(toIndex) == 6)) {
+                    pawnBonus = VAL_7TH_RANK_PAWN;
+                } else {
+                    pawnBonus = 0;
+                }
+                moves[i] = move | checkingBit |
+                    ((historyValue + checkBonus + valPositional + pawnBonus) << SHIFT_MOVE_VALUE);
             } else {
                 moves[i] = moves[moves[0]];
                 moves[0]--;

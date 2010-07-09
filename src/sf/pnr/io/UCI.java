@@ -47,8 +47,7 @@ public class UCI implements UciProcess {
         this.in = new BufferedReader(new InputStreamReader(in));
         this.out = new PrintStream(out, true);
         chess = new PawnsNRoses();
-        uciListener = new UciBestMoveListener(this.out);
-        uciListener.setDebug(true);
+        uciListener = new UciBestMoveListener(this.out, true);
         chess.setBestMoveListener(uciListener);
     }
 
@@ -270,12 +269,13 @@ public class UCI implements UciProcess {
         chess.cancel();
     }
 
-    private static class UciBestMoveListener implements BestMoveListener {
+    public static class UciBestMoveListener implements BestMoveListener {
         private final PrintStream out;
         private boolean debug = false;
 
-        public UciBestMoveListener(final PrintStream out) {
+        public UciBestMoveListener(final PrintStream out, final boolean debug) {
             this.out = out;
+            this.debug = debug;
         }
 
         @Override

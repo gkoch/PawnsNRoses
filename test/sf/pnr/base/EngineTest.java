@@ -1,6 +1,7 @@
 package sf.pnr.base;
 
 import junit.framework.TestCase;
+import sf.pnr.io.UCI;
 
 import static sf.pnr.base.Engine.*;
 import static sf.pnr.base.Evaluation.*;

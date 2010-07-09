@@ -18,6 +18,7 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     private final long[] totalMoveTime;
     private final int[] failureCount;
     private final boolean debugStats = false;
+    private final long startTime;
 
     public MultiEngineSearchTask(final UciRunner[] runners, final int fixedDepth, final int timeToSolve,
                                  final int debugPrintInterval) {
@@ -29,6 +30,7 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
         totalNodeCount = new long[runners.length];
         totalDepth = new int[runners.length];
         totalMoveTime = new long[runners.length];
+        startTime = System.currentTimeMillis();
     }
 
     @Override
@@ -120,7 +122,8 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     }
 
     private void printStats() {
-        System.out.printf("Statistics after %d tests:\r\n", testCount);
+        System.out.printf("Statistics after %d tests (elapsed time: %f2.1s):\r\n",
+            testCount, ((double) System.currentTimeMillis() - startTime) / 1000);
         System.out.printf("%25s\t%5s\t%5s\t%9s\t%5s\t%7s\r\n", "Engine name", "%", "ply", "nodes", "msec", "nodes/sec");
         for (int i = 0; i < runners.length; i++) {
             final UciRunner runner = runners[i];

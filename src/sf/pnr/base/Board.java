@@ -2,10 +2,10 @@ package sf.pnr.base;
 
 import sf.pnr.alg.RepetitionTable;
 
-import static sf.pnr.base.Utils.*;
-import static sf.pnr.base.Evaluation.*;
-
 import java.util.Arrays;
+
+import static sf.pnr.base.Evaluation.*;
+import static sf.pnr.base.Utils.*;
 
 public final class Board {
 

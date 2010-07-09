@@ -24,8 +24,8 @@ public final class Engine {
     private static final int LATE_MOVE_REDUCTION_MIN_DEPTH = 3 << SHIFT_PLY;
     private static final int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
 
-    private static final int DEPTH_EXT_CHECK = PLY;
-    private static final int DEPTH_EXT_7TH_RANK_PAWN = PLY >> 1;
+    private static final int DEPTH_EXT_CHECK = Configuration.getInstance().getDepthExtCheck();
+    private static final int DEPTH_EXT_7TH_RANK_PAWN = Configuration.getInstance().getDepthExt7ThRankPawn();
 
     private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
     private static final SearchStage[] searchStages = SearchStage.values();
@@ -134,8 +134,8 @@ public final class Engine {
         final long zobristKey = board.getZobristKey();
         final long ttValue = transpositionTable.read(zobristKey);
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
-        if (ttValue != 0 && ttDepth >= (depth >> SHIFT_PLY)) {
+        final int ttDepth = (int) (((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH) << SHIFT_PLY);
+        if (ttValue != 0 && ttDepth >= depth) {
             final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
             final long ttType = ttValue & TT_TYPE;
             if (ttType == TT_TYPE_EXACT) {
@@ -150,9 +150,9 @@ public final class Engine {
             }
         }
 
-        if (depth > 3 * PLY && (ttMove == 0 || ttDepth < (depth >> (SHIFT_PLY + 1)))) {
+        if (depth > 3 * PLY && (ttMove == 0 || ttDepth < depth / 2)) {
             // internal iterative deepening
-            final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, 0);
+            final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, searchedPly);
             ttMove = getMoveFromSearchResult(searchResult);
         }
 
@@ -169,11 +169,10 @@ public final class Engine {
             final boolean highPriorityStage =
                 searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
             final int[] moves = getMoves(searchStage, board, ttMove, searchedPly);
-            final boolean startQuiescence =
-                depth < (2 << SHIFT_PLY) && (searchStage == SearchStage.CAPTURES_WINNING ||
-                    searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING ||
-                    searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
-                        (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
+            final boolean allowQuiescence = (searchStage == SearchStage.CAPTURES_WINNING ||
+                searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING ||
+                searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
+                    (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
             for (int i = moves[0]; i > 0; i--) {
                 final int move = moves[i];
                 assert (move & BASE_INFO) != 0;
@@ -220,7 +219,7 @@ public final class Engine {
 
                 // evaluate the move
                 if (a > alpha) {
-                    a = -negascout(board, depth - PLY + depthExt, -b, -alpha, startQuiescence, true, searchedPly + 1);
+                    a = -negascout(board, depth - PLY + depthExt, -b, -alpha, allowQuiescence, true, searchedPly + 1);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
@@ -233,7 +232,8 @@ public final class Engine {
                         moveGenerator.popFrame();
                         assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
-                        addMoveToHistoryTable(board, searchedPly, searchStage, move);
+                        addMoveToHistoryTable(board, move);
+                        addMoveToKillers(searchedPly, searchStage, move);
                         assert move != 0;
                         return getSearchResult(move, a);
                     }
@@ -241,7 +241,7 @@ public final class Engine {
 
                 if (a >= b) {
                     // null-window was too narrow, try a full search
-                    a = -negascout(board, depth - PLY + depthExt, -beta, -a, startQuiescence, true, searchedPly + 1);
+                    a = -negascout(board, depth - PLY + depthExt, -beta, -a, allowQuiescence, true, searchedPly + 1);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
@@ -252,12 +252,10 @@ public final class Engine {
                         moveGenerator.popFrame();
                         assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
-                        addMoveToHistoryTable(board, searchedPly, searchStage, move);
+                        addMoveToHistoryTable(board, move);
+                        addMoveToKillers(searchedPly, searchStage, move);
                         assert move != 0;
                         return getSearchResult(move, a);
-                    }
-                    if (a < beta && a > alpha) {
-                        transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     }
                 }
 
@@ -268,6 +266,8 @@ public final class Engine {
                     bestMove = move;
                     alpha = a;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
+                    addMoveToHistoryTable(board, move);
+                    addMoveToKillers(searchedPly, searchStage, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
@@ -360,18 +360,23 @@ public final class Engine {
         }
 
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        if (depth > 3 * PLY && (ttMove == 0 || ttDepth < (depth >> (SHIFT_PLY + 1)))) {
+        if (depth > 3 * PLY && ttMove == 0) {
             // internal iterative deepening
             final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, searchedPly);
             ttMove = getMoveFromSearchResult(searchResult);
         }
 
         // futility pruning
-        final int futility;
+        final boolean futility;
         if (depth < (3 << SHIFT_PLY) && !inCheck) {
-            futility = depth <= PLY ? VAL_FUTILITY_THRESHOLD : VAL_DEEP_FUTILITY_THRESHOLD;
+            final int value = board.getMaterialValue();
+            if (depth < (2 << SHIFT_PLY)) {
+                futility = value < alpha - VAL_FUTILITY_THRESHOLD;
+            } else {
+                futility = value < alpha - VAL_DEEP_FUTILITY_THRESHOLD;
+            }
         } else {
-            futility = 0;
+            futility = false;
         }
 
         moveGenerator.pushFrame();
@@ -384,11 +389,14 @@ public final class Engine {
             final boolean highPriorityStage =
                 searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
             final int[] moves = getMoves(searchStage, board, ttMove, searchedPly);
-            final boolean startQuiescence =
-                depth < (2 << SHIFT_PLY) && (searchStage == SearchStage.CAPTURES_WINNING ||
-                    searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING ||
-                    searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
-                        (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
+            final boolean allowQuiescence = (searchStage == SearchStage.CAPTURES_WINNING ||
+                searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING ||
+                searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
+                    (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
+            final boolean allowToRecurseDown = !futility ||
+                (searchStage == SearchStage.TRANS_TABLE || searchStage == SearchStage.CAPTURES_WINNING ||
+                    searchStage == SearchStage.PROMOTION);
+
             for (int i = moves[0]; i > 0; i--) {
                 final int move = moves[i];
                 assert (move & BASE_INFO) != 0;
@@ -407,26 +415,9 @@ public final class Engine {
                 hasLegalMove = true;
 
                 final boolean opponentInCheck = (move & CHECKING) > 0;
-                int depthExt = 0;
-                if (opponentInCheck) {
-                    depthExt += DEPTH_EXT_CHECK;
-                }
-                final int toIndex = getMoveToIndex(move);
-                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
-                    final int piece = board.getBoard()[toIndex];
-                    final int signum = (toMove << 1) - 1;
-                    final int absPiece = signum * piece;
-                    if (absPiece == PAWN) {
-                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
-                    }
-                }
-
-                if (depthExt == 0 && futility > 0 && !highPriorityStage) {
-                    final int value = board.getMaterialValue();
-                    if (value < alpha - futility) {
-                        board.takeBack(undo);
-                        break;
-                    }
+                if (!allowToRecurseDown && !opponentInCheck) {
+                    board.takeBack(undo);
+                    break;
                 }
 
                 int a = alpha + 1;
@@ -443,9 +434,23 @@ public final class Engine {
                     moveCount++;
                 }
 
+                int depthExt = 0;
+                if (opponentInCheck) {
+                    depthExt += DEPTH_EXT_CHECK;
+                }
+                final int toIndex = getMoveToIndex(move);
+                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
+                    final int piece = board.getBoard()[toIndex];
+                    final int signum = (toMove << 1) - 1;
+                    final int absPiece = signum * piece;
+                    if (absPiece == PAWN) {
+                        depthExt += DEPTH_EXT_7TH_RANK_PAWN;
+                    }
+                }
+
                 // evaluate the move
                 if (a > alpha && b >= -VAL_MATE_THRESHOLD) {
-                    a = -negascout(board, depth - PLY + depthExt, -b, -alpha, startQuiescence, true, searchedPly + 1);
+                    a = -negascout(board, depth - PLY + depthExt, -b, -alpha, allowQuiescence, true, searchedPly + 1);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
@@ -457,14 +462,15 @@ public final class Engine {
                         moveGenerator.popFrame();
                         assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
-                        addMoveToHistoryTable(board, searchedPly, searchStage, move);
+                        addMoveToHistoryTable(board, move);
+                        addMoveToKillers(searchedPly, searchStage, move);
                         return a;
                     }
                 }
 
                 if (a >= b) {
                     // null-window was too narrow, try a full search
-                    a = -negascout(board, depth - PLY + depthExt, -beta, -a, startQuiescence, true, searchedPly + 1);
+                    a = -negascout(board, depth - PLY + depthExt, -beta, -a, allowQuiescence, true, searchedPly + 1);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
@@ -475,11 +481,9 @@ public final class Engine {
                         moveGenerator.popFrame();
                         assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
-                        addMoveToHistoryTable(board, depth, searchStage, move);
+                        addMoveToHistoryTable(board, move);
+                        addMoveToKillers(searchedPly, searchStage, move);
                         return a;
-                    }
-                    if (a < beta && a > alpha) {
-                        transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     }
                 }
                 hasEvaluatedMove = true;
@@ -488,6 +492,8 @@ public final class Engine {
                     bestMove = move;
                     alpha = a;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
+                    addMoveToHistoryTable(board, move);
+                    addMoveToKillers(searchedPly, searchStage, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
@@ -568,7 +574,7 @@ public final class Engine {
         int b = beta;
         int bestMove = 0;
         for (SearchStage searchStage: searchStages) {
-            final int[] moves = getMoves(searchStage, board, 0, 0);
+            final int[] moves = getMoves(searchStage, board, 0, MAX_SEARCH_DEPTH - 1);
 
             final boolean allowToRecurseDown = (searchStage == SearchStage.CAPTURES_WINNING ||
                     searchStage == SearchStage.PROMOTION);
@@ -610,7 +616,7 @@ public final class Engine {
                     moveGenerator.popFrame();
                     assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
                     transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN, age);
-                    addMoveToHistoryTable(board, 0, searchStage, move);
+                    addMoveToHistoryTable(board, move);
                     return a;
                 }
                 if (a >= b) {
@@ -621,15 +627,12 @@ public final class Engine {
                         moveGenerator.popFrame();
                         return alpha;
                     }
-                    if (a < beta && a > alpha) {
-                        transpositionTable.set(zobristKey, TT_TYPE_EXACT, move, 0, a - VAL_MIN, age);
-                    }
                     if (a >= beta) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
                         assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN, age);
-                        addMoveToHistoryTable(board, 0, searchStage, move);
+                        addMoveToHistoryTable(board, move);
                         return a;
                     }
                 }
@@ -638,6 +641,7 @@ public final class Engine {
                     bestMove = move;
                     alpha = a;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, 0, a - VAL_MIN, age);
+                    addMoveToHistoryTable(board, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
@@ -663,8 +667,7 @@ public final class Engine {
         return alpha;
     }
 
-    private void addMoveToHistoryTable(final Board board, final int searchedPly, final SearchStage searchStage,
-                                       final int move) {
+    private void addMoveToHistoryTable(final Board board, final int move) {
         final int fromIndex = getMoveFromIndex(move);
         final int toIndex = getMoveToIndex(move);
         final int pieceHistoryIdx = board.getBoard()[fromIndex] + 7;
@@ -674,6 +677,9 @@ public final class Engine {
         if (history[pieceHistoryIdx][fromIndex64][toIndex64] > historyMax) {
             historyMax = history[pieceHistoryIdx][fromIndex64][toIndex64];
         }
+    }
+
+    private void addMoveToKillers(final int searchedPly, final SearchStage searchStage, final int move) {
         if (searchStage == SearchStage.NORMAL) {
             final int fromTo = move & FROM_TO;
             if (killerMoves[searchedPly][0] != fromTo) {
@@ -707,7 +713,7 @@ public final class Engine {
         final int[] moves;
         switch (searchStage) {
             case TRANS_TABLE:
-                if (ttMove > 0 && (ttMove & BASE_INFO) > 0) {
+                if ((ttMove & BASE_INFO) > 0) {
                     moves = new int[2];
                     moves[0] = 1;
                     if (board.isCheckingMove(ttMove)) {
@@ -730,16 +736,15 @@ public final class Engine {
             case KILLERS:
                 moves = new int[3];
                 int killerCount = 0;
-                final int searchedDepth = searchedPly;
-                if (killerMoves[searchedDepth][0] > 0) {
-                    int move = killerMoves[searchedDepth][0];
+                if (killerMoves[searchedPly][0] > 0) {
+                    int move = killerMoves[searchedPly][0];
                     if (isValidKillerMove(board, getMoveFromIndex(move), getMoveToIndex(move))) {
-                        moves[++killerCount] = move;
+                        moves[++killerCount] = move | (board.isCheckingMove(move)? CHECKING: 0);
                     }
-                    if (killerMoves[searchedDepth][1] > 0) {
-                        move = killerMoves[searchedDepth][1];
+                    if (killerMoves[searchedPly][1] > 0) {
+                        move = killerMoves[searchedPly][1];
                         if (isValidKillerMove(board, getMoveFromIndex(move), getMoveToIndex(move))) {
-                            moves[++killerCount] = move;
+                            moves[++killerCount] = move | (board.isCheckingMove(move)? CHECKING: 0);
                         }
                     }
                     moves[0] = killerCount;

@@ -124,7 +124,7 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     }
 
     private void printStats() {
-        System.out.printf("Statistics after %d tests (elapsed time: %f2.1s):\r\n",
+        System.out.printf("Statistics after %d tests (elapsed time: %2.1fs):\r\n",
             testCount, ((double) System.currentTimeMillis() - startTime) / 1000);
         System.out.printf("%40s\t%5s\t%5s\t%9s\t%5s\t%7s\r\n", "Engine name", "%", "ply", "nodes", "msec", "nodes/sec");
         for (int i = 0; i < runners.size(); i++) {

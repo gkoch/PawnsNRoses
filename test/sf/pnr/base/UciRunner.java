@@ -9,11 +9,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Map;
+import java.util.Properties;
 
 public class UciRunner {
     private final String name;
-    private final Map<String, String> uciParameters;
+    private final Properties uciOptions;
     private final UciProcess process;
     private BufferedWriter writer;
     private BufferedReader reader;
@@ -23,10 +23,9 @@ public class UciRunner {
     private long moveTime;
     private boolean debug = false;
 
-    public UciRunner(final String name, final Map<String, String> uciParameters, final UciProcess process)
-            throws IOException {
+    public UciRunner(final String name, final Properties uciOptions, final UciProcess process) throws IOException {
         this.name = name;
-        this.uciParameters = uciParameters;
+        this.uciOptions = uciOptions;
         this.process = process;
         final OutputStream os;
         if (debug) {
@@ -50,6 +49,12 @@ public class UciRunner {
     public void uciNewGame() throws IOException {
         sendCommand("ucinewgame");
         ensureReady();
+        if (uciOptions != null) {
+            for (String name: uciOptions.stringPropertyNames()) {
+                sendCommand(String.format("setoption name %s value %s", name, uciOptions.getProperty(name)));
+            }
+            ensureReady();
+        }
     }
 
     public void position(final Board board) throws IOException {

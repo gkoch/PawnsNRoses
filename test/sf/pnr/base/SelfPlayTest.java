@@ -7,8 +7,8 @@ public class SelfPlayTest {
 
     public static void main(final String[] args) {
         final Configuration config = Configuration.getInstance();
-        config.setTranspositionTableSizeInMB(128);
-        config.setEvalHashTableSizeInMB(8);
+        config.setProperty(Configurable.Key.TRANSP_TABLE_SIZE, "128");
+        config.setProperty(Configurable.Key.EVAL_TABLE_SIZE, "8");
         while (true) {
             final Board board = new Board();
             board.restart();

@@ -2,11 +2,11 @@ package sf.pnr.io;
 
 import sf.pnr.base.BestMoveListener;
 import sf.pnr.base.Board;
+import sf.pnr.base.Configurable;
 import sf.pnr.base.Configuration;
 import sf.pnr.base.StringUtils;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,18 +53,11 @@ public class UCI implements UciProcess {
 
     public static void main(final String[] args) throws IOException, ExecutionException, InterruptedException {
         final Configuration config = Configuration.getInstance();
-
-        final String bookPath = System.getProperty("polyglot.book");
-        final File book = bookPath != null? new File(bookPath): null;
-        config.setOpeningBook(book);
-
-        final String transpTableSizeStr = System.getProperty("transposition.table.size", "24");
-        final int transpTableSize = Integer.parseInt(transpTableSizeStr);
-        config.setTranspositionTableSizeInMB(transpTableSize);
-
-        final String evalHashTableSizeStr = System.getProperty("eval.hashtable.size", "8");
-        final int evalHashTableSize = Integer.parseInt(evalHashTableSizeStr);
-        config.setEvalHashTableSizeInMB(evalHashTableSize);
+        final String configurationFile = System.getProperty("configuration.file");
+        if (configurationFile != null) {
+            config.loadFromFile(configurationFile);
+        }
+        config.loadFromSystemProperties();
 
         final OutputStream os;
         if (args.length > 0) {
@@ -85,15 +78,50 @@ public class UCI implements UciProcess {
                 out.println("id name Pawns N' Roses");
                 out.println("id author George Koch");
                 out.println("uciok");
-                out.printf("info string useBook: %b, book: %s\r\n", chess.useBook(),
-                    chess.getBook() != null? chess.getBook().getAbsolutePath(): "-");
+                for (Configurable.Key key: Configurable.Key.values()) {
+                    out.printf("option name %s type string default %s\r\n", StringUtils.toUciOption(key),
+                        Configuration.getInstance().getString(key));
+                }
+//                out.printf("info string useBook: %b, book: %s\r\n", chess.useBook(),
+//                    chess.getBook() != null? chess.getBook().getAbsolutePath(): "-");
             } else if (line.startsWith("debug ")) {
                 uciListener.setDebug("on".equals(line.substring(6).trim()));
             } else if ("isready".equals(line)) {
                 ensureReady();
                 print("readyok");
             } else if (line.startsWith("setoption ")) {
-                // no options yet
+                final String content = line.substring(10).trim();
+                final String name;
+                final String value;
+                if (content.startsWith("name ")) {
+                    final int pos = content.indexOf(" value ");
+                    if (pos == -1) {
+                        name = content.substring(5).trim();
+                        value = "";
+                    } else {
+                        name = content.substring(5, pos).trim();
+                        value = content.substring(pos + 7).trim();
+                    }
+                } else if (content.startsWith("value ")) {
+                    final int pos = content.indexOf(" name ");
+                    if (pos == -1) {
+                        name = "";
+                        value = "";
+                    } else {
+                        value = content.substring(6, pos).trim();
+                        name = content.substring(pos + 6).trim();
+                    }
+                } else {
+                    name = "";
+                    value = "";
+                }
+                if (name.length() == 0) {
+                    // missing name
+                    continue;
+                }
+                final String keyStr = StringUtils.fromUciOption(name);
+                final Configurable.Key key = Configuration.getKey(keyStr);
+                Configuration.getInstance().setProperty(key, value);
             } else if ("ucinewgame".equals(line)) {
                 ensureReady();
                 chess.restart();

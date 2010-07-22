@@ -57,9 +57,10 @@ public class SearchTask implements EpdProcessorTask {
         boolean passed = true;
 //            Assert.assertEquals(Engine.getMoveFromSearchResult(result), bestLine[0]);
         try {
-            if (commands.containsKey("bm")) {
+            if (commands.containsKey("bm") || commands.containsKey("pm")) {
                 final int[] bestLine = engine.getBestLine(board, Engine.getMoveFromSearchResult(result));
-                final String[] bestMoves = commands.get("bm").split("/");
+                final String[] bestMoves =
+                    (commands.containsKey("bm")? commands.get("bm"): commands.get("pm")).split("/");
                 final String engineBestMove = StringUtils.toShort(board, bestLine[0]);
                 if (!StringUtils.containsString(bestMoves, engineBestMove)) {
     //                System.out.printf("Failed to solve puzzle %d. (%s). Engine suggested %s, best moves: %s, commands: %s\r\n",

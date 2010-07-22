@@ -1,5 +1,6 @@
 package sf.pnr.alg;
 
+import sf.pnr.base.Configurable;
 import sf.pnr.base.Configuration;
 
 import java.util.Arrays;
@@ -8,11 +9,13 @@ import java.util.Arrays;
  */
 public final class EvalHashTable {
     private static final int MAX_CHECK_INDEX = 3 * 20;
+    @Configurable(Configurable.Key.EVAL_TABLE_SIZE)
+    private static int TABLE_SIZE = 1;
 
     private final int[] array;
 
     public EvalHashTable() {
-        array = new int[Configuration.getInstance().getEvalHashTableSizeInMB() * 1024 * 1024 / 12 * 3];
+        array = new int[TABLE_SIZE * 1024 * 1024 / 12 * 3];
     }
 
     public int read(final long zobrist) {

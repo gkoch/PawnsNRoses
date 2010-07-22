@@ -24,16 +24,18 @@ public final class Engine {
     private static final int LATE_MOVE_REDUCTION_MIN_DEPTH = 3 << SHIFT_PLY;
     private static final int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
 
-    private static final int DEPTH_EXT_CHECK = Configuration.getInstance().getDepthExtCheck();
-    private static final int DEPTH_EXT_7TH_RANK_PAWN = Configuration.getInstance().getDepthExt7ThRankPawn();
+    @Configurable(Configurable.Key.DEPTH_EXT_CHECK)
+    private static int DEPTH_EXT_CHECK = PLY / 2;
+    @Configurable(Configurable.Key.DEPTH_EXT_7TH_RANK_PAWN)
+    private static int DEPTH_EXT_7TH_RANK_PAWN = PLY / 4;
 
     private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
     private static final SearchStage[] searchStages = SearchStage.values();
 
     private final MoveGenerator moveGenerator = new MoveGenerator();
     private final Evaluation evaluation = new Evaluation();
-    private final TranspositionTable transpositionTable;
-    private final int[][][] history;
+    private final TranspositionTable transpositionTable = new TranspositionTable();
+    private final int[][][] history = new int[14][64][64];
     private final int[][] killerMoves = new int[MAX_SEARCH_DEPTH][2]; 
     private long searchStartTime;
     private long searchEndTime;
@@ -44,11 +46,6 @@ public final class Engine {
     private int historyMax = 0;
     private BestMoveListener listener;
     private int age;
-
-    public Engine() {
-        transpositionTable = new TranspositionTable();
-        history = new int[14][64][64];
-    }
 
     public long search(final Board board, int maxDepth, final long timeLeft) {
         age = (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES;

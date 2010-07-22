@@ -1,5 +1,6 @@
 package sf.pnr.alg;
 
+import sf.pnr.base.Configurable;
 import sf.pnr.base.Configuration;
 
 import java.util.Arrays;
@@ -32,10 +33,13 @@ public final class TranspositionTable {
     private static final int MAX_CHECK_COUNT_CUT = 10;
     private static final int MAX_CHECK_INDEX = 2 * MAX_CHECK_COUNT_EXACT;
 
+    @Configurable(Configurable.Key.TRANSP_TABLE_SIZE)
+    private static int TABLE_SIZE = 1;
+
     private final long[][] arrays;
 
     public TranspositionTable() {
-        final int size = Configuration.getInstance().getTranspositionTableSizeInMB() * 1024 * 1024;
+        final int size = TABLE_SIZE * 1024 * 1024;
         final int arrayCount = size >>> ARRAY_SIZE_SHIFT;
         arrays = new long[arrayCount][ARRAY_LENGHT];
     }

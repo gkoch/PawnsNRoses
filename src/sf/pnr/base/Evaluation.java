@@ -43,27 +43,42 @@ public final class Evaluation {
 
     public static final int[] SHIFT_POSITION_BONUS = new int[]{0, 8};
 
-    public static final int PENALTY_DOUBLE_PAWN = -20;
-    public static final int PENALTY_TRIPLE_PAWN = -30;
-    public static final int PENALTY_ISOLATED_PAWN = -30;
-    public static final int PENALTY_WEAK_PAWN = -30;
+    @Configurable(Configurable.Key.EVAL_PENALTY_DOUBLE_PAWN)
+    public static int PENALTY_DOUBLE_PAWN = -20;
+    @Configurable(Configurable.Key.EVAL_PENALTY_TRIPLE_PAWN)
+    public static int PENALTY_TRIPLE_PAWN = -30;
+    @Configurable(Configurable.Key.EVAL_PENALTY_ISOLATED_PAWN)
+    public static int PENALTY_ISOLATED_PAWN = -30;
+    @Configurable(Configurable.Key.EVAL_PENALTY_WEAK_PAWN)
+    public static int PENALTY_WEAK_PAWN = -30;
 
-    public static final int BONUS_PAWN_SHIELD = 30;
-    public static final int BONUS_PAWN_STORM_MAX = 25;
+    @Configurable(Configurable.Key.EVAL_BONUS_PAWN_SHIELD)
+    public static int BONUS_PAWN_SHIELD = 30;
+    @Configurable(Configurable.Key.EVAL_BONUS_PAWN_STORM_MAX)
+    public static int BONUS_PAWN_STORM_MAX = 25;
     public static final int BONUS_PAWN_STORM_DEDUCTION_MAIN_FILE = 5;
     public static final int BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE = 4;
     public static final int BONUS_PASSED_PAWN_PER_SQUARE = 5;
-    public static final int BONUS_DEFENSE = 2;
-    public static final int BONUS_ATTACK = 3;
-    public static final int BONUS_HUNG_PIECE = 3;
-    public static final int BONUS_MOBILITY = 1;
-    public static final int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 1, 2, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    public static final int[] BONUS_DISTANCE_BISHOP = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
-    public static final int[] BONUS_DISTANCE_ROOK = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
-    public static final int[] BONUS_DISTANCE_QUEEN = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
+    @Configurable(Configurable.Key.EVAL_BONUS_DEFENSE)
+    public static int BONUS_DEFENSE = 2;
+    @Configurable(Configurable.Key.EVAL_BONUS_ATTACK)
+    public static int BONUS_ATTACK = 3;
+    @Configurable(Configurable.Key.EVAL_BONUS_HUNG_PIECE)
+    public static int BONUS_HUNG_PIECE = 3;
+    @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY)
+    public static int BONUS_MOBILITY = 1;
+    @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_KNIGHT)
+    public static int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 1, 2, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_BISHOP)
+    public static int[] BONUS_DISTANCE_BISHOP = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
+    @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_ROOK)
+    public static int[] BONUS_DISTANCE_ROOK = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
+    @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_QUEEN)
+    public static int[] BONUS_DISTANCE_QUEEN = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
     public static final int BONUS_KING_IN_SIGHT_NON_SLIDING = 5;
     public static final int BONUS_KING_IN_SIGHT_SLIDING = 3;
-    public static final int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN - 125;
+    @Configurable(Configurable.Key.EVAL_BONUS_UNSTOPPABLE_PAWN)
+    public static int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN - 125;
 
     public static final int INITIAL_MATERIAL_VALUE;
 
@@ -203,8 +218,8 @@ public final class Evaluation {
     }
 
     private boolean random;
-    private PawnHashTable pawnHashTable = new PawnHashTable();
-    private EvalHashTable evalHashTable = new EvalHashTable();
+    private final PawnHashTable pawnHashTable = new PawnHashTable();
+    private final EvalHashTable evalHashTable = new EvalHashTable();
 
     public int evaluate(final Board board) {
         final int state = board.getState();

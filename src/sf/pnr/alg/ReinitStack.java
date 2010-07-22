@@ -11,6 +11,7 @@ public final class ReinitStack <T extends Reinitialiseable> {
     private int size;
     private int allocated;
 
+    @SuppressWarnings({"unchecked"})
     public ReinitStack(final Class<T> clazz, final int capacity) {
         elements = (T[]) Array.newInstance(clazz, capacity);
         allocated = 0;

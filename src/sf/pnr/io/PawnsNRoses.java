@@ -1,9 +1,7 @@
 package sf.pnr.io;
 
-import sf.pnr.alg.TranspositionTable;
 import sf.pnr.base.BestMoveListener;
 import sf.pnr.base.Board;
-import sf.pnr.base.Configuration;
 import sf.pnr.base.Engine;
 import sf.pnr.base.Polyglot;
 import sf.pnr.base.StringUtils;
@@ -20,11 +18,11 @@ public class PawnsNRoses {
     private Engine engine;
     private int depth;
     private int time;
+    private BestMoveListener listener;
 
     public PawnsNRoses() {
-        final File polyglotBook = Configuration.getInstance().getOpeningBook();
-        polyglot = new Polyglot(polyglotBook);
-        useBook = polyglotBook != null && polyglotBook.exists();
+        polyglot = new Polyglot();
+        useBook = Polyglot.BOOK != null && Polyglot.BOOK.exists();
         board = new Board();
         board.restart();
         engine = new Engine();
@@ -33,8 +31,12 @@ public class PawnsNRoses {
     }
 
     public void restart() {
+        board = new Board();
         board.restart();
-        engine.clear();
+        engine = new Engine();
+        if (listener != null) {
+            engine.setBestMoveListener(listener);
+        }
         final File book = polyglot.getBook();
         useBook = book != null && book.exists();
     }
@@ -99,7 +101,8 @@ public class PawnsNRoses {
     }
 
     public void setBestMoveListener(final BestMoveListener listener) {
-        engine.setBestMoveListener(listener);
+        this.listener = listener;
+        engine.setBestMoveListener(this.listener);
     }
 
     public boolean isWhiteToMove() {

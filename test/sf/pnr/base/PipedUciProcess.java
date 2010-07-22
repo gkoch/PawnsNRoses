@@ -19,8 +19,6 @@ public class PipedUciProcess implements UciProcess {
     private final ExecutorService executor;
 
     public PipedUciProcess() throws IOException {
-        Configuration.getInstance().setTranspositionTableSizeInMB(128);
-        Configuration.getInstance().setEvalHashTableSizeInMB(8);
         final PipedOutputStream toEngineOut = new PipedOutputStream();
         toEngineIn = new PipedInputStream(toEngineOut);
         final PipedInputStream fromEngineIn = new PipedInputStream();

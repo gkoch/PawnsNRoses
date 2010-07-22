@@ -102,7 +102,7 @@ public class Utils {
     public static final int SHIFT_ATTACK_DELTA = 4;
     public static final int ATTACK_DELTA = 0xFF << SHIFT_ATTACK_DELTA;
     public static final int SHIFT_ATTACK_DISTANCE = 12;
-    public static final int ATTACK_DISTANCE = 0x0F << SHIFT_ATTACK_DISTANCE;
+    public static final int ATTACK_DISTANCE = 0x07 << SHIFT_ATTACK_DISTANCE;
     public static final int[] ATTACK_BITS;
 
     public static final int[][] ATTACK_VALUE = new int[7][7];

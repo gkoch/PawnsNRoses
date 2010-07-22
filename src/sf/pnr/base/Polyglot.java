@@ -212,19 +212,20 @@ public class Polyglot {
     private static final int[] PROMOTION_MAP = new int[]
         {EMPTY, MT_PROMOTION_KNIGHT, MT_PROMOTION_BISHOP, MT_PROMOTION_ROOK, MT_PROMOTION_QUEEN};
 
-    private final File book;
+    @Configurable(Configurable.Key.POLYGLOT_BOOK)
+    public static File BOOK = null;
+
     private long recordSize;
 
-    public Polyglot(final File book) {
-        this.book = book;
+    public Polyglot() {
         recordSize = 16;
     }
 
     public int readMove(final Board board) {
         try {
-            final RandomAccessFile file = new RandomAccessFile(book, "r");
+            final RandomAccessFile file = new RandomAccessFile(BOOK, "r");
             final long zobrist = board.getPolyglotZobristKey();
-            final long bytes = book.length();
+            final long bytes = BOOK.length();
             int low = 0;
             int high = (int) (bytes / recordSize - 1);
             while (low <= high) {
@@ -258,7 +259,7 @@ public class Polyglot {
                             moves[1] = move;
                         }
                     }
-                    for (int i = mid + 1; i < book.length(); i++) {
+                    for (int i = mid + 1; i < BOOK.length(); i++) {
                         file.seek(i * recordSize);
                         long testZobrist = file.readLong();
                         if (testZobrist != zobrist) {
@@ -328,6 +329,6 @@ public class Polyglot {
     }
 
     public File getBook() {
-        return book;
+        return BOOK;
     }
 }

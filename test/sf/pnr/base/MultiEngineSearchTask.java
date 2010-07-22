@@ -2,13 +2,14 @@ package sf.pnr.base;
 
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.List;
 import java.util.Map;
 
 /**
 */
 public class MultiEngineSearchTask implements EpdProcessorTask {
 
-    private final UciRunner[] runners;
+    private final List<UciRunner> runners;
     private final int fixedDepth;
     private final int timeToSolve;
     private final int debugPrintInterval;
@@ -20,16 +21,16 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     private final boolean debugStats = false;
     private final long startTime;
 
-    public MultiEngineSearchTask(final UciRunner[] runners, final int fixedDepth, final int timeToSolve,
+    public MultiEngineSearchTask(final List<UciRunner> runners, final int fixedDepth, final int timeToSolve,
                                  final int debugPrintInterval) {
         this.runners = runners;
         this.fixedDepth = fixedDepth;
         this.timeToSolve = timeToSolve;
         this.debugPrintInterval = debugPrintInterval;
-        failureCount = new int[runners.length];
-        totalNodeCount = new long[runners.length];
-        totalDepth = new int[runners.length];
-        totalMoveTime = new long[runners.length];
+        failureCount = new int[runners.size()];
+        totalNodeCount = new long[runners.size()];
+        totalDepth = new int[runners.size()];
+        totalMoveTime = new long[runners.size()];
         startTime = System.currentTimeMillis();
     }
 
@@ -62,17 +63,18 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
             time = timeToSolve;
         }
         try {
-            for (int i = 0; i < runners.length; i++) {
-                final UciRunner runner = runners[i];
+            for (int i = 0; i < runners.size(); i++) {
+                final UciRunner runner = runners.get(i);
                 runner.uciNewGame();
                 runner.position(board);
                 runner.go(depth, time);
                 boolean passed = true;
                 try {
-                    if (commands.containsKey("bm")) {
+                    if (commands.containsKey("bm") || commands.containsKey("pm")) {
                         final String engineBestMove =
                             StringUtils.toShort(board, StringUtils.fromLong(board, runner.getBestMove()));
-                        final String[] bestMoves = commands.get("bm").split("/");
+                        final String[] bestMoves =
+                            (commands.containsKey("bm")? commands.get("bm"): commands.get("pm")).split("/");
                         if (engineBestMove == null || !StringUtils.containsString(bestMoves, engineBestMove)) {
                             passed = false;
                             if (debugStats) {
@@ -124,10 +126,10 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     private void printStats() {
         System.out.printf("Statistics after %d tests (elapsed time: %f2.1s):\r\n",
             testCount, ((double) System.currentTimeMillis() - startTime) / 1000);
-        System.out.printf("%25s\t%5s\t%5s\t%9s\t%5s\t%7s\r\n", "Engine name", "%", "ply", "nodes", "msec", "nodes/sec");
-        for (int i = 0; i < runners.length; i++) {
-            final UciRunner runner = runners[i];
-            System.out.printf("%25s\t%5.1f\t%5.1f\t%9.1f\t%3.2f\t%9.1f\r\n", runner.getName(),
+        System.out.printf("%40s\t%5s\t%5s\t%9s\t%5s\t%7s\r\n", "Engine name", "%", "ply", "nodes", "msec", "nodes/sec");
+        for (int i = 0; i < runners.size(); i++) {
+            final UciRunner runner = runners.get(i);
+            System.out.printf("%40s\t%5.1f\t%5.1f\t%9.1f\t%3.2f\t%9.1f\r\n", runner.getName(),
                 ((double) (testCount - failureCount[i]) * 100) / testCount, ((double) totalDepth[i]) / testCount,
                 ((double) totalNodeCount[i]) / testCount, ((double) totalMoveTime[i]) / testCount,
                 ((double) totalNodeCount[i]) / totalMoveTime[i] * 1000);

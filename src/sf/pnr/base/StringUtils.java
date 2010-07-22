@@ -518,4 +518,43 @@ public class StringUtils {
         }
         return false;
     }
+
+    public static String toUciOption(final Configurable.Key key) {
+        final String keyStr = key.getKey();
+        final StringBuilder builder = new StringBuilder(keyStr.length());
+        boolean upperCase = true;
+        for (int i = 0; i < keyStr.length(); i++) {
+            final char ch = keyStr.charAt(i);
+            if (ch == '.') {
+                builder.append(' ');
+                upperCase = true;
+            } else if (upperCase) {
+                builder.append(Character.toUpperCase(ch));
+                upperCase = false;
+            } else {
+                builder.append(ch);
+                upperCase = false;
+            }
+        }
+        return builder.toString();
+    }
+
+    public static String fromUciOption(final String key) {
+        final StringBuilder builder = new StringBuilder(key.length());
+        boolean lowerCase = true;
+        for (int i = 0; i < key.length(); i++) {
+            final char ch = key.charAt(i);
+            if (ch == ' ') {
+                builder.append('.');
+                lowerCase = true;
+            } else if (lowerCase) {
+                builder.append(Character.toLowerCase(ch));
+                lowerCase = false;
+            } else {
+                builder.append(ch);
+                lowerCase = false;
+            }
+        }
+        return builder.toString();
+    }
 }

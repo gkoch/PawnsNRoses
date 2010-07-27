@@ -203,7 +203,7 @@ public final class Engine {
                 int a = alpha + 1;
                 if (!highPriorityStage) {
                     if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
-                            ((move & MT_CASTLING) == 0) && !opponentInCheck) {
+                            !Utils.isCastling(move) && !opponentInCheck) {
                         a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true, searchedPly + 1);
                         if (cancelled) {
                             board.takeBack(undo);
@@ -420,7 +420,7 @@ public final class Engine {
                 int a = alpha + 1;
                 if (!highPriorityStage) {
                     if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
-                            ((move & MT_CASTLING) == 0) && !opponentInCheck) {
+                            !Utils.isCastling(move) && !opponentInCheck) {
                         a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true, searchedPly + 1);
                         if (cancelled) {
                             board.takeBack(undo);

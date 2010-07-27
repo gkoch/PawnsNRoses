@@ -590,7 +590,7 @@ public final class Board {
         final int attacked = board[toIndex];
         // if it we are moving on the line to the opponent king and it's not castling or capturing
         // then it's not a checking move (assuming that we start from a legal position)
-        if (attacked == EMPTY && ((move & MT_CASTLING) == 0) &&
+        if (attacked == EMPTY && !Utils.isCastling(move) &&
                 (ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_Q & ATTACK_ARRAY[kingIndex - fromIndex + 120]) > 0) {
             return false;
         }
@@ -626,7 +626,7 @@ public final class Board {
             case QUEEN:
                 return isAttackedBySliding(kingIndex, ATTACK_BITS[absPiece], toIndex);
             case KING:
-                if ((move & MT_CASTLING) > 0) {
+                if (Utils.isCastling(move)) {
                     if ((move & MT_CASTLING_QUEENSIDE) > 0) {
                         return isAttackedBySliding(kingIndex, ATTACK_R, toIndex + 1);
                     } else {

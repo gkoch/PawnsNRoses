@@ -349,4 +349,9 @@ public class Utils {
     public static int side(final int piece) {
         return 1 - (piece >>> 31);
     }
+
+    public static boolean isCastling(final int move) {
+        final int moveType = move & MOVE_TYPE;
+        return moveType == MT_CASTLING_KINGSIDE || moveType == MT_CASTLING_QUEENSIDE;
+    }
 }

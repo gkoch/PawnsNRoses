@@ -3,9 +3,10 @@ package sf.pnr.base;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -34,11 +35,13 @@ public class ConfigurationTest {
             }
         });
 
-        final Properties defaults = new Properties();
+        final Map<String, String> defaults = new HashMap<String, String>();
         for (Configurable.Key key: Configurable.Key.values()) {
             final String value = Configuration.getInstance().getString(key);
-            defaults.setProperty(StringUtils.toUciOption(key), value);
+            defaults.put(StringUtils.toUciOption(key), value);
         }
+        final Map<String, String> postSearchOptions = new LinkedHashMap<String, String>();
+//        postSearchOptions.put("Command", "releaseEngine");
 
 //        final Properties defaultValues = new Properties();
 //        for (Configurable.Key key: Configurable.Key.values()) {
@@ -57,11 +60,12 @@ public class ConfigurationTest {
                 reader.close();
             }
             final Map<Configurable.Key, String> configs = Configuration.preprocess(properties);
-            final Properties uciOptions = new Properties(defaults);
+            final Map<String, String> uciOptions = new HashMap<String, String>(defaults);
             for (Map.Entry<Configurable.Key, String> entry: configs.entrySet()) {
-                uciOptions.setProperty(StringUtils.toUciOption(entry.getKey()), entry.getValue());
+                uciOptions.put(StringUtils.toUciOption(entry.getKey()), entry.getValue());
             }
-            runners.add(new UciRunner("Pawns N' Roses - " + file.getName(), uciOptions, new PipedUciProcess()));
+            runners.add(new UciRunner(
+                "Pawns N' Roses - " + file.getName(), uciOptions, postSearchOptions, new PipedUciProcess()));
         }
         try {
             new EpdProcessor().process(testFiles, new MultiEngineSearchTask(runners, 6, 0, 20));

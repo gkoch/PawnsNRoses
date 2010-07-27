@@ -19,13 +19,13 @@ public class PawnsNRoses {
     private int depth;
     private int time;
     private BestMoveListener listener;
+    private boolean random;
 
     public PawnsNRoses() {
         polyglot = new Polyglot();
         useBook = Polyglot.BOOK != null && Polyglot.BOOK.exists();
         board = new Board();
         board.restart();
-        engine = new Engine();
         depth = 0;
         time = 0;
     }
@@ -33,12 +33,18 @@ public class PawnsNRoses {
     public void restart() {
         board = new Board();
         board.restart();
-        engine = new Engine();
-        if (listener != null) {
-            engine.setBestMoveListener(listener);
-        }
         final File book = polyglot.getBook();
         useBook = book != null && book.exists();
+    }
+
+    private void ensureEngineIsAvailable() {
+        if (engine == null) {
+            engine = new Engine();
+            if (listener != null) {
+                engine.setBestMoveListener(listener);
+            }
+            engine.setRandomEval(random);
+        }
     }
 
     public void restartBoard() {
@@ -76,6 +82,7 @@ public class PawnsNRoses {
             useBook = move != 0;
         }
         if (move == 0) {
+            ensureEngineIsAvailable();
             final long result = engine.search(board, depth, time);
             move = Engine.getMoveFromSearchResult(result);
         }
@@ -84,8 +91,10 @@ public class PawnsNRoses {
     }
 
     public void moveNow() {
-        final int[] bestLine = engine.getBestLine(board);
-        moveNow(bestLine[0]);
+        if (engine != null) {
+            final int[] bestLine = engine.getBestLine(board);
+            moveNow(bestLine[0]);
+        }
     }
 
     public void moveNow(int move) {
@@ -93,20 +102,32 @@ public class PawnsNRoses {
     }
 
     public void cancel() {
-        engine.cancel();
+        if (engine != null) {
+            engine.cancel();
+        }
     }
 
     public void setRandom(final boolean random) {
-        engine.setRandomEval(random);
+        this.random = random;
+        if (engine != null) {
+            engine.setRandomEval(this.random);
+        }
     }
 
     public void setBestMoveListener(final BestMoveListener listener) {
         this.listener = listener;
-        engine.setBestMoveListener(this.listener);
+        if (engine != null) {
+            engine.setBestMoveListener(this.listener);
+        }
     }
 
     public boolean isWhiteToMove() {
         return (board.getState() & Utils.WHITE_TO_MOVE) == Utils.WHITE_TO_MOVE;
+    }
+
+    @Executable()
+    public void releaseEngine() {
+        engine = null;
     }
 
     public boolean useBook() {

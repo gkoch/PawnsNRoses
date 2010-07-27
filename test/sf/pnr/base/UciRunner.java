@@ -9,11 +9,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Properties;
+import java.util.Map;
 
 public class UciRunner {
     private final String name;
-    private final Properties uciOptions;
+    private final Map<String, String> uciOptions;
+    private final Map<String, String> postSearchOptions;
     private final UciProcess process;
     private BufferedWriter writer;
     private BufferedReader reader;
@@ -23,9 +24,15 @@ public class UciRunner {
     private long moveTime;
     private boolean debug = false;
 
-    public UciRunner(final String name, final Properties uciOptions, final UciProcess process) throws IOException {
+    public UciRunner(final String name, final Map<String, String> uciOptions, final UciProcess process) throws IOException {
+        this(name, uciOptions, null, process);
+    }
+
+    public UciRunner(final String name, final Map<String, String> uciOptions, final Map<String, String> postSearchOptions,
+                     final UciProcess process) throws IOException {
         this.name = name;
         this.uciOptions = uciOptions;
+        this.postSearchOptions = postSearchOptions;
         this.process = process;
         final OutputStream os;
         if (debug) {
@@ -49,12 +56,7 @@ public class UciRunner {
     public void uciNewGame() throws IOException {
         sendCommand("ucinewgame");
         ensureReady();
-        if (uciOptions != null) {
-            for (String name: uciOptions.stringPropertyNames()) {
-                sendCommand(String.format("setoption name %s value %s", name, uciOptions.getProperty(name)));
-            }
-            ensureReady();
-        }
+        setOptions(uciOptions);
     }
 
     public void position(final Board board) throws IOException {
@@ -83,6 +85,16 @@ public class UciRunner {
         final long endTime = System.currentTimeMillis();
         moveTime = endTime - startTime;
         ensureReady();
+        setOptions(postSearchOptions);
+    }
+
+    private void setOptions(final Map<String, String> options) throws IOException {
+        if (options != null) {
+            for (Map.Entry<String, String> entry: options.entrySet()) {
+                sendCommand(String.format("setoption name %s value %s", entry.getKey(), entry.getValue()));
+            }
+            ensureReady();
+        }
     }
 
     public int getDepth() {

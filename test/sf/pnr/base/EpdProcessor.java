@@ -38,6 +38,7 @@ public class EpdProcessor {
                     final String fen = firstSegments[0] + " " + firstSegments[1] + " " + firstSegments[2] + " " +
                         firstSegments[3] + " 0 1";
                     if (!fens.add(fen)) {
+//                        System.out.printf("Skipping duplicate FEN in file '%s': %s\r\n", fileName, fen);
                         continue;
                     }
                     final Board board = StringUtils.fromFen(fen);

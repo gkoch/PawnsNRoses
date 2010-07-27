@@ -502,8 +502,8 @@
 1r1q2k1/R4p2/3Pb2p/4Q1p1/1p2B3/2p3P1/1P3P1P/6K1 w - - bm Bh7; id "Holmes Middlegame Pos. 0145"; c0 "white pieces=9 black pieces=9"; c1 "material balance: 0,0";
 1r1q3k/1bp1n1pp/3p4/4n3/4Nr2/1P1Q3R/P1P2PPP/5RK1 w - - bm Nf6; id "Holmes Middlegame Pos. 0146"; c0 "white pieces=11 black pieces=11"; c1 "material balance: -5,0";
 1r1q3k/1bp1n1pp/3p4/4n3/4Nr2/1P1Q3R/P1P2PPP/5RK1 w - - bm Nf6; id "position 0321";
-1r1qk2r/5pbp/p1np2b1/4p3/1pP5/3BB3/PPN2PPP/R2Q1RK1 w kq - bm Bxg6; id "Holmes Middlegame Pos. 0147"; c0 "white pieces=13 black pieces=13"; c1 "material balance: 0,0";
-1r1qk2r/5pbp/p1np2b1/4p3/1pP5/3BB3/PPN2PPP/R2Q1RK1 w kq - bm f4 Bxg6 Rb1 f3 Re1 Qf3; c0 "Pos (23) - CCC-III"; c1 "10 8 5 2 2 2"; id "Pos(23)";
+1r1qk2r/5pbp/p1np2b1/4p3/1pP5/3BB3/PPN2PPP/R2Q1RK1 w k - bm Bxg6; id "Holmes Middlegame Pos. 0147"; c0 "white pieces=13 black pieces=13"; c1 "material balance: 0,0";
+1r1qk2r/5pbp/p1np2b1/4p3/1pP5/3BB3/PPN2PPP/R2Q1RK1 w k - bm f4 Bxg6 Rb1 f3 Re1 Qf3; c0 "Pos (23) - CCC-III"; c1 "10 8 5 2 2 2"; id "Pos(23)";
 1r1qr1k1/5p1p/1n2p1p1/pp1pP1P1/2pP1BB1/PnP3P1/1P3PK1/1R1Q3R w - - bm Rxh7; id "Holmes Middlegame Pos. 0148"; c0 "white pieces=14 black pieces=14"; c1 "material balance: 0,0";
 1r1qr3/1p1n2k1/p2P1pp1/2pP1b1p/P1P1N3/1PQB2P1/5R2/5RK1 w - - bm Rxf5; id "Holmes Middlegame Pos. 0149"; c0 "white pieces=12 black pieces=12"; c1 "material balance: 0,0";
 1r1r1qk1/p2n1p1p/bp1Pn1pQ/2pNp3/2P2P1N/1P5B/P6P/3R1RK1 w - - bm Ne7+; id "Holmes Middlegame Pos. 0150"; c0 "white pieces=13 black pieces=14"; c1 "material balance: -1,0";
@@ -2242,7 +2242,7 @@
 2rqk1nr/pp3ppp/2n1p3/2b5/3N4/2NQB1P1/PP2PPKP/R4R2 w k - bm Nxe6; id "Holmes Middlegame Pos. 0867"; c0 "white pieces=13 black pieces=13"; c1 "material balance: 0,0";
 2rqk2r/3n1ppp/1p2n3/p7/3P4/B2B2Q1/PP3PPP/R3R1K1 w k - bm Rxe6+; id "Holmes Middlegame Pos. 0868"; c0 "white pieces=12 black pieces=11"; c1 "material balance: 1,0";
 2rqk2r/p2nbppp/1pb1p3/3n4/3P4/P1NB1N2/1P3PPP/R1BQR1K1 w k - bm Nxd5; id "Holmes Middlegame Pos. 0869"; c0 "white pieces=14 black pieces=14"; c1 "material balance: 0,0";
-2rqk2r/pb1nbp1p/4p1p1/1B1n4/Np1N4/7Q/PP3PPP/R1B1R1K1 w kq - bm Rxe6; id "Holmes Middlegame Pos. 0870"; c0 "white pieces=13 black pieces=14"; c1 "material balance: -1,0";
+2rqk2r/pb1nbp1p/4p1p1/1B1n4/Np1N4/7Q/PP3PPP/R1B1R1K1 w k - bm Rxe6; id "Holmes Middlegame Pos. 0870"; c0 "white pieces=13 black pieces=14"; c1 "material balance: -1,0";
 2rqkb1r/3n1p1p/p3p1pn/1p1pP1N1/5P2/2N5/PPP3PP/R1BQ1R1K w k - bm a4; id "Holmes Middlegame Pos. 0871"; c0 "white pieces=14 black pieces=14"; c1 "material balance: 0,0";
 2rqkb1r/3n1p1p/p3p1pn/1p1pP1N1/5P2/2N5/PPP3PP/R1BQ1R1K w k - bm f5 Ne2 g4 a4 Qd3; c0 "Pos (45) - CCC-III"; c1 "10 6 6 6 5"; id "Pos(45)";
 2rqnk1r/pp2bpp1/2p1pn1p/2P1N2P/3P1BP1/3BQ3/PP6/2K2R1R w - - bm Nxf7; id "Holmes Middlegame Pos. 0872"; c0 "white pieces=13 black pieces=14"; c1 "material balance: -1,0";
@@ -6343,7 +6343,7 @@
 8/4k3/2n1p2R/8/8/1b1B2P1/5P2/1r3K2 w - - acd 14; ce 365; pv Bxb1 Ne5 Ke2 Bc4+ Kd2 Bd5 f4 Ng4 Rh4 Nf6 Bd3 Kd6 g4 Ne4+ Bxe4 Bxe4; pm Bxb1; bm Bxb1; id "Crafty POS255";
 8/4k3/2n1p2R/8/8/1b1B2P1/5P2/1r3K2 w - - bm Bxb1; c0 "DEEP BLUE PROTOTYPE/JUDIT POLGAR, Game 1, Match, August 1993, move 63W (Bxb1)"; id "Crafty POS255";
 8/4k3/2n1p2R/8/8/1b1B2P1/5P2/1r3K2 w - - bm Bxb1; id "Crafty POS255"; c0 "DEEP BLUE PROTOTYPE/JUDIT POLGAR, Game 1, Match, August 1993, move 63W (Bxb1)";
-8/4k3/2n1p2R/8/8/1b1B2P1/5P2/1r3k2 w - - bm Bxb1; id "Crafty Test Pos.255"; c0 "DEEP BLUE PROTOTYPE/JUDIT POLGAR, Game 1, Match, August 1993, move 63W (Bxb1)";
+8/4k3/2n1p2R/8/8/1b1B2P1/5P2/1r3K2 w - - bm Bxb1; id "Crafty Test Pos.255"; c0 "DEEP BLUE PROTOTYPE/JUDIT POLGAR, Game 1, Match, August 1993, move 63W (Bxb1)";
 8/4k3/2n1p2R/8/8/1b1B2P1/5P2/1r3K2 w - - bm Bxb1; id "Holmes Endgame Pos. 1524"; c0 "white pieces=5 black pieces=5"; c1 "material balance: -2,5";
 8/4k3/3b4/7R/P3b3/4P3/4K3/8 w - - bm Rh4; id "Holmes Endgame Pos. 1525"; c0 "white pieces=4 black pieces=3"; c1 "material balance: 0,0";
 8/4k3/3pP1p1/P2P3p/1K1N4/8/r7/8 w - - bm Nc6+; id "Holmes Endgame Pos. 1526"; c0 "white pieces=5 black pieces=5"; c1 "material balance: -1,5";
@@ -9278,7 +9278,7 @@ r1bq1r1k/1pp3pp/p1np4/2b1p1B1/2BPp1n1/2P2N2/PP2RPPP/R2Q1NK1 b - - bm exf3; id "H
 r1bq1r1k/1pppNppp/p7/4R2Q/n7/8/PPPP1PPP/R1B3K1 w - - bm Qxh7+; id "Holmes Middlegame Pos. 2614"; c0 "white pieces=13 black pieces=13"; c1 "material balance: 0,0";
 r1bq1r1k/ppp1N1p1/7p/2bp1pN1/2Bn1B1Q/8/PP3PP1/R3R1K1 w - - bm Qxh6+; id "Holmes Middlegame Pos. 2615"; c0 "white pieces=12 black pieces=14"; c1 "material balance: 0,5";
 r1bq1r2/pp2n1p1/4p1k1/3pPpN1/1b1n2QP/2N5/PP3PP1/R1B1K2R w KQ - bm h5+; id "Holmes Middlegame Pos. 2616"; c0 "white pieces=13 black pieces=14"; c1 "material balance: -3,5";
-r1bq1r2/pp3ppk/2n1p3/3pP3/1b4QP/2N2N2/PPP2PP1/R3K2R w kKQ - bm Qh5+; id "Holmes Middlegame Pos. 2617"; c0 "white pieces=13 black pieces=13"; c1 "material balance: -2,5";
+r1bq1r2/pp3ppk/2n1p3/3pP3/1b4QP/2N2N2/PPP2PP1/R3K2R w KQ - bm Qh5+; id "Holmes Middlegame Pos. 2617"; c0 "white pieces=13 black pieces=13"; c1 "material balance: -2,5";
 r1bq1r2/pp4k1/4p2p/3pPp1Q/3N1R1P/2PB4/6P1/6K1 w - - bm Rg4+; id "Holmes Middlegame Pos. 2618"; c0 "white pieces=9 black pieces=11"; c1 "material balance: -3,5";
 r1bq1r2/ppp2pkp/3p2nn/2bN2NQ/2B1P3/8/PPp3PP/R1B2R1K w - - bm Qxh6+; id "Holmes Middlegame Pos. 2619"; c0 "white pieces=13 black pieces=15"; c1 "material balance: -2,0";
 r1bq1rk1/1p2bppp/p1n1p3/3n4/3P4/2N2NB1/PP2BPPP/R2Q1RK1 w - - acd 12; acn 90584048; acs 510; bm Qb3; c0 "WCHESS/DEEP BLUE PROTOTYPE, NACCC, World CCC 1995, move 14W (Qb3)"; ce 23; id "Crafty POS313"; pv Rc1 Nxc3 bxc3 Bd7 Bf4 Bf6 Qd2 Qe7 Rb1 b5 c4 Qa3;

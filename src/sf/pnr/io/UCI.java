@@ -13,6 +13,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -119,9 +122,13 @@ public class UCI implements UciProcess {
                     // missing name
                     continue;
                 }
-                final String keyStr = StringUtils.fromUciOption(name);
-                final Configurable.Key key = Configuration.getKey(keyStr);
-                Configuration.getInstance().setProperty(key, value);
+                if ("Command".equals(name)) {
+                    executeCommand(value);
+                } else {
+                    final String keyStr = StringUtils.fromUciOption(name);
+                    final Configurable.Key key = Configuration.getKey(keyStr);
+                    Configuration.getInstance().setProperty(key, value);
+                }
             } else if ("ucinewgame".equals(line)) {
                 ensureReady();
                 chess.restart();
@@ -265,6 +272,59 @@ public class UCI implements UciProcess {
                 return new ConventionalTimeControl(timeLeft);
             }
         }
+    }
+
+    private void executeCommand(final String fullCommand) {
+        final String[] parts = fullCommand.split(" ", 2);
+        final String command = parts[0];
+        try {
+            final String[] args;
+            if (parts.length > 1 && parts[1].trim().length() > 0) {
+                args = parts[1].split(",", -1);
+            } else {
+                args = new String[0];
+            }
+            final Method method = getMethod(command, args.length);
+            final Executable annotation = method.getAnnotation(Executable.class);
+            method.invoke(chess, getArgs(annotation, args));
+        } catch (Exception e) {
+            out.printf("Failed to execute command '%s': %s\r\n", fullCommand, e.getMessage());
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
+                throw new UndeclaredThrowableException(e);
+            }
+        }
+    }
+
+    private Object[] getArgs(final Executable annotation, final String[] args) {
+        final Object[] result = new Object[args.length];
+        final Class<?>[] types = annotation.values();
+        for (int i = 0, length = types.length; i < length; i++) {
+            final Class<?> clazz = types[i];
+            if (int.class.equals(clazz)) {
+                result[i] = Integer.parseInt(args[i]);
+            } else if (String.class.equals(clazz)) {
+                result[i] = args[i];
+            } else {
+                throw new IllegalStateException("Unexpected parameter type: " + clazz);
+            }
+        }
+        return result;
+    }
+
+    private Method getMethod(final String command, final int argCount) throws NoSuchMethodException {
+        final Method[] methods = PawnsNRoses.class.getDeclaredMethods();
+        for (Method method: methods) {
+            if (method.getName().equals(command)) {
+                final Executable annotation = method.getAnnotation(Executable.class);
+                if (annotation != null && annotation.values().length == argCount) {
+                    return method;
+                }
+            }
+        }
+        throw new NoSuchMethodException(
+            String.format("Couldn't find executable method '%s' with %d arguments", command, argCount));
     }
 
     private void print(final String message) {

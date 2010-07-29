@@ -2,6 +2,9 @@ package sf.pnr.base;
 
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -9,15 +12,19 @@ import java.util.Map;
 */
 public class MultiEngineSearchTask implements EpdProcessorTask {
 
+    private static final Comparator<Stats> FAILURE_COUNT_COMPARATOR = new Comparator<Stats>() {
+        @Override
+        public int compare(final Stats s1, final Stats s2) {
+            return s1.getFailureCount() - s2.getFailureCount();
+        }
+    };
+
     private final List<UciRunner> runners;
     private final int fixedDepth;
     private final int timeToSolve;
     private final int debugPrintInterval;
     private int testCount = 0;
-    private final long[] totalNodeCount;
-    private final int[] totalDepth;
-    private final long[] totalMoveTime;
-    private final int[] failureCount;
+    private final Stats[] stats;
     private final boolean debugStats = false;
     private final long startTime;
 
@@ -27,10 +34,11 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
         this.fixedDepth = fixedDepth;
         this.timeToSolve = timeToSolve;
         this.debugPrintInterval = debugPrintInterval;
-        failureCount = new int[runners.size()];
-        totalNodeCount = new long[runners.size()];
-        totalDepth = new int[runners.size()];
-        totalMoveTime = new long[runners.size()];
+        stats = new Stats[runners.size()];
+        final Iterator<UciRunner> iter = runners.iterator();
+        for (int i = 0; i < stats.length; i++) {
+            stats[i] = new Stats(iter.next().getName());
+        }
         startTime = System.currentTimeMillis();
     }
 
@@ -101,13 +109,7 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
                     throw e;
                 }
 
-                if (!passed) {
-                    failureCount[i]++;
-                }
-
-                totalNodeCount[i] += runner.getNodeCount();
-                totalDepth[i] += runner.getDepth();
-                totalMoveTime[i] += runner.getMoveTime();
+                stats[i].addResult(runner.getNodeCount(), runner.getDepth(), runner.getMoveTime(), passed);
                 if (debugStats) {
                     System.out.printf("%s - nodes: %d, depth: %d, time: %d\r\n",
                         runner.getName(), runner.getNodeCount(), runner.getDepth(), runner.getMoveTime());
@@ -127,12 +129,63 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
         System.out.printf("Statistics after %d tests (elapsed time: %2.1fs):\r\n",
             testCount, ((double) System.currentTimeMillis() - startTime) / 1000);
         System.out.printf("%40s\t%5s\t%5s\t%9s\t%5s\t%7s\r\n", "Engine name", "%", "ply", "nodes", "msec", "nodes/sec");
-        for (int i = 0; i < runners.size(); i++) {
-            final UciRunner runner = runners.get(i);
-            System.out.printf("%40s\t%5.1f\t%5.1f\t%9.1f\t%3.2f\t%9.1f\r\n", runner.getName(),
-                ((double) (testCount - failureCount[i]) * 100) / testCount, ((double) totalDepth[i]) / testCount,
-                ((double) totalNodeCount[i]) / testCount, ((double) totalMoveTime[i]) / testCount,
-                ((double) totalNodeCount[i]) / totalMoveTime[i] * 1000);
+        final Stats[] sorted = new Stats[stats.length];
+        System.arraycopy(stats, 0, sorted, 0, stats.length);
+        Arrays.sort(sorted, FAILURE_COUNT_COMPARATOR);
+        for (Stats stats: sorted) {
+            System.out.printf("%40s\t%5.1f\t%5.1f\t%9.1f\t%3.2f\t%9.1f\r\n", stats.getName(), stats.getPassRate() * 100,
+                stats.getAvgDepth(), stats.getAvgNodeCount(), stats.getAvgMoveTime(), stats.getNodesPerSec());
+        }
+    }
+
+    private static class Stats {
+        private final String name;
+        private long totalNodeCount;
+        private int totalDepth;
+        private long totalMoveTime;
+        private int failureCount;
+        private int testCount;
+
+        public Stats(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getFailureCount() {
+            return failureCount;
+        }
+
+        public void addResult(final long nodeCount, final int depth, final long moveTime, final boolean passed) {
+            totalNodeCount += nodeCount;
+            totalDepth += depth;
+            totalMoveTime += moveTime;
+            if (!passed) {
+                failureCount++;
+            }
+            testCount++;
+        }
+
+        public double getAvgNodeCount() {
+            return ((double) totalNodeCount) / testCount;
+        }
+
+        public double getAvgDepth() {
+            return ((double) totalDepth) / testCount;
+        }
+
+        public double getAvgMoveTime() {
+            return ((double) totalMoveTime) / testCount;
+        }
+
+        public double getPassRate() {
+            return ((double) (testCount - failureCount)) / testCount;
+        }
+
+        public double getNodesPerSec() {
+            return ((double) totalNodeCount * 1000) / totalMoveTime;
         }
     }
 }

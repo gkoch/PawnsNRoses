@@ -10,12 +10,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 /**
  */
 public class ConfigurationTest {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         if (args.length != 1) {
             throw new IllegalArgumentException("Config directory expected");
         }
@@ -53,7 +54,7 @@ public class ConfigurationTest {
         final List<UciRunner> runners = new ArrayList<UciRunner>(files.length);
         for (File file: files) {
             final Properties properties = new Properties();
-            final FileReader reader = new FileReader(file.getName());
+            final FileReader reader = new FileReader(file);
             try {
                 properties.load(reader);
             } finally {

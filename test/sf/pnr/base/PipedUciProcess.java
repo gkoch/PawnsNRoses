@@ -9,8 +9,10 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class PipedUciProcess implements UciProcess {
 
@@ -18,14 +20,15 @@ public class PipedUciProcess implements UciProcess {
     private final PipedInputStream toEngineIn;
     private final ExecutorService executor;
 
-    public PipedUciProcess() throws IOException {
+    public PipedUciProcess() throws IOException, ExecutionException, InterruptedException {
         final PipedOutputStream toEngineOut = new PipedOutputStream();
         toEngineIn = new PipedInputStream(toEngineOut);
         final PipedInputStream fromEngineIn = new PipedInputStream();
         fromEngineOut = new PipedOutputStream(fromEngineIn);
         executor = Executors.newSingleThreadExecutor();
-        executor.submit(new UciCallable(fromEngineIn, toEngineOut));
+        final Future<Boolean> future = executor.submit(new UciCallable(fromEngineIn, toEngineOut));
         executor.shutdown();
+        future.get();
     }
 
     @Override

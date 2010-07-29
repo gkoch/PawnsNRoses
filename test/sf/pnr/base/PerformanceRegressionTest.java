@@ -8,12 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 /**
  */
 public class PerformanceRegressionTest {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         final String engineDir = System.getProperty("searchTest.engineDir");
         final List<String> testFiles = new ArrayList<String>();
         testFiles.add("pos.epd");

@@ -19,6 +19,7 @@ public class PipedUciProcess implements UciProcess {
     private final PipedOutputStream fromEngineOut;
     private final PipedInputStream toEngineIn;
     private final ExecutorService executor;
+    private Future<Boolean> future;
 
     public PipedUciProcess() throws IOException, ExecutionException, InterruptedException {
         final PipedOutputStream toEngineOut = new PipedOutputStream();
@@ -26,9 +27,8 @@ public class PipedUciProcess implements UciProcess {
         final PipedInputStream fromEngineIn = new PipedInputStream();
         fromEngineOut = new PipedOutputStream(fromEngineIn);
         executor = Executors.newSingleThreadExecutor();
-        final Future<Boolean> future = executor.submit(new UciCallable(fromEngineIn, toEngineOut));
+        future = executor.submit(new UciCallable(fromEngineIn, toEngineOut));
         executor.shutdown();
-        future.get();
     }
 
     @Override
@@ -44,6 +44,15 @@ public class PipedUciProcess implements UciProcess {
     @Override
     public void destroy() {
         executor.shutdownNow();
+        try {
+            future.get();
+        } catch (InterruptedException e) {
+            // no need to rethrow it at this point
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            // no need to rethrow it at this point
+            e.printStackTrace();
+        }
     }
 
     private static class UciCallable implements Callable<Boolean> {

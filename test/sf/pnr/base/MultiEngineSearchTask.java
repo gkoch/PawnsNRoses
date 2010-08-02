@@ -15,7 +15,11 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     private static final Comparator<Stats> FAILURE_COUNT_COMPARATOR = new Comparator<Stats>() {
         @Override
         public int compare(final Stats s1, final Stats s2) {
-            return s1.getFailureCount() - s2.getFailureCount();
+            int result = s1.getFailureCount() - s2.getFailureCount();
+            if (result == 0) {
+                result = (int) (s1.getTotalNodeCount() - s2.getTotalNodeCount());
+            }
+            return result;
         }
     };
 
@@ -152,6 +156,10 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
 
         public String getName() {
             return name;
+        }
+
+        public long getTotalNodeCount() {
+            return totalNodeCount;
         }
 
         public int getFailureCount() {

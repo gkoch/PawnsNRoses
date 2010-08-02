@@ -48,4 +48,31 @@ public class UtilsTest extends TestCase {
         assertEquals(WHITE, side(board.getBoard()[A[0]]));
         assertEquals(BLACK, side(board.getBoard()[A[7]]));
     }
+
+    public void testAttackArray() {
+        for (int i = 1; i < 8; i++) {
+            assertEquals(1, (ATTACK_ARRAY[A[0] - A[i] + 120] & ATTACK_DISTANCE_ROOK) >> SHIFT_ATTACK_DISTANCE_ROOK);
+            assertEquals(1, (ATTACK_ARRAY[A[i] - A[0] + 120] & ATTACK_DISTANCE_ROOK) >> SHIFT_ATTACK_DISTANCE_ROOK);
+            assertEquals(2, (ATTACK_ARRAY[A[0] - B[i] + 120] & ATTACK_DISTANCE_ROOK) >> SHIFT_ATTACK_DISTANCE_ROOK);
+            assertEquals(2, (ATTACK_ARRAY[B[i] - A[0] + 120] & ATTACK_DISTANCE_ROOK) >> SHIFT_ATTACK_DISTANCE_ROOK);
+
+            final int diag = getIndex(i, i);
+            assertEquals(1, (ATTACK_ARRAY[A[0] - diag + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+            assertEquals(1, (ATTACK_ARRAY[diag - A[0] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+            assertEquals(7, (ATTACK_ARRAY[A[0] - (diag - 1) + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+            assertEquals(7, (ATTACK_ARRAY[(diag - 1) - A[0] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+
+            assertEquals(1, (ATTACK_ARRAY[A[0] - A[i] + 120] & ATTACK_DISTANCE_QUEEN) >> SHIFT_ATTACK_DISTANCE_QUEEN);
+            assertEquals(1, (ATTACK_ARRAY[A[i] - A[0] + 120] & ATTACK_DISTANCE_QUEEN) >> SHIFT_ATTACK_DISTANCE_QUEEN);
+            assertEquals(1, (ATTACK_ARRAY[A[0] - diag + 120] & ATTACK_DISTANCE_QUEEN) >> SHIFT_ATTACK_DISTANCE_QUEEN);
+            assertEquals(1, (ATTACK_ARRAY[diag - A[0] + 120] & ATTACK_DISTANCE_QUEEN) >> SHIFT_ATTACK_DISTANCE_QUEEN);
+        }
+        assertEquals(2, (ATTACK_ARRAY[E[0] - E[2] + 120] & ATTACK_DISTANCE_KNIGHT) >> SHIFT_ATTACK_DISTANCE_KNIGHT);
+        assertEquals(3, (ATTACK_ARRAY[F[4] - F[3] + 120] & ATTACK_DISTANCE_KNIGHT) >> SHIFT_ATTACK_DISTANCE_KNIGHT);
+        assertEquals(2, (ATTACK_ARRAY[E[0] - E[2] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+        assertEquals(2, (ATTACK_ARRAY[D[7] - A[0] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+        assertEquals(2, (ATTACK_ARRAY[H[7] - E[0] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+        assertEquals(2, (ATTACK_ARRAY[E[0] - H[7] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+        assertEquals(2, (ATTACK_ARRAY[E[0] - B[7] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+    }
 }

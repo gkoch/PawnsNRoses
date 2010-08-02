@@ -68,13 +68,13 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY)
     public static int BONUS_MOBILITY = 1;
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_KNIGHT)
-    public static int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 1, 2, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    public static int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 5, 3, 2, 2, 1, 1, 0};
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_BISHOP)
-    public static int[] BONUS_DISTANCE_BISHOP = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
+    public static int[] BONUS_DISTANCE_BISHOP = new int[] {0, 3, 1, 0, 0, 0, 0, 0};
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_ROOK)
-    public static int[] BONUS_DISTANCE_ROOK = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
+    public static int[] BONUS_DISTANCE_ROOK = new int[] {0, 3, 1, 0, 0, 0, 0, 0};
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_QUEEN)
-    public static int[] BONUS_DISTANCE_QUEEN = new int[] {0, 1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
+    public static int[] BONUS_DISTANCE_QUEEN = new int[] {0, 2, 1, 0, 0, 0, 0, 0};
     public static final int BONUS_KING_IN_SIGHT_NON_SLIDING = 5;
     public static final int BONUS_KING_IN_SIGHT_SLIDING = 3;
     @Configurable(Configurable.Key.EVAL_BONUS_UNSTOPPABLE_PAWN)
@@ -382,16 +382,14 @@ public final class Evaluation {
             score += Long.bitCount(attacked) * BONUS_ATTACK;
             score += Long.bitCount(knightMask ^ defended ^ attacked) * BONUS_MOBILITY;
             score += Long.bitCount(knightMask & opponentKingMask) * BONUS_KING_IN_SIGHT_NON_SLIDING;
-            distance[0] += BONUS_DISTANCE_KNIGHT[distance(knight, opponentKing)];
+            distance[0] += BONUS_DISTANCE_KNIGHT[
+                distance(knight, opponentKing, ATTACK_DISTANCE_KNIGHT, SHIFT_ATTACK_DISTANCE_KNIGHT)];
         }
         return score;
     }
 
-    public static int distance(final int from0x88, final int to0x88) {
-        final int distance = (ATTACK_ARRAY[from0x88 - to0x88 + 120] & ATTACK_DISTANCE) >> SHIFT_ATTACK_DISTANCE;
-        assert distance == Math.max(Math.abs(getRank(from0x88) - getRank(to0x88)), Math.abs(getFile(from0x88) - getFile(to0x88))):
-            StringUtils.toString0x88(from0x88) + " -> " + StringUtils.toString0x88(to0x88) + " @ " + distance;
-        return distance;
+    public static int distance(final int from0x88, final int to0x88, final int distanceMask, final int distanceShift) {
+        return (ATTACK_ARRAY[from0x88 - to0x88 + 120] & distanceMask) >> distanceShift;
     }
 
     private int computeMobilityBonusSliding(final Board boardObj, final int side, final int type,
@@ -413,7 +411,8 @@ public final class Evaluation {
                     }
                 }
             }
-            distance[0] += distanceBonus[distance(piecePos, opponentKing)];
+            distance[0] += distanceBonus[distance(piecePos, opponentKing, ATTACK_DISTANCE_MASKS[type],
+                SHIFT_ATTACK_DISTANCES[type])];
         }
         return score;
     }

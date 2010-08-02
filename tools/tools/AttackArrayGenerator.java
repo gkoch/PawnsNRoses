@@ -1,10 +1,22 @@
 package tools;
 
+import sf.pnr.base.Utils;
+
 import static sf.pnr.base.Utils.*;
 
 public class AttackArrayGenerator {
 
     private static final String[] LONG_LEADING_ZEROS = new String[17];
+
+    private static final int[] KNIGHT_DISTANCE = new int[]
+       {0, 3, 2, 5, 4, 3, 4, 5,
+        3, 4, 1, 2, 3, 4, 5, 4,
+        2, 1, 4, 3, 4, 3, 4, 5,
+        5, 2, 3, 2, 3, 4, 5, 4,
+        4, 3, 4, 3, 4, 3, 4, 5,
+        3, 4, 3, 4, 3, 4, 5, 4,
+        4, 5, 4, 5, 4, 5, 4, 5,
+        5, 4, 5, 4, 5, 4, 5, 6};
 
     static {
         final StringBuilder builder = new StringBuilder(16);
@@ -17,7 +29,7 @@ public class AttackArrayGenerator {
     public static void main(final String[] args) {
         final long[] attackArray = new long[240];
         generateAttacks(attackArray);
-        print(int.class, "ATTACK_ARRAY", 4, 12, attackArray);
+        print(int.class, "ATTACK_ARRAY", 8, 8, attackArray);
     }
 
     private static void generateAttacks(final long[] attackArray) {
@@ -43,14 +55,38 @@ public class AttackArrayGenerator {
             }
         }
         // add distance
-        for (int pos = 0; pos < 120; pos++) {
+        for (int pos = 1; pos < 120; pos++) {
             if ((pos & 0x88) == 0) {
                 final int file = getFile(pos);
                 final int rank = getRank(pos);
-                attackArray[pos + 120] |= Math.max(file, rank) << SHIFT_ATTACK_DISTANCE;
-                attackArray[pos + 120 - 2 * file] |= Math.max(file, rank) << SHIFT_ATTACK_DISTANCE;
-                attackArray[120 - pos] |= Math.max(file, rank) << SHIFT_ATTACK_DISTANCE;
-                attackArray[120 - pos + 2 * file] |= Math.max(file, rank) << SHIFT_ATTACK_DISTANCE;
+                final int pos64 = Utils.convert0x88To64(pos);
+                
+                int distance = Math.max(file, rank) << SHIFT_ATTACK_DISTANCE_KING;
+                distance |= (KNIGHT_DISTANCE[pos64] << SHIFT_ATTACK_DISTANCE_KNIGHT);
+
+                final int bishopDistance;
+                if (file == rank) {
+                    bishopDistance = 1;
+                } else if ((file - rank) % 2 == 0) {
+                    bishopDistance = 2;
+                } else {
+                    bishopDistance = 7;
+                }
+
+                final int rookDistance;
+                if (file == 0 || rank == 0) {
+                    rookDistance = 1;
+                } else {
+                    rookDistance = 2;
+                }
+
+                distance |= bishopDistance << SHIFT_ATTACK_DISTANCE_BISHOP | rookDistance << SHIFT_ATTACK_DISTANCE_ROOK |
+                    Math.min(bishopDistance, rookDistance) << SHIFT_ATTACK_DISTANCE_QUEEN;
+
+                attackArray[pos + 120] |= distance;
+                attackArray[pos + 120 - 2 * file] |= distance;
+                attackArray[120 - pos] |= distance;
+                attackArray[120 - pos + 2 * file] |= distance;
             }
         }
     }

@@ -18,15 +18,18 @@ public final class Engine {
     private static final int VAL_CHECK_BONUS = 500;
     private static final int VAL_BLOCKED_CHECK_BONUS = 100;
     private static final int VAL_7TH_RANK_PAWN = 300;
-    private static final int VAL_FUTILITY_THRESHOLD = 400;
-    private static final int VAL_DEEP_FUTILITY_THRESHOLD = 675;
+    @Configurable(Configurable.Key.ENGINE_FUTILITY_THRESHOLD)
+    private static int VAL_FUTILITY_THRESHOLD = 400;
+    @Configurable(Configurable.Key.ENGINE_DEEP_FUTILITY_THRESHOLD)
+    private static int VAL_DEEP_FUTILITY_THRESHOLD = 675;
+    @Configurable(Configurable.Key.ENGINE_RAZORING_THRESHOLD)
     private static final int VAL_RAZORING_THRESHOLD = 400;
     private static final int LATE_MOVE_REDUCTION_MIN_DEPTH = 3 << SHIFT_PLY;
     private static final int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
 
-    @Configurable(Configurable.Key.DEPTH_EXT_CHECK)
+    @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_CHECK)
     private static int DEPTH_EXT_CHECK = PLY / 2;
-    @Configurable(Configurable.Key.DEPTH_EXT_7TH_RANK_PAWN)
+    @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_7TH_RANK_PAWN)
     private static int DEPTH_EXT_7TH_RANK_PAWN = PLY / 4;
 
     private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
@@ -462,6 +465,22 @@ public final class Engine {
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
                         return a;
+                    }
+                }
+
+                // Razoring
+                if (depthExt == 0 && moveCount > 0) {
+                    final int value = board.getMaterialValue();
+                    if (depth <= (3 << SHIFT_PLY) && value < beta - VAL_RAZORING_THRESHOLD && beta > alpha + 1) {
+                        final int qscore = -quiescence(board, -b, -alpha);
+                        if (cancelled) {
+                            moveGenerator.popFrame();
+                            return alpha;
+                        }
+                        if (qscore < b) {
+                            board.takeBack(undo);
+                            break;
+                        }
                     }
                 }
 

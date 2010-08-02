@@ -19,8 +19,9 @@ public @interface Configurable {
         EVAL_BONUS_DISTANCE_BISHOP("evaluation.bonus.distanceBishop"),
         EVAL_BONUS_DISTANCE_ROOK("evaluation.bonus.distanceRook"),
         EVAL_BONUS_DISTANCE_QUEEN("evaluation.bonus.distanceQueen"),
-        DEPTH_EXT_CHECK("engine.depthExt.check"), DEPTH_EXT_7TH_RANK_PAWN("engine.depthExt.7thRankPawn"),
-        ;
+        ENGINE_DEPTH_EXT_CHECK("engine.depthExt.check"), ENGINE_DEPTH_EXT_7TH_RANK_PAWN("engine.depthExt.7thRankPawn"),
+        ENGINE_FUTILITY_THRESHOLD("engine.futility.threshold"), ENGINE_DEEP_FUTILITY_THRESHOLD("engine.deepFutility.threshold"),
+        ENGINE_RAZORING_THRESHOLD("engine.razoring.threshold");
 
         private final String key;
         Key(final String key) {

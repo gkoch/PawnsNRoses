@@ -20,6 +20,7 @@ public class ConfigurationTest {
         if (args.length != 1) {
             throw new IllegalArgumentException("Config directory expected");
         }
+        Configuration.getInstance().loadFromSystemProperties();
 
         final List<String> testFiles = new ArrayList<String>();
         testFiles.add("pos.epd");

@@ -387,6 +387,15 @@ public class EngineTest extends TestCase {
         assertEquals("Nb2", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
     }
 
+    public void testAttackedKnight() {
+        final Board board = fromFen("1r3rk1/3bppbp/1q1p1np1/1N6/P3P3/3Q2PP/1P1B1PB1/2R2RK1 b - - 0 1");
+        final long result = engine.search(board, 6, 0);
+        final int score = Engine.getValueFromSearchResult(result);
+        assertTrue(Integer.toString(score), score < VAL_PAWN);
+        assertTrue(Integer.toString(score), score > -VAL_PAWN);
+        assertTrue("Bxb5, Qa6".contains(StringUtils.toShort(board, Engine.getMoveFromSearchResult(result))));
+    }
+
     public void testConsistency() {
         final Board board = fromFen("6qk/7p/p1pp1Q2/4p3/4P1b1/8/2P3PP/6NK b - - 6 32");
         final long result1 = engine.search(board, 8, 0);

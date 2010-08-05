@@ -203,6 +203,22 @@ public final class Engine {
                     }
                 }
 
+                // razoring
+                if (depthExt == 0 && moveCount > 0) {
+                    final int value = board.getMaterialValue();
+                    if (depth <= (3 << SHIFT_PLY) && value < beta - VAL_RAZORING_THRESHOLD && beta > alpha + 1) {
+                        final int qscore = -quiescence(board, -b, -alpha);
+                        if (cancelled) {
+                            moveGenerator.popFrame();
+                            return alpha;
+                        }
+                        if (qscore < b) {
+                            board.takeBack(undo);
+                            break;
+                        }
+                    }
+                }
+
                 int a = alpha + 1;
                 if (!highPriorityStage) {
                     if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&

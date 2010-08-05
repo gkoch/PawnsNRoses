@@ -246,11 +246,11 @@ public class UCI implements UciProcess {
                     }
                 } catch (Exception e) {
                     out.println("info string " + e.getMessage());
-                    e.printStackTrace(out);
+                    e.printStackTrace();
                     throw e;
                 } catch (Error e) {
                     out.println("info string " + e.getMessage());
-                    e.printStackTrace(out);
+                    e.printStackTrace();
                     throw e;
                 }
             }
@@ -353,7 +353,15 @@ public class UCI implements UciProcess {
 
     @Override
     public void destroy() {
-        chess.cancel();
+        try {
+            ensureReady();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new UndeclaredThrowableException(e);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            throw new UndeclaredThrowableException(e);
+        }
     }
 
     public static class UciBestMoveListener implements BestMoveListener {

@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,7 +75,19 @@ public class UCI implements UciProcess {
 
     public void run() throws IOException, ExecutionException, InterruptedException {
         while (true) {
-            final String line = in.readLine().trim();
+            final Future<String> isFuture = THREAD_POOL.submit(new Callable<String>() {
+                public String call() throws IOException {
+                    return in.readLine().trim();
+                }
+            });
+            String line = null;
+            while (line == null) {
+                try {
+                    line = isFuture.get(1L, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    out.println("info string ready for next command, state: " + state);
+                }
+            }
             if ("uci".equals(line)) {
                 assert state == State.START;
                 state = State.UCI_RECEIVED;

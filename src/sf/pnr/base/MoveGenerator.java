@@ -80,14 +80,12 @@ public class MoveGenerator {
         final int[] board = boardObj.getBoard();
         final int leftIndex = rankIndex + enPassant - 1;
         if ((leftIndex & 0x88) == 0 && board[leftIndex] == pawn) {
-//            final int value = VAL_PAWN;
-            final int value = ATTACK_VALUE[PAWN][PAWN];
+            final int value = VAL_PAWN;
             captures[++captures[0]] = (toIndex << SHIFT_TO) | leftIndex | MT_EN_PASSANT | (value << SHIFT_MOVE_VALUE);
         }
         final int rightIndex = leftIndex + 2;
         if ((rightIndex & 0x88) == 0 && board[rightIndex] == pawn) {
-//            final int value = VAL_PAWN;
-            final int value = ATTACK_VALUE[PAWN][PAWN];
+            final int value = VAL_PAWN;
             captures[++captures[0]] = (toIndex << SHIFT_TO) | rightIndex | MT_EN_PASSANT | (value << SHIFT_MOVE_VALUE);
         }
     }
@@ -142,16 +140,6 @@ public class MoveGenerator {
                         final int move = (pos << SHIFT_TO) | startingPos | ((2000 + value) << SHIFT_MOVE_VALUE);
                         loosingCaptures[++loosingCaptures[0]] = move;
                     }
-//                    final int absAttacked = attacked * -signum;
-//                    final int absPiece = signum * board[startingPos];
-//                    final int valPiece = VAL_PIECES[absPiece];
-//                    final int move = (pos << SHIFT_TO) | startingPos |
-//                        (ATTACK_VALUE[absPiece][absAttacked] << SHIFT_MOVE_VALUE);
-//                    if (VAL_PIECES[absAttacked] > valPiece) {
-//                        winningCaptures[++winningCaptureIdx] = move;
-//                    } else {
-//                        loosingCaptures[++loosingCaptureIdx] = move;
-//                    }
                     break;
                 } else {
                     break;
@@ -186,16 +174,6 @@ public class MoveGenerator {
                         final int move = (pos << SHIFT_TO) | startingPos | ((2000 + value) << SHIFT_MOVE_VALUE);
                         loosingCaptures[++loosingCaptureIdx] = move;
                     }
-//                    final int absAttacked = attacked * -signum;
-//                    final int absPiece = signum * board[startingPos];
-//                    final int valPiece = VAL_PIECES[absPiece];
-//                    final int move = (pos << SHIFT_TO) | startingPos |
-//                        (ATTACK_VALUE[absPiece][absAttacked] << SHIFT_MOVE_VALUE);
-//                    if (VAL_PIECES[absAttacked] > valPiece) {
-//                        winningCaptures[++winningCaptureIdx] = move;
-//                    } else {
-//                        loosingCaptures[++loosingCaptureIdx] = move;
-//                    }
                 }
             }
         }
@@ -221,8 +199,7 @@ public class MoveGenerator {
                 if ((toIndex & 0x88) == 0 && Integer.signum(board[toIndex]) == signumOpponent) {
                     final int move = (toIndex << SHIFT_TO) + fromIndex;
                     final int toRank = getRank(toIndex);
-//                    final int captureValue = staticExchangeEvaluation(boardObj, fromIndex, toIndex);
-                    final int captureValue = ATTACK_VALUE[PAWN][signumOpponent * board[toIndex]];
+                    final int captureValue = staticExchangeEvaluation(boardObj, fromIndex, toIndex);
                     if (toRank == 0 || toRank == 7) {
                         captures[++capturesIdx] = move | MT_PROMOTION_QUEEN |
                             ((VAL_QUEEN - VAL_PAWN + captureValue) << SHIFT_MOVE_VALUE);

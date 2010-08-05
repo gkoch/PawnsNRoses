@@ -24,8 +24,10 @@ public final class Engine {
     private static int VAL_DEEP_FUTILITY_THRESHOLD = 675;
     @Configurable(Configurable.Key.ENGINE_RAZORING_THRESHOLD)
     private static int VAL_RAZORING_THRESHOLD = 400;
-    private static final int LATE_MOVE_REDUCTION_MIN_DEPTH = 3 << SHIFT_PLY;
-    private static final int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
+    @Configurable(Configurable.Key.ENGINE_LMR_MIN_DEPTH)
+    private static int LATE_MOVE_REDUCTION_MIN_DEPTH = 3 << SHIFT_PLY;
+    @Configurable(Configurable.Key.ENGINE_LMR_MIN_MOVE)
+    private static int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
 
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_CHECK)
     private static int DEPTH_EXT_CHECK = PLY / 2;

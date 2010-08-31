@@ -209,14 +209,15 @@ public final class Engine {
                 if (depthExt == 0 && moveCount > 0) {
                     final int value = board.getMaterialValue();
                     if (depth <= (3 << SHIFT_PLY) && value < beta - VAL_RAZORING_THRESHOLD && beta > alpha + 1) {
-                        final int qscore = -quiescence(board, -b, -alpha);
+//                        final int qscore = -quiescence(board, -b, -alpha);
+                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
                         if (cancelled) {
                             moveGenerator.popFrame();
                             return alpha;
                         }
                         if (qscore < b) {
                             board.takeBack(undo);
-                            break;
+                            continue;
                         }
                     }
                 }
@@ -470,14 +471,15 @@ public final class Engine {
                 if (depthExt == 0 && moveCount > 0) {
                     final int value = board.getMaterialValue();
                     if (depth <= (3 << SHIFT_PLY) && value < beta - VAL_RAZORING_THRESHOLD && beta > alpha + 1) {
-                        final int qscore = -quiescence(board, -b, -alpha);
+//                        final int qscore = -quiescence(board, -b, -alpha);
+                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
                         if (cancelled) {
                             moveGenerator.popFrame();
                             return alpha;
                         }
                         if (qscore < b) {
                             board.takeBack(undo);
-                            break;
+                            continue;
                         }
                     }
                 }

@@ -100,6 +100,7 @@ public final class Board {
 	}
 	
 	public int[] getPieces(final int side, final int type) {
+        assert pieces[type][side][0] >= 0 && pieces[type][side][0] <= 16;
 		return pieces[type][side];
 	}
 	

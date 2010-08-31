@@ -396,6 +396,15 @@ public class EngineTest extends TestCase {
         assertTrue("Bxb5, Qa6".contains(StringUtils.toShort(board, Engine.getMoveFromSearchResult(result))));
     }
 
+    public void testBishopMove() {
+        final Board board = fromFen("r1bqk2r/2ppbppp/p7/1p2P3/4n3/1B6/PPP2PPP/RNBQ1RK1 b kq - 0 1");
+        final long result = engine.search(board, 6, 0);
+        final int score = Engine.getValueFromSearchResult(result);
+        assertTrue(Integer.toString(score), score < VAL_PAWN);
+        assertTrue(Integer.toString(score), score > -VAL_PAWN);
+        assertEquals("Bb7", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
+    }
+
     public void testConsistency() {
         final Board board = fromFen("6qk/7p/p1pp1Q2/4p3/4P1b1/8/2P3PP/6NK b - - 6 32");
         final long result1 = engine.search(board, 8, 0);

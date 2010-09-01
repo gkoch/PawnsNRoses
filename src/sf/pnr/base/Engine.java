@@ -979,8 +979,9 @@ public final class Engine {
             return boardObj.isAttackedBySliding(toIndex, ATTACK_BITS[absPiece], fromIndex);
         }
         if (absPiece == PAWN) {
-            // intentionally ignored: toIndex - fromIndex == signum * UP * 2!
-            return toIndex - fromIndex == signum * UP;
+            final int squareInFront = fromIndex + signum * UP;
+            return toIndex == squareInFront ||
+                (board[squareInFront] == EMPTY && toIndex == squareInFront + signum * UP);
         } else {
             return boardObj.isAttackedByNonSliding(toIndex, ATTACK_BITS[absPiece], fromIndex);
         }

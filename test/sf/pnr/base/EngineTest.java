@@ -395,6 +395,14 @@ public class EngineTest extends TestCase {
         assertEquals("Nb2", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
     }
 
+    public void testPawnSacMate() {
+        final Board board = fromFen("6bk/4Np2/5K2/4P1N1/8/8/8/8 w - - 0 1");
+        final long result = engine.search(board, 3, 0);
+        final int score = Engine.getValueFromSearchResult(result);
+        assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
+        assertEquals("e6", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
+    }
+
     public void testIsValidKillerMove() {
         final Board board = fromFen("8/5N1p/6p1/4Bn1k/8/7K/6P1/2r1q3 w - - 0 1");
         assertTrue(engine.isValidKillerMove(board, G[1], G[3]));

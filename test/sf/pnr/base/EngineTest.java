@@ -392,7 +392,7 @@ public class EngineTest extends TestCase {
         final long result = engine.search(board, 2, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
-        assertEquals("Nb2", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
+        assertEquals("g4#", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
     }
 
     public void testPawnSacMate() {

@@ -163,10 +163,10 @@ public final class Engine {
         final boolean inCheck = board.attacksKing(1 - toMove);
 
         moveGenerator.pushFrame();
-        boolean hasLegalMove = false;
         int b = beta;
         int bestMove = 0;
-        int moveCount = 0;
+        int legalMoveCount = 0;
+        int quietMoveCount = 0;
         for (SearchStage searchStage: searchStages) {
             final boolean highPriorityStage =
                 searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
@@ -190,6 +190,9 @@ public final class Engine {
                     continue;
                 }
 
+                // register that we had a legal move
+                legalMoveCount++;
+
                 final boolean opponentInCheck = (move & CHECKING) > 0;
                 int depthExt = 0;
                 if (opponentInCheck) {
@@ -206,11 +209,11 @@ public final class Engine {
                 }
 
                 // razoring
-                if (depthExt == 0 && moveCount > 0) {
+                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && b == alpha + 1) {
                     final int value = -board.getMaterialValue();
-                    if (depth <= (3 << SHIFT_PLY) && value < beta - VAL_RAZORING_THRESHOLD && beta > alpha + 1) {
-//                        final int qscore = -quiescence(board, -b, -alpha);
-                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
+                    if (value < beta - VAL_RAZORING_THRESHOLD) {
+                        final int qscore = -quiescence(board, -b, -alpha);
+//                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
                         if (cancelled) {
                             moveGenerator.popFrame();
                             return alpha;
@@ -224,16 +227,15 @@ public final class Engine {
 
                 int a = alpha + 1;
                 if (!highPriorityStage) {
-                    if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
+                    if (quietMoveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
                             !Utils.isCastling(move) && !opponentInCheck && depthExt == 0) {
                         a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true, searchedPly + 1);
                         if (cancelled) {
                             board.takeBack(undo);
                             moveGenerator.popFrame();
-                            return depth <= PLY || moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
+                            return depth <= PLY || legalMoveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
                         }
                     }
-                    moveCount++;
                 }
 
                 // evaluate the move
@@ -242,7 +244,7 @@ public final class Engine {
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return depth <= PLY || moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
+                        return depth <= PLY || legalMoveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
                     }
 
                     // the other player has a better option, beta cut off
@@ -264,7 +266,7 @@ public final class Engine {
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return depth <= PLY || moveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
+                        return depth <= PLY || legalMoveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
                     }
                     if (a >= beta) {
                         board.takeBack(undo);
@@ -278,28 +280,29 @@ public final class Engine {
                     }
                 }
 
-                // register that we had a legal move
-                hasLegalMove = true;
                 board.takeBack(undo);
                 if (a > alpha) {
                     bestMove = move;
                     alpha = a;
+                    quietMoveCount = 0;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, move);
                     addMoveToKillers(searchedPly, searchStage, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
+                } else {
+                    quietMoveCount++;
                 }
 
                 b = alpha + 1;
             }
-            if (hasLegalMove && alpha > VAL_MATE_THRESHOLD) {
+            if (legalMoveCount > 0 && alpha > VAL_MATE_THRESHOLD) {
                 break;
             }
         }
         moveGenerator.popFrame();
-        if (!hasLegalMove) {
+        if (legalMoveCount == 0) {
             if (inCheck) {
                 return ((long) -Evaluation.VAL_MATE) & 0xFFFFFFFFL;
             } else {
@@ -399,11 +402,11 @@ public final class Engine {
         }
 
         moveGenerator.pushFrame();
-        boolean hasLegalMove = false;
-        boolean hasEvaluatedMove = false;
         int b = beta;
         int bestMove = 0;
-        int moveCount = 0;
+        int legalMoveCount = 0;
+        int quietMoveCount = 0;
+        boolean hasEvaluatedMove = false;
         for (SearchStage searchStage: searchStages) {
             final boolean highPriorityStage =
                 searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
@@ -431,7 +434,7 @@ public final class Engine {
                 }
 
                 // register that we had a legal move
-                hasLegalMove = true;
+                legalMoveCount++;
 
                 final boolean opponentInCheck = (move & CHECKING) > 0;
                 if (!allowToRecurseDown && !opponentInCheck) {
@@ -442,7 +445,7 @@ public final class Engine {
                 int a = alpha + 1;
                 int depthExt = 0;
                 if (!highPriorityStage) {
-                    if (moveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
+                    if (quietMoveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
                             !Utils.isCastling(move) && !opponentInCheck && depthExt == 0) {
                         a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true, searchedPly + 1);
                         if (cancelled) {
@@ -451,7 +454,6 @@ public final class Engine {
                             return alpha;
                         }
                     }
-                    moveCount++;
                 }
 
                 if (opponentInCheck) {
@@ -468,11 +470,11 @@ public final class Engine {
                 }
 
                 // razoring
-                if (depthExt == 0 && moveCount > 0) {
+                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && b == alpha + 1) {
                     final int value = -board.getMaterialValue();
-                    if (depth <= (3 << SHIFT_PLY) && value < beta - VAL_RAZORING_THRESHOLD && beta > alpha + 1) {
-//                        final int qscore = -quiescence(board, -b, -alpha);
-                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
+                    if (value < beta - VAL_RAZORING_THRESHOLD) {
+                        final int qscore = -quiescence(board, -b, -alpha);
+//                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
                         if (cancelled) {
                             moveGenerator.popFrame();
                             return alpha;
@@ -527,22 +529,25 @@ public final class Engine {
                 if (a > alpha) {
                     bestMove = move;
                     alpha = a;
+                    quietMoveCount = 0;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, move);
                     addMoveToKillers(searchedPly, searchStage, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
+                } else {
+                    quietMoveCount++;
                 }
 
                 b = alpha + 1;
             }
-            if (hasLegalMove && alpha > VAL_MATE_THRESHOLD) {
+            if (legalMoveCount > 0 && alpha > VAL_MATE_THRESHOLD) {
                 break;
             }
         }
         moveGenerator.popFrame();
-        if (!hasLegalMove) {
+        if (legalMoveCount == 0) {
             if (inCheck) {
                 return -Evaluation.VAL_MATE;
             } else {

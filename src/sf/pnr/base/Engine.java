@@ -576,11 +576,14 @@ public final class Engine {
             return VAL_DRAW;
         }
         
+        final int state = board.getState();
+        final int toMove = state & WHITE_TO_MOVE;
+
         final int eval = evaluation.evaluate(board);
         if (eval > alpha) {
             alpha = eval;
-            if (alpha >= beta) {
-                return beta;
+            if (alpha >= beta && !board.attacksKing(1 - toMove)) {
+                return alpha;
             }
         }
 
@@ -606,9 +609,6 @@ public final class Engine {
                 }
             }
         }
-
-        final int state = board.getState();
-        final int toMove = state & WHITE_TO_MOVE;
 
         moveGenerator.pushFrame();
         boolean hasLegalMove = false;

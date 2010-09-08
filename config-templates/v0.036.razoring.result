@@ -1,0 +1,27 @@
+Statistics after 6260 tests (elapsed time: 20033.3s):
+                             Engine name            %     ply       nodes        msec   nodes/sec
+        Pawns N' Roses - razoring-11.ini         39.4     5.8     22459.5       124.55   180325.1
+        Pawns N' Roses - razoring-20.ini         39.4     5.8     22809.0       126.14   180822.9
+        Pawns N' Roses - razoring-15.ini         39.3     5.8     22523.3       120.70   186602.5
+         Pawns N' Roses - razoring-9.ini         39.3     5.8     22599.8       127.79   176853.6
+         Pawns N' Roses - razoring-4.ini         39.3     5.8     22349.2       124.16   180009.9
+        Pawns N' Roses - razoring-17.ini         39.3     5.8     22665.1       124.42   182170.2
+         Pawns N' Roses - razoring-5.ini         39.3     5.8     22194.3       126.90   174897.2
+        Pawns N' Roses - razoring-18.ini         39.2     5.8     22539.5       120.78   186615.8
+         Pawns N' Roses - razoring-3.ini         39.2     5.8     22192.0       124.44   178333.7
+        Pawns N' Roses - razoring-21.ini         39.2     5.8     22555.6       120.34   187428.9
+        Pawns N' Roses - razoring-23.ini         39.2     5.8     22733.5       125.00   181874.1
+        Pawns N' Roses - razoring-24.ini         39.2     5.8     22771.8       137.40   165730.4
+        Pawns N' Roses - razoring-13.ini         39.2     5.8     22616.3       122.64   184405.7
+         Pawns N' Roses - razoring-0.ini         39.1     5.8     22188.6       121.10   183224.1
+        Pawns N' Roses - razoring-16.ini         39.1     5.8     22603.9       124.77   181158.6
+         Pawns N' Roses - razoring-6.ini         39.1     5.8     22290.7       122.41   182098.7
+         Pawns N' Roses - razoring-2.ini         39.1     5.8     22213.7       132.75   167338.3
+        Pawns N' Roses - razoring-14.ini         39.1     5.8     22601.4       124.18   182002.7
+         Pawns N' Roses - razoring-7.ini         39.1     5.8     22589.8       130.16   173550.2
+        Pawns N' Roses - razoring-22.ini         39.1     5.8     22667.5       166.39   136234.4
+         Pawns N' Roses - razoring-1.ini         39.1     5.8     22291.6       121.59   183330.8
+         Pawns N' Roses - razoring-8.ini         39.0     5.8     22503.4       124.47   180798.3
+        Pawns N' Roses - razoring-19.ini         39.0     5.8     22688.9       124.23   182639.8
+        Pawns N' Roses - razoring-10.ini         39.0     5.8     22765.1       124.12   183412.9
+        Pawns N' Roses - razoring-12.ini         38.8     5.8     22543.5       127.62   176649.2	<< default for v0.036

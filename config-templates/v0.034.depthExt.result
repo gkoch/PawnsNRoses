@@ -1,0 +1,27 @@
+ Statistics after 7880 tests (elapsed time: 33554.3s):
+                             Engine name            %     ply       nodes        msec   nodes/sec
+        Pawns N' Roses - depthExt-24.ini         45.3     5.6     49322.2       235.25   209658.3
+        Pawns N' Roses - depthExt-23.ini         44.6     5.6     42044.2       208.19   201953.3
+        Pawns N' Roses - depthExt-22.ini         44.4     5.6     41783.5       204.86   203965.5
+        Pawns N' Roses - depthExt-20.ini         44.3     5.6     41524.2       209.72   197994.4
+        Pawns N' Roses - depthExt-21.ini         44.2     5.6     41792.3       206.88   202010.7
+        Pawns N' Roses - depthExt-19.ini         41.3     5.8     31226.9       162.07   192680.8
+        Pawns N' Roses - depthExt-17.ini         41.0     5.8     28983.0       180.82   160284.5
+        Pawns N' Roses - depthExt-18.ini         40.8     5.8     29089.6       160.84   180859.8
+        Pawns N' Roses - depthExt-16.ini         40.7     5.8     28260.6       151.11   187026.1
+        Pawns N' Roses - depthExt-14.ini         40.5     5.8     30791.6       160.24   192154.1
+        Pawns N' Roses - depthExt-15.ini         40.4     5.8     27786.2       150.41   184738.4
+        Pawns N' Roses - depthExt-12.ini         40.2     5.8     28268.6       153.87   183713.8
+        Pawns N' Roses - depthExt-11.ini         40.0     5.8     27505.1       157.52   174608.5	<< default for v0.034
+        Pawns N' Roses - depthExt-13.ini         40.0     5.8     28272.2       153.01   184776.2
+        Pawns N' Roses - depthExt-10.ini         39.9     5.8     27476.2       149.50   183785.9
+         Pawns N' Roses - depthExt-9.ini         37.9     5.9     30431.5       176.83   172097.5
+         Pawns N' Roses - depthExt-4.ini         37.7     5.9     30462.3       164.94   184685.5
+         Pawns N' Roses - depthExt-8.ini         37.6     5.9     28063.8       164.30   170812.1
+         Pawns N' Roses - depthExt-1.ini         37.4     5.9     27312.6       148.48   183950.4
+         Pawns N' Roses - depthExt-7.ini         37.4     5.9     27615.0       156.15   176854.7
+         Pawns N' Roses - depthExt-2.ini         37.3     5.9     27488.1       151.14   181866.2
+         Pawns N' Roses - depthExt-3.ini         37.3     5.9     27323.4       155.54   175664.7
+         Pawns N' Roses - depthExt-6.ini         37.2     5.9     27393.4       153.96   177925.0
+         Pawns N' Roses - depthExt-0.ini         37.1     5.9     27366.2       162.67   168236.2
+         Pawns N' Roses - depthExt-5.ini         37.0     5.9     27352.6       153.25   178477.9

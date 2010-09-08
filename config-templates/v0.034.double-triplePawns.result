@@ -1,0 +1,37 @@
+Statistics after 7880 tests (elapsed time: 46012.6s):
+                             Engine name            %     ply       nodes        msec   nodes/sec
+Pawns N' Roses - double-triplePawns-1.ini        40.5     5.8     28060.7       167.45   167572.8
+Pawns N' Roses - double-triplePawns-24.ini       40.4     5.8     28059.7       166.69   168338.0
+Pawns N' Roses - double-triplePawns-16.ini       40.4     5.8     27984.6       165.54   169050.8
+Pawns N' Roses - double-triplePawns-0.ini        40.3     5.8     27856.4       162.46   171471.0
+Pawns N' Roses - double-triplePawns-11.ini       40.3     5.8     28073.0       169.97   165168.2
+Pawns N' Roses - double-triplePawns-28.ini       40.3     5.8     27877.6       164.04   169946.3
+Pawns N' Roses - double-triplePawns-33.ini       40.3     5.8     27888.7       169.47   164565.2
+Pawns N' Roses - double-triplePawns-31.ini       40.3     5.8     28018.2       164.80   170012.2
+Pawns N' Roses - double-triplePawns-19.ini       40.3     5.8     28031.7       183.86   152459.6
+Pawns N' Roses - double-triplePawns-30.ini       40.3     5.8     28272.7       166.47   169832.1
+Pawns N' Roses - double-triplePawns-21.ini       40.2     5.8     27892.8       162.97   171151.3
+Pawns N' Roses - double-triplePawns-32.ini       40.2     5.8     28087.8       162.18   173184.4
+Pawns N' Roses - double-triplePawns-10.ini       40.2     5.8     28184.5       164.73   171096.7
+Pawns N' Roses - double-triplePawns-8.ini        40.2     5.8     28034.4       164.16   170774.7
+Pawns N' Roses - double-triplePawns-29.ini       40.2     5.8     28198.4       168.07   167777.9
+Pawns N' Roses - double-triplePawns-25.ini       40.2     5.8     27947.1       169.60   164778.2
+Pawns N' Roses - double-triplePawns-5.ini        40.1     5.8     28040.8       162.67   172374.8
+Pawns N' Roses - double-triplePawns-2.ini        40.1     5.8     28030.4       164.37   170527.6
+Pawns N' Roses - double-triplePawns-26.ini       40.1     5.8     28034.7       166.79   168083.5
+Pawns N' Roses - double-triplePawns-4.ini        40.1     5.8     28081.4       162.93   172350.7
+Pawns N' Roses - double-triplePawns-15.ini       40.1     5.8     28112.9       163.22   172243.6
+Pawns N' Roses - double-triplePawns-6.ini        40.1     5.8     28001.7       168.58   166101.8
+Pawns N' Roses - double-triplePawns-17.ini       40.1     5.8     28081.6       167.83   167320.5
+Pawns N' Roses - double-triplePawns-13.ini       40.1     5.8     27934.9       162.12   172307.1
+Pawns N' Roses - double-triplePawns-9.ini        40.1     5.8     28035.9       161.84   173235.0
+Pawns N' Roses - double-triplePawns-3.ini        40.1     5.8     28193.3       168.39   167425.2
+Pawns N' Roses - double-triplePawns-34.ini       40.1     5.8     28040.0       163.69   171303.0
+Pawns N' Roses - double-triplePawns-27.ini       40.1     5.8     28094.2       165.01   170255.5
+Pawns N' Roses - double-triplePawns-23.ini       40.1     5.8     28195.0       167.01   168827.1
+Pawns N' Roses - double-triplePawns-14.ini       40.0     5.8     28140.5       165.84   169683.4
+Pawns N' Roses - double-triplePawns-18.ini       39.9     5.8     28163.2       164.77   170921.8
+Pawns N' Roses - double-triplePawns-22.ini       39.9     5.8     27965.0       164.84   169646.9
+Pawns N' Roses - double-triplePawns-12.ini       39.9     5.8     27893.6       161.96   172227.2		<< default for v0.034
+Pawns N' Roses - double-triplePawns-20.ini       39.8     5.8     27932.1       159.60   175018.6
+Pawns N' Roses - double-triplePawns-7.ini        39.8     5.8     27760.6       163.57   169719.0

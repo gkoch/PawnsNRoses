@@ -112,9 +112,12 @@ public final class Engine {
             }
             searchResult = result;
             if (listener != null) {
-                listener.bestMoveChanged(depth, getMoveFromSearchResult(result), value,
-                    System.currentTimeMillis() - searchStartTime,
-                    getBestLine(board, getMoveFromSearchResult(searchResult)), nodeCount);
+                final int bestMove = getMoveFromSearchResult(result);
+                assert bestMove != 0;
+                if (bestMove != 0) {
+                    listener.bestMoveChanged(depth, bestMove, value, System.currentTimeMillis() - searchStartTime,
+                        getBestLine(board, bestMove), nodeCount);
+                }
             }
             if (value > VAL_MATE_THRESHOLD) {
                 break;
@@ -884,12 +887,22 @@ public final class Engine {
 
     public void clear() {
         transpositionTable.clear();
+        evaluation.getEvalHashTable().clear();
+        evaluation.getPawnHashTable().clear();
         for (int[][] arrays: history) {
             for (int[] array: arrays) {
                 Arrays.fill(array, 0);
             }
         }
         historyMax = 0;
+    }
+
+    public TranspositionTable getTranspositionTable() {
+        return transpositionTable;
+    }
+
+    public Evaluation getEvaluation() {
+        return evaluation;
     }
 
     public int[] getBestLine(final Board board) {

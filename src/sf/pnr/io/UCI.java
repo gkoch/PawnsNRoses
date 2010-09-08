@@ -75,19 +75,7 @@ public class UCI implements UciProcess {
 
     public void run() throws IOException, ExecutionException, InterruptedException {
         while (true) {
-            final Future<String> isFuture = THREAD_POOL.submit(new Callable<String>() {
-                public String call() throws IOException {
-                    return in.readLine().trim();
-                }
-            });
-            String line = null;
-            while (line == null) {
-                try {
-                    line = isFuture.get(1L, TimeUnit.SECONDS);
-                } catch (TimeoutException e) {
-                    out.println("info string ready for next command, state: " + state);
-                }
-            }
+            String line = in.readLine().trim();
             if ("uci".equals(line)) {
                 assert state == State.START;
                 state = State.UCI_RECEIVED;

@@ -722,4 +722,12 @@ public final class Evaluation {
     public void setRandom(final boolean random) {
         this.random = random;
     }
+
+    public EvalHashTable getEvalHashTable() {
+        return evalHashTable;
+    }
+
+    public PawnHashTable getPawnHashTable() {
+        return pawnHashTable;
+    }
 }

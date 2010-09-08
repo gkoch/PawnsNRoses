@@ -136,8 +136,20 @@ public final class TranspositionTable {
     }
 
     public void clear() {
-        for (long[] array : arrays) {
+        for (long[] array: arrays) {
             Arrays.fill(array, 0);
         }
+    }
+
+    public int scan() {
+        int emptySlots = 0;
+        for (long[] array: arrays) {
+            for (int i = 0; i < array.length; i += 2) {
+                if (array[i] == 0) {
+                    emptySlots++;
+                }
+            }
+        }
+        return emptySlots;
     }
 }

@@ -54,7 +54,7 @@ public final class EvalHashTable {
 
         final int toCheck1 = startIndex + MAX_CHECK_INDEX;
         for (int i = startIndex; i < array.length; i += 3) {
-            if (array[i] == 0) {
+            if (array[i] == 0 && array[i + 1] == 0) {
                 array[i] = zobristHigh;
                 array[i + 1] = zobristLow;
                 array[i + 2] = value;
@@ -68,7 +68,7 @@ public final class EvalHashTable {
         }
         final int toCheck2 = MAX_CHECK_INDEX - (array.length - startIndex);
         for (int i = 0; i < startIndex; i += 3) {
-            if (array[i] == 0) {
+            if (array[i] == 0 && array[i + 1] == 0) {
                 array[i] = zobristHigh;
                 array[i + 1] = zobristLow;
                 array[i + 2] = value;
@@ -92,5 +92,15 @@ public final class EvalHashTable {
 
     public void clear() {
         Arrays.fill(array, 0);
+    }
+
+    public int scan() {
+        int emptySlots = 0;
+        for (int i = 0; i < array.length; i += 3) {
+            if (array[i] == 0 && array[i + 1] == 0) {
+                emptySlots++;
+            }
+        }
+        return emptySlots;
     }
 }

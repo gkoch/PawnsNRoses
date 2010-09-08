@@ -3,6 +3,7 @@ package sf.pnr.io;
 import sf.pnr.base.BestMoveListener;
 import sf.pnr.base.Board;
 import sf.pnr.base.Engine;
+import sf.pnr.base.Evaluation;
 import sf.pnr.base.Polyglot;
 import sf.pnr.base.StringUtils;
 import sf.pnr.base.Utils;
@@ -128,6 +129,16 @@ public class PawnsNRoses {
     @Executable()
     public void releaseEngine() {
         engine = null;
+    }
+
+    @Executable()
+    public void scanHashTables() {
+        if (engine != null) {
+            engine.getTranspositionTable().scan();
+            final Evaluation evaluation = engine.getEvaluation();
+            evaluation.getEvalHashTable().scan();
+            evaluation.getPawnHashTable().scan();
+        }
     }
 
     public boolean useBook() {

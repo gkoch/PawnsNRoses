@@ -1,7 +1,6 @@
 package sf.pnr.base;
 
 import junit.framework.TestCase;
-import sf.pnr.io.UCI;
 
 import static sf.pnr.base.Engine.*;
 import static sf.pnr.base.Evaluation.*;
@@ -132,9 +131,10 @@ public class EngineTest extends TestCase {
 
     public void testMateWithPromotion2() {
         final Board board = fromFen("k2r4/3N4/K1P5/8/7b/8/8/8 w - - 0 1");
-        final long result = engine.search(board, 3, 0);
+        final long result = engine.search(board, 5, 0);
         final int score = Engine.getValueFromSearchResult(result);
         assertTrue(Integer.toString(score), score > VAL_MATE_THRESHOLD);
+        assertEquals("c7", toShort(board, Engine.getMoveFromSearchResult(result)));
     }
 
     public void testMateWithOpponentPromotion() {

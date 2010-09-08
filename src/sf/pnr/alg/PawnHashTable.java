@@ -45,6 +45,16 @@ public class PawnHashTable {
         Arrays.fill(array, 0);
     }
 
+    public int scan() {
+        int emptySlots = 0;
+        for (int i = 0; i < array.length; i += 2) {
+            if (array[i] == 0) {
+                emptySlots++;
+            }
+        }
+        return emptySlots;
+    }
+
     public static int getValueFromPawnHashValue(final long pawnHashValue) {
         return (int) ((pawnHashValue & VALUE_MASK) - VALUE_OFFSET);
     }

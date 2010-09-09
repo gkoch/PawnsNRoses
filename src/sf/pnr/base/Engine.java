@@ -445,20 +445,7 @@ public final class Engine {
                     break;
                 }
 
-                int a = alpha + 1;
                 int depthExt = 0;
-                if (!highPriorityStage) {
-                    if (quietMoveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
-                            !Utils.isCastling(move) && !opponentInCheck && depthExt == 0) {
-                        a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true, searchedPly + 1);
-                        if (cancelled) {
-                            board.takeBack(undo);
-                            moveGenerator.popFrame();
-                            return alpha;
-                        }
-                    }
-                }
-
                 if (opponentInCheck) {
                     depthExt += DEPTH_EXT_CHECK;
                 }
@@ -485,6 +472,19 @@ public final class Engine {
                         if (qscore < b) {
                             board.takeBack(undo);
                             continue;
+                        }
+                    }
+                }
+
+                int a = alpha + 1;
+                if (!highPriorityStage) {
+                    if (quietMoveCount >= LATE_MOVE_REDUCTION_MIN_MOVE && !inCheck && depth >= LATE_MOVE_REDUCTION_MIN_DEPTH &&
+                            !Utils.isCastling(move) && !opponentInCheck && depthExt == 0) {
+                        a = -negascout(board, depth - (2 << SHIFT_PLY), -b, -alpha, false, true, searchedPly + 1);
+                        if (cancelled) {
+                            board.takeBack(undo);
+                            moveGenerator.popFrame();
+                            return alpha;
                         }
                     }
                 }

@@ -219,6 +219,7 @@ public final class Engine {
 //                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
                         if (cancelled) {
                             moveGenerator.popFrame();
+                            board.takeBack(undo);
                             return alpha;
                         }
                         if (qscore < b) {
@@ -467,6 +468,7 @@ public final class Engine {
 //                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
                         if (cancelled) {
                             moveGenerator.popFrame();
+                            board.takeBack(undo);
                             return alpha;
                         }
                         if (qscore < b) {
@@ -737,10 +739,11 @@ public final class Engine {
         final long currentTime = System.currentTimeMillis();
         if (searchEndTime <= currentTime) {
             cancelled = true;
-//            System.out.printf("info string Cancelling after %d ms (node count: %d)\r\n", currentTime - searchStartTime, nodeCount);
+//                System.out.printf("info string Cancelling after %d ms, search time: %d ms (node count: %d)\r\n", currentTime - searchStartTime, searchEndTime - searchStartTime, nodeCount);
             return;
         }
         long timeEllapsed = currentTime - searchStartTime;
+//        System.out.printf("info string Processed %d nodes in %d ms\r\n", nodeCount, timeEllapsed);
         if (timeEllapsed < 10) {
             timeEllapsed = 10;
         }
@@ -750,6 +753,7 @@ public final class Engine {
             nodesToProcessUntilNextCheck = 200;
         }
         nodeCountAtNextTimeCheck = nodeCount + nodesToProcessUntilNextCheck;
+//        System.out.printf("info string Next check at node count %d\r\n", nodeCountAtNextTimeCheck);
         lastCheckTime = currentTime;
     }
 
@@ -780,19 +784,12 @@ public final class Engine {
             case KILLERS:
                 moves = new int[3];
                 int killerCount = 0;
-                if (killerMoves[searchedPly][0] > 0) {
-                    int move = killerMoves[searchedPly][0];
+                for (int move: killerMoves[searchedPly]) {
                     if (isValidKillerMove(board, getMoveFromIndex(move), getMoveToIndex(move))) {
                         moves[++killerCount] = move | (board.isCheckingMove(move)? CHECKING: 0);
                     }
-                    if (killerMoves[searchedPly][1] > 0) {
-                        move = killerMoves[searchedPly][1];
-                        if (isValidKillerMove(board, getMoveFromIndex(move), getMoveToIndex(move))) {
-                            moves[++killerCount] = move | (board.isCheckingMove(move)? CHECKING: 0);
-                        }
-                    }
-                    moves[0] = killerCount;
                 }
+                moves[0] = killerCount;
                 break;
             case NORMAL:
                 moves = moveGenerator.getMoves();
@@ -990,16 +987,18 @@ public final class Engine {
         final int toMove = boardObj.getState() & WHITE_TO_MOVE;
         final int signum = Integer.signum(piece);
         if (((toMove << 1) - 1) != signum) {
+            // fromIndex is occupied by the opponent's piece
             return false;
         }
         final int absPiece = signum * piece;
         if (boardObj.isSliding(absPiece)) {
             return boardObj.isAttackedBySliding(toIndex, ATTACK_BITS[absPiece], fromIndex);
-        }
-        if (absPiece == PAWN) {
+        } else if (absPiece == PAWN) {
             final int squareInFront = fromIndex + signum * UP;
-            return toIndex == squareInFront ||
-                (board[squareInFront] == EMPTY && toIndex == squareInFront + signum * UP);
+            final int fromRank = getRank(fromIndex);
+            final int toRank = getRank(toIndex);
+            return toRank != 0 && toRank != 7 && (toIndex == squareInFront ||
+                (board[squareInFront] == EMPTY && toIndex == squareInFront + signum * UP && (fromRank == 1 || fromRank == 7)));
         } else {
             return boardObj.isAttackedByNonSliding(toIndex, ATTACK_BITS[absPiece], fromIndex);
         }

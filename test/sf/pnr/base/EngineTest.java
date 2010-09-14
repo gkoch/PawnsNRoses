@@ -11,13 +11,19 @@ import static sf.pnr.base.Utils.*;
  */
 public class EngineTest extends TestCase {
 
-    private final Engine engine = new Engine();
+    private Engine engine = new Engine();
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         engine.clear();
         engine.setSearchEndTime(Long.MAX_VALUE);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        engine = null;
+        super.tearDown();
     }
 
     public void testPositions() {
@@ -403,9 +409,19 @@ public class EngineTest extends TestCase {
         assertEquals("e6", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
     }
 
-    public void testIsValidKillerMove() {
+    public void testIsValidKillerMovePawnDoubleSquareMove() {
         final Board board = fromFen("8/5N1p/6p1/4Bn1k/8/7K/6P1/2r1q3 w - - 0 1");
         assertTrue(engine.isValidKillerMove(board, G[1], G[3]));
+    }
+
+    public void testIsValidKillerMovePawnInvalidDoubleSquareMove() {
+        final Board board = fromFen("7R/8/4K3/7P/4n1p1/7k/8/8 w - - 1 3");
+        assertFalse(engine.isValidKillerMove(board, H[4], H[6]));
+    }
+
+    public void testIsValidKillerMovePromotion() {
+        final Board board = fromFen("8/4k2P/p7/8/8/8/6K1/q7 w - - 0 3");
+        assertFalse(engine.isValidKillerMove(board, H[6], H[7]));
     }
 
     public void testAttackedKnight() {
@@ -424,6 +440,15 @@ public class EngineTest extends TestCase {
         assertTrue(Integer.toString(score), score < VAL_PAWN);
         assertTrue(Integer.toString(score), score > -VAL_PAWN);
         assertEquals("Bb7", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
+    }
+
+    public void testStalemate2() {
+        final Board board = fromFen("1k6/8/p5p1/6p1/6P1/5P1P/6PK/8 w - - 0 1");
+        final long result = engine.search(board, 8, 0);
+        final int score = Engine.getValueFromSearchResult(result);
+        assertTrue(Integer.toString(score), score < VAL_PAWN / 2);
+        assertTrue(Integer.toString(score), score > -VAL_PAWN / 2);
+        assertEquals("f4", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
     }
 
     public void testConsistency() {

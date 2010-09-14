@@ -138,6 +138,7 @@ public final class Board {
         assert piece != EMPTY: "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
 		final int moveType = (moveBase & MOVE_TYPE);
         final int signum = Integer.signum(piece);
+        assert (((state & WHITE_TO_MOVE) << 1) - 1) == signum;
         final int absPiece = signum * piece;
         final int toIndex = getMoveToIndex(moveBase);
         assert fromIndex != toIndex;
@@ -237,6 +238,7 @@ public final class Board {
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
         assert getMaterialValueAsWhite() == Evaluation.computeMaterialValueAsWhite(this):
             "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
+        assert (((state & WHITE_TO_MOVE) << 1) - 1) == -signum;
 		return undo;
 	}
 
@@ -342,11 +344,11 @@ public final class Board {
         assert getMaterialValueAsWhite() == Evaluation.computeMaterialValueAsWhite(this);
         assert bitboardAllPieces[WHITE] == BitBoard.computeAllPieces(this, WHITE);
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
+        assert zobristIncremental == computeZobristIncremental(this);
         repetitionTable.decrement(zobrist);
         // restore the state and the move info
 		state = (int) (undo >>> 32);
         final int move = (int) undo;
-//        System.out.println("Undo: " + StringUtils.toSimple(move));
 
         // extract the info
         final int fromIndex = getMoveFromIndex(move);
@@ -360,6 +362,7 @@ public final class Board {
         final int signum = Integer.signum(piece);
         final int signumOpponent = -signum;
         final int currentPlayer = state & WHITE_TO_MOVE;
+        assert ((currentPlayer << 1) - 1) == signum;
 
         zobristIncremental ^= ZOBRIST_WHITE_TO_MOVE;
         assert zobristIncremental == computeZobristIncremental(this);
@@ -585,7 +588,7 @@ public final class Board {
         final int signum = (toMove << 1) - 1;
         final int piece = board[fromIndex];
         final int absPiece = signum * piece;
-        assert absPiece != EMPTY;
+        assert absPiece != EMPTY: StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
         final int kingIndex = pieces[KING][1 - toMove][1];
         final int toIndex = getMoveToIndex(move);
         final int attacked = board[toIndex];
@@ -612,7 +615,8 @@ public final class Board {
                 } else {
                     // it's a promotion
                     final int promotedTo = PROMOTION_TO_PIECE[(move & MOVE_TYPE) >> SHIFT_MOVE_TYPE];
-                    assert promotedTo == KNIGHT || promotedTo == BISHOP || promotedTo == ROOK || promotedTo == QUEEN;
+                    assert promotedTo == KNIGHT || promotedTo == BISHOP || promotedTo == ROOK || promotedTo == QUEEN:
+                        StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
                     if (promotedTo == KNIGHT) {
                         return ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_N) == ATTACK_N);
                     } else {

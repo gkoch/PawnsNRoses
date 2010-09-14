@@ -52,7 +52,16 @@ public class SearchTask implements EpdProcessorTask {
             depth = 0;
             time = timeToSolve;
         }
+
+        final long startTime = System.currentTimeMillis();
         final long result = engine.search(board, depth, time);
+        final long endTime = System.currentTimeMillis();
+
+        if (time > 0 && time * 1.5 < (endTime - startTime)) {
+            System.out.printf(
+                "Used significantly more time than was allowed. FEN: %s, target time: %d ms, time used: %d ms\r\n",
+                StringUtils.toFen(board), time, (endTime - startTime));
+        }
 
         boolean passed = true;
 //            Assert.assertEquals(Engine.getMoveFromSearchResult(result), bestLine[0]);

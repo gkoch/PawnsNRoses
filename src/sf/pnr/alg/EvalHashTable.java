@@ -27,7 +27,7 @@ public final class EvalHashTable {
         for (int i = startIndex; i < array.length; i += 3) {
             if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
                 return array[i + 2];
-            } else if (array[i] == 0) {
+            } else if ((array[i] | array[i + 1]) == 0) {
                 return 0;
             } else if (i > startIndex + MAX_CHECK_INDEX) {
                 return 0;
@@ -37,7 +37,7 @@ public final class EvalHashTable {
         for (int i = 0; i < startIndex; i += 3) {
             if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
                 return array[i + 2];
-            } else if (array[i] == 0) {
+            } else if ((array[i] | array[i + 1]) == 0) {
                 return 0;
             } else if (i > toCheck) {
                 return 0;

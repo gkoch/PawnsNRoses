@@ -165,6 +165,20 @@ public final class Engine {
         final int toMove = state & WHITE_TO_MOVE;
         final boolean inCheck = board.attacksKing(1 - toMove);
 
+        // razoring
+        if (depth <= (3 << SHIFT_PLY)) {
+            final int value = board.getMaterialValue();
+            if (value < beta - VAL_RAZORING_THRESHOLD) {
+                final int qscore = quiescence(board, alpha, beta);
+                if (cancelled) {
+                    return alpha;
+                }
+                if (qscore < beta) {
+                    return qscore;
+                }
+            }
+        }
+
         moveGenerator.pushFrame();
         int b = beta;
         int bestMove = 0;
@@ -210,24 +224,6 @@ public final class Engine {
                         depthExt += DEPTH_EXT_7TH_RANK_PAWN;
                     }
                 }
-
-                // razoring
-//                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && legalMoveCount > 1) {
-//                    final int value = -board.getMaterialValue();
-//                    if (value < beta - VAL_RAZORING_THRESHOLD) {
-//                        final int qscore = -quiescence(board, -b, -alpha);
-////                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
-//                        if (cancelled) {
-//                            moveGenerator.popFrame();
-//                            board.takeBack(undo);
-//                            return alpha;
-//                        }
-//                        if (qscore < b) {
-//                            board.takeBack(undo);
-//                            continue;
-//                        }
-//                    }
-//                }
 
                 int a = alpha + 1;
                 if (!highPriorityStage) {
@@ -392,6 +388,20 @@ public final class Engine {
             ttMove = getMoveFromSearchResult(searchResult);
         }
 
+        // razoring
+        if (depth <= (3 << SHIFT_PLY)) {
+            final int value = board.getMaterialValue();
+            if (value < beta - VAL_RAZORING_THRESHOLD) {
+                final int qscore = quiescence(board, alpha, beta);
+                if (cancelled) {
+                    return alpha;
+                }
+                if (qscore < beta) {
+                    return qscore;
+                }
+            }
+        }
+
         // futility pruning
         final boolean futility;
         if (depth < (3 << SHIFT_PLY) && !inCheck) {
@@ -457,24 +467,6 @@ public final class Engine {
                     final int absPiece = signum * piece;
                     if (absPiece == PAWN) {
                         depthExt += DEPTH_EXT_7TH_RANK_PAWN;
-                    }
-                }
-
-                // razoring
-                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && legalMoveCount > 1) {
-                    final int value = -board.getMaterialValue();
-                    if (value < beta - VAL_RAZORING_THRESHOLD) {
-                        final int qscore = -quiescence(board, -b, -alpha);
-//                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
-                        if (cancelled) {
-                            moveGenerator.popFrame();
-                            board.takeBack(undo);
-                            return alpha;
-                        }
-                        if (qscore < b) {
-                            board.takeBack(undo);
-                            continue;
-                        }
                     }
                 }
 

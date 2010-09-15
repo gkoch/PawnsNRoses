@@ -212,22 +212,22 @@ public final class Engine {
                 }
 
                 // razoring
-                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && legalMoveCount > 1) {
-                    final int value = -board.getMaterialValue();
-                    if (value < beta - VAL_RAZORING_THRESHOLD) {
-                        final int qscore = -quiescence(board, -b, -alpha);
-//                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
-                        if (cancelled) {
-                            moveGenerator.popFrame();
-                            board.takeBack(undo);
-                            return alpha;
-                        }
-                        if (qscore < b) {
-                            board.takeBack(undo);
-                            continue;
-                        }
-                    }
-                }
+//                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && legalMoveCount > 1) {
+//                    final int value = -board.getMaterialValue();
+//                    if (value < beta - VAL_RAZORING_THRESHOLD) {
+//                        final int qscore = -quiescence(board, -b, -alpha);
+////                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
+//                        if (cancelled) {
+//                            moveGenerator.popFrame();
+//                            board.takeBack(undo);
+//                            return alpha;
+//                        }
+//                        if (qscore < b) {
+//                            board.takeBack(undo);
+//                            continue;
+//                        }
+//                    }
+//                }
 
                 int a = alpha + 1;
                 if (!highPriorityStage) {

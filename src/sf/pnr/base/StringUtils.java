@@ -468,12 +468,12 @@ public class StringUtils {
             final MoveGenerator moveGenerator = new MoveGenerator();
             moveGenerator.pushFrame();
             moveGenerator.generatePseudoLegalMoves(boardObj);
-            boolean hasLegalMove = hasLegalMove(boardObj, moveGenerator.getWinningCaptures()) ||
-                hasLegalMove(boardObj, moveGenerator.getLoosingCaptures());
+            boolean hasLegalMove = boardObj.hasLegalMove(moveGenerator.getWinningCaptures()) ||
+                boardObj.hasLegalMove(moveGenerator.getLoosingCaptures());
             if (!hasLegalMove) {
                 moveGenerator.generatePseudoLegalMovesNonAttacking(boardObj);
-                hasLegalMove = hasLegalMove(boardObj, moveGenerator.getMoves()) ||
-                    hasLegalMove(boardObj, moveGenerator.getPromotions());
+                hasLegalMove = boardObj.hasLegalMove(moveGenerator.getMoves()) ||
+                    boardObj.hasLegalMove(moveGenerator.getPromotions());
             }
             if (hasLegalMove) {
                 builder.append('+');
@@ -483,18 +483,6 @@ public class StringUtils {
         }
         boardObj.takeBack(undo);
         return builder.toString();
-    }
-
-    private static boolean hasLegalMove(final Board board, final int[] moves) {
-        boolean found = false;
-        for (int i = moves[0]; i > 0 && !found; i--) {
-            final long undo = board.move(moves[i]);
-            final int toMove = board.getState() & WHITE_TO_MOVE;
-            final int kingIndex = board.getKing(1 - toMove);
-            found = !board.isAttacked(kingIndex, toMove);
-            board.takeBack(undo);
-        }
-        return found;
     }
 
     public static String toString0x88(final int pos) {

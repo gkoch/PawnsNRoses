@@ -331,6 +331,13 @@ public class BoardTest extends TestCase {
         assertEquals(8, board.getPieces(BLACK_TO_MOVE, PAWN)[0]);
     }
 
+    public void testIsMate() {
+        final Board board = fromFen("r3qk1r/ppp1n2p/3p1p2/8/4P3/1BpP4/PPP3PP/R1B1K2R w KQ - 0 1");
+        assertFalse(board.isMate());
+        board.move(StringUtils.fromSimple("c1h6"));
+        assertTrue(board.isMate());
+    }
+
 	private static void playAndUndo(final int... moves) {
 		final Board board = new Board();
 		board.restart();

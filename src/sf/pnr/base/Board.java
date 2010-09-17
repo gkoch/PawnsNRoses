@@ -663,4 +663,34 @@ public final class Board {
         }
         return false;
     }
+
+    public boolean isMate() {
+        final int toMove = state & WHITE_TO_MOVE;
+        final int kingIndex = pieces[KING][toMove][1];
+        if (isAttacked(kingIndex, 1 - toMove)) {
+            final MoveGenerator moveGenerator = new MoveGenerator();
+            moveGenerator.pushFrame();
+            moveGenerator.generatePseudoLegalMoves(this);
+            boolean hasLegalMove = hasLegalMove(moveGenerator.getWinningCaptures()) ||
+                hasLegalMove(moveGenerator.getLoosingCaptures());
+            if (!hasLegalMove) {
+                moveGenerator.generatePseudoLegalMovesNonAttacking(this);
+                hasLegalMove = hasLegalMove(moveGenerator.getMoves()) || hasLegalMove(moveGenerator.getPromotions());
+            }
+            return !hasLegalMove;
+        }
+        return false;
+    }
+
+    public boolean hasLegalMove(final int[] moves) {
+        boolean found = false;
+        for (int i = moves[0]; i > 0 && !found; i--) {
+            final long undo = move(moves[i]);
+            final int toMove = state & WHITE_TO_MOVE;
+            final int kingIndex = pieces[KING][(1 - toMove)][1];
+            found = !isAttacked(kingIndex, toMove);
+            takeBack(undo);
+        }
+        return found;
+    }
 }

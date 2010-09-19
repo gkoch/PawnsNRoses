@@ -19,8 +19,9 @@ public class UciRunner {
     private BufferedWriter writer;
     private BufferedReader reader;
     private int depth;
-    private String bestMove;
     private long nodeCount;
+    private int score;
+    private String bestMove;
     private long moveTime;
     private boolean debug = false;
 
@@ -70,16 +71,30 @@ public class UciRunner {
             throw new IllegalArgumentException("Cannot set both depth and time to 0");
         }
         final StringBuilder command = new StringBuilder();
-        command.append("go ");
+        command.append("go");
         if (depth > 0) {
-            command.append("depth ");
+            command.append(" depth ");
             command.append(depth);
         }
         if (time > 0) {
-            command.append("movetime ");
+            command.append(" movetime ");
             command.append(time);
         }
-        sendCommand(command.toString());
+        go(command.toString());
+    }
+
+    public void go(final int wtime, final int btime, final int winc, final int binc) throws IOException {
+        final StringBuilder command = new StringBuilder();
+        command.append("go");
+        command.append(" wtime ").append(wtime);
+        command.append(" btime ").append(btime);
+        command.append(" winc ").append(winc);
+        command.append(" binc ").append(binc);
+        go(command.toString());
+    }
+
+    private void go(final String command) throws IOException {
+        sendCommand(command);
         final long startTime = System.currentTimeMillis();
         waitBestMove();
         final long endTime = System.currentTimeMillis();
@@ -101,12 +116,16 @@ public class UciRunner {
         return depth;
     }
 
-    public String getBestMove() {
-        return bestMove;
-    }
-
     public long getNodeCount() {
         return nodeCount;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public String getBestMove() {
+        return bestMove;
     }
 
     public long getMoveTime() {
@@ -125,11 +144,26 @@ public class UciRunner {
                     System.out.println(line);
                 }
                 final String[] parts = line.split(" ");
+                boolean resetFields = true;
                 for (int i = 0; i < parts.length; i++) {
                     if (parts[i].equals("depth")) {
-                        depth = Integer.parseInt(parts[i + 1]);
+                        if (resetFields) {
+                            resetFields();
+                            resetFields = false;
+                        }
+                        depth = Integer.parseInt(parts[++i]);
                     } else if (parts[i].equals("nodes")) {
-                        nodeCount = Long.parseLong(parts[i + 1]);
+                        if (resetFields) {
+                            resetFields();
+                            resetFields = false;
+                        }
+                        nodeCount = Long.parseLong(parts[++i]);
+                    } else if (parts[i].equals("cp")) {
+                        if (resetFields) {
+                            resetFields();
+                            resetFields = false;
+                        }
+                        score = Integer.parseInt(parts[++i]);
                     }
                 }
             }
@@ -140,6 +174,12 @@ public class UciRunner {
             }
             bestMove = line.substring("bestmove ".length()).split(" ")[0].trim();
         }
+    }
+
+    private void resetFields() {
+        depth = 0;
+        nodeCount = 0L;
+        score = 0;
     }
 
     public void close() throws IOException {

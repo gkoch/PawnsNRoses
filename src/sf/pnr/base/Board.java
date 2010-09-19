@@ -98,6 +98,10 @@ public final class Board {
 	public int getState() {
 		return state;
 	}
+
+    public int getFullMoveCount() {
+        return (state & FULL_MOVES) >> SHIFT_FULL_MOVES;
+    }
 	
 	public int[] getPieces(final int side, final int type) {
         assert pieces[type][side][0] >= 0 && pieces[type][side][0] <= 16;

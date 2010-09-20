@@ -6,7 +6,9 @@ import sf.pnr.base.Configurable;
 import sf.pnr.base.Configuration;
 import sf.pnr.base.StringUtils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,7 +71,13 @@ public class UCI implements UciProcess {
         } else {
             os = System.out;
         }
-        final UCI protocol = new UCI(System.in, os);
+
+        MultiInputStream is = new MultiInputStream();
+        if (System.getProperty("startup.file") != null) {
+            is.addInputStream(new FileInputStream(System.getProperty("startup.file")));
+        }
+        is.addInputStream(System.in);
+        final UCI protocol = new UCI(is, os);
         protocol.run();
     }
 

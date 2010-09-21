@@ -386,7 +386,7 @@ public final class Engine {
         }
 
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        if (depth > 3 * PLY && ttMove == 0) {
+        if (depth > 3 * PLY && (ttMove == 0 || ttDepth < depth / 2)) {
             // internal iterative deepening
             final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, searchedPly);
             ttMove = getMoveFromSearchResult(searchResult);

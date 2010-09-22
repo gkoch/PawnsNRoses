@@ -70,7 +70,10 @@ public class ConfigurationTest {
                 "Pawns N' Roses - " + file.getName(), uciOptions, postSearchOptions, new PipedUciProcess()));
         }
         try {
-            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(runners, 6, 0, 20));
+            final int depth = Integer.parseInt(System.getProperty("searchTest.maxDepth", "0"));
+            final int time = Integer.parseInt(System.getProperty("searchTest.maxTime", "500"));
+            final int printInterval = Integer.parseInt(System.getProperty("searchTest.printInterval", "20"));
+            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(runners, depth, time, printInterval));
         } finally {
             for (UciRunner runner : runners) {
                 runner.close();

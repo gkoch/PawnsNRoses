@@ -45,6 +45,12 @@ public final class Configuration {
         }
     }
 
+
+    public Class<?> getType(final Configurable.Key key) {
+        final Field field = keyToField.get(key);
+        return field.getType();
+    }
+
     public String getString(final Configurable.Key key) {
         final Field field = keyToField.get(key);
         try {

@@ -1,5 +1,7 @@
 package sf.pnr.base;
 
+import sf.pnr.io.UCI;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileReader;
@@ -40,7 +42,7 @@ public class ConfigurationTest {
         final Map<String, String> defaults = new HashMap<String, String>();
         for (Configurable.Key key: Configurable.Key.values()) {
             final String value = Configuration.getInstance().getString(key);
-            defaults.put(StringUtils.toUciOption(key), value);
+            defaults.put(UCI.toUciOption(key), value);
         }
         final Map<String, String> postSearchOptions = new LinkedHashMap<String, String>();
 //        postSearchOptions.put("Command", "releaseEngine");
@@ -64,7 +66,7 @@ public class ConfigurationTest {
             final Map<Configurable.Key, String> configs = Configuration.preprocess(properties);
             final Map<String, String> uciOptions = new HashMap<String, String>(defaults);
             for (Map.Entry<Configurable.Key, String> entry: configs.entrySet()) {
-                uciOptions.put(StringUtils.toUciOption(entry.getKey()), entry.getValue());
+                uciOptions.put(UCI.toUciOption(entry.getKey()), entry.getValue());
             }
             runners.add(new UciRunner(
                 "Pawns N' Roses - " + file.getName(), uciOptions, postSearchOptions, new PipedUciProcess()));

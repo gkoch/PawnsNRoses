@@ -6,7 +6,6 @@ import sf.pnr.base.Configurable;
 import sf.pnr.base.Configuration;
 import sf.pnr.base.StringUtils;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -22,8 +21,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,12 +87,11 @@ public class UCI implements UciProcess {
                 out.println("id name Pawns N' Roses");
                 out.println("id author George Koch");
                 out.println("uciok");
+                final Configuration config = Configuration.getInstance();
                 for (Configurable.Key key: Configurable.Key.values()) {
-                    out.printf("option name %s type string default %s\r\n", StringUtils.toUciOption(key),
-                        Configuration.getInstance().getString(key));
+                    out.printf("option name %s type %s default %s\r\n", toUciOption(key),
+                        toUciType(config.getType(key)), config.getString(key));
                 }
-//                out.printf("info string useBook: %b, book: %s\r\n", chess.useBook(),
-//                    chess.getBook() != null? chess.getBook().getAbsolutePath(): "-");
             } else if (line.startsWith("debug ")) {
                 uciListener.setDebug("on".equals(line.substring(6).trim()));
             } else if ("isready".equals(line)) {
@@ -134,7 +130,7 @@ public class UCI implements UciProcess {
                 if ("Command".equals(name)) {
                     executeCommand(value);
                 } else {
-                    final String keyStr = StringUtils.fromUciOption(name);
+                    final String keyStr = fromUciOption(name);
                     final Configurable.Key key = Configuration.getKey(keyStr);
                     Configuration.getInstance().setProperty(key, value);
                 }
@@ -372,6 +368,49 @@ public class UCI implements UciProcess {
             e.printStackTrace();
             throw new UndeclaredThrowableException(e);
         }
+    }
+
+    public static String toUciOption(final Configurable.Key key) {
+        final String keyStr = key.getKey();
+        final StringBuilder builder = new StringBuilder(keyStr.length());
+        boolean upperCase = true;
+        for (int i = 0; i < keyStr.length(); i++) {
+            final char ch = keyStr.charAt(i);
+            if (ch == '.') {
+                builder.append(' ');
+                upperCase = true;
+            } else if (upperCase) {
+                builder.append(Character.toUpperCase(ch));
+                upperCase = false;
+            } else {
+                builder.append(ch);
+                upperCase = false;
+            }
+        }
+        return builder.toString();
+    }
+
+    public static String fromUciOption(final String key) {
+        final StringBuilder builder = new StringBuilder(key.length());
+        boolean lowerCase = true;
+        for (int i = 0; i < key.length(); i++) {
+            final char ch = key.charAt(i);
+            if (ch == ' ') {
+                builder.append('.');
+                lowerCase = true;
+            } else if (lowerCase) {
+                builder.append(Character.toLowerCase(ch));
+                lowerCase = false;
+            } else {
+                builder.append(ch);
+                lowerCase = false;
+            }
+        }
+        return builder.toString();
+    }
+
+    public static String toUciType(final Class<?> clazz) {
+        return "string";
     }
 
     public static class UciBestMoveListener implements BestMoveListener {

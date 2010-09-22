@@ -33,6 +33,8 @@ public final class Engine {
     private static int DEPTH_EXT_CHECK = PLY / 2;
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_7TH_RANK_PAWN)
     private static int DEPTH_EXT_7TH_RANK_PAWN = PLY / 4;
+    @Configurable(Configurable.Key.ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT)
+    private static double ITERATIVE_DEEPENING_TIME_LIMIT = 0.9;
 
     private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
     private static final SearchStage[] searchStages = SearchStage.values();
@@ -122,7 +124,7 @@ public final class Engine {
             if (value > VAL_MATE_THRESHOLD) {
                 break;
             }
-            if ((System.currentTimeMillis() - searchStartTime) > (searchEndTime - searchStartTime) * 0.9) {
+            if ((System.currentTimeMillis() - searchStartTime) > (searchEndTime - searchStartTime) * ITERATIVE_DEEPENING_TIME_LIMIT) {
                 break;
             }
         }

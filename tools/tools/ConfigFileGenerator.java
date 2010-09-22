@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,13 +29,13 @@ public class ConfigFileGenerator {
                 final int end = value.indexOf(']', start + 1);
                 final String entryStr = value.substring(start + 1, end);
                 final String[] parts = entryStr.split(",");
-                final int min = Integer.parseInt(parts[0].trim());
-                final int max = Integer.parseInt(parts[1].trim());
-                final int inc;
+                final BigDecimal min = new BigDecimal(parts[0].trim());
+                final BigDecimal max = new BigDecimal(parts[1].trim());
+                final BigDecimal inc;
                 if (parts.length > 2) {
-                    inc = Integer.parseInt(parts[2].trim());
+                    inc = new BigDecimal(parts[2].trim());
                 } else {
-                    inc = 1;
+                    inc = new BigDecimal(1);
                 }
                 List<TemplateEntry> list = entries.get(name);
                 if (list == null) {
@@ -60,7 +61,7 @@ public class ConfigFileGenerator {
                     final ListIterator<TemplateEntry> iter = list.listIterator(list.size());
                     while (iter.hasPrevious()) {
                         final TemplateEntry entry = iter.previous();
-                        builder.replace(entry.getStartPos(), entry.getEndPos() + 1, String.valueOf(entry.getCounter()));
+                        builder.replace(entry.getStartPos(), entry.getEndPos() + 1, entry.getCounter().toPlainString());
                     }
                     value = builder.toString();
                 }
@@ -87,14 +88,15 @@ public class ConfigFileGenerator {
     }
 
     private static class TemplateEntry {
-        private final int min;
-        private final int max;
-        private final int inc;
+        private final BigDecimal min;
+        private final BigDecimal max;
+        private final BigDecimal inc;
         private final int startPos;
         private final int endPos;
-        private int counter;
+        private BigDecimal counter;
 
-        private TemplateEntry(final int min, final int max, final int inc, final int startPos, final int endPos) {
+        private TemplateEntry(final BigDecimal min, final BigDecimal max, final BigDecimal inc,
+                              final int startPos, final int endPos) {
             this.min = min;
             this.max = max;
             this.inc = inc;
@@ -111,7 +113,7 @@ public class ConfigFileGenerator {
             return endPos;
         }
 
-        public int getCounter() {
+        public BigDecimal getCounter() {
             return counter;
         }
 
@@ -120,11 +122,8 @@ public class ConfigFileGenerator {
         }
 
         public boolean incCounter() {
-            final boolean success = counter <= max - inc;
-            if (success) {
-                counter += inc;
-            }
-            return success;
+            counter = counter.add(inc);
+            return counter.compareTo(max) <= 0;
         }
     }
 }

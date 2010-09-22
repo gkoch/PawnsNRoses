@@ -100,6 +100,8 @@ public final class Configuration {
                 field.setBoolean(null, Boolean.parseBoolean(value));
             } else if (long.class.equals(type)) {
                 field.setLong(null, Long.parseLong(value));
+            } else if (double.class.equals(type)) {
+                field.setDouble(null, Double.parseDouble(value));
             } else if (String.class.equals(type)) {
                 field.set(null, value);
             } else if (File.class.equals(type)) {

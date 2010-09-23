@@ -6,10 +6,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 public class ConfigFileGenerator {
 
@@ -47,10 +50,37 @@ public class ConfigFileGenerator {
             }
         }
 
-        boolean hasNext = true;
-        int templateCount = 0;
+        Map<String, TemplateEntry> fileNameEntries = new HashMap<String, TemplateEntry>();
+        for (String name: template.stringPropertyNames()) {
+            final List<TemplateEntry> templateEntries = entries.get(name);
+            if (templateEntries.size() > 1) {
+                fileNameEntries.clear();
+                break;
+            }
+            if (templateEntries.size() == 1) {
+                fileNameEntries.put(name, templateEntries.get(0));
+            }
+        }
+        final TemplateIdGenerator idGenerator;
+        if (fileNameEntries.size() > 1) {
+            final Set<String> names = fileNameEntries.keySet();
+            final int prefixLen = getCommonLen(names, true);
+            final int suffixLen = getCommonLen(names, false);
+            if (prefixLen + suffixLen > 0) {
+                idGenerator = new MultiEntryIdGenerator(fileNameEntries, prefixLen, suffixLen);
+            } else {
+                idGenerator = new IncrementalIdGenerator();
+            }
+        } else if (fileNameEntries.size() == 1) {
+            idGenerator = new SingleEntryIdGenerator(fileNameEntries.values().iterator().next());
+        } else {
+            idGenerator = new IncrementalIdGenerator();
+        }
+
         final File targetDir = new File(configRootDir, templateName);
         targetDir.mkdirs();
+        boolean hasNext = true;
+        int templateCount = 0;
         while (hasNext) {
             final Properties config = new Properties();
             for (String name: template.stringPropertyNames()) {
@@ -67,11 +97,47 @@ public class ConfigFileGenerator {
                 }
                 config.setProperty(name, value);
             }
-            config.store(new FileWriter(new File(targetDir, templateName + "-" + templateCount + ".ini")),
+            config.store(
+                new FileWriter(new File(targetDir, String.format("%s-%s.ini", templateName, idGenerator.getId()))),
                 "Config #" + templateCount);
             templateCount++;
             hasNext = increment(entries);
         }
+    }
+
+    private static int getCommonLen(final Set<String> names, final boolean prefixMatch) {
+        int len = 0;
+        int dotPos = 0;
+        for (boolean match = true; match; ) {
+            char ch = (char) -1;
+            for (String name: names) {
+                if (name.length() <= len) {
+                    match = false;
+                    break;
+                }
+                final int pos;
+                if (prefixMatch) {
+                    pos = len;
+                } else {
+                    pos = name.length() - 1 - len;
+                }
+                if (ch == (char) -1) {
+                    ch = name.charAt(pos);
+                } else {
+                    if (name.charAt(pos) != ch) {
+                        match = false;
+                        break;
+                    }
+                }
+            }
+            if (match) {
+                len++;
+                if (ch == '.') {
+                    dotPos = len;
+                }
+            }
+        }
+        return dotPos;
     }
 
     private static boolean increment(final LinkedHashMap<String, List<TemplateEntry>> entries) {
@@ -85,6 +151,58 @@ public class ConfigFileGenerator {
             }
         }
         return false;
+    }
+
+    private static interface TemplateIdGenerator {
+        public String getId();
+    }
+
+    private static class IncrementalIdGenerator implements TemplateIdGenerator {
+        private int counter = 0;
+        @Override
+        public String getId() {
+            return String.valueOf(counter++);
+        }
+    }
+
+    private static class SingleEntryIdGenerator implements TemplateIdGenerator {
+        private final TemplateEntry entry;
+
+        public SingleEntryIdGenerator(final TemplateEntry entry) {
+            this.entry = entry;
+        }
+
+        @Override
+        public String getId() {
+            return entry.getCounter().toPlainString();
+        }
+    }
+
+    private static class MultiEntryIdGenerator implements TemplateIdGenerator {
+        private final Map<String, TemplateEntry> entries;
+        private final int prefixLen;
+        private final int suffixLen;
+
+        public MultiEntryIdGenerator(final Map<String, TemplateEntry> entries, final int prefixLen, final int suffixLen) {
+            this.entries = entries;
+            this.prefixLen = prefixLen;
+            this.suffixLen = suffixLen;
+        }
+
+        @Override
+        public String getId() {
+            final StringBuilder builder = new StringBuilder();
+            for (Map.Entry<String, TemplateEntry> entry: entries.entrySet()) {
+                if (builder.length() > 0) {
+                    builder.append("-");
+                }
+                final String name = entry.getKey();
+                builder.append(name.substring(prefixLen, name.length() - suffixLen));
+                builder.append("@");
+                builder.append(entry.getValue().getCounter().toPlainString());
+            }
+            return builder.toString();
+        }
     }
 
     private static class TemplateEntry {

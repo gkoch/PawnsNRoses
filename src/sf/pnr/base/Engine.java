@@ -129,6 +129,8 @@ public final class Engine {
             }
         }
         assert getMoveFromSearchResult(searchResult) != 0 || getValueFromSearchResult(searchResult) == 0;
+        assert (Utils.getMoveFromIndex(getMoveFromSearchResult(searchResult)) & 0x88) == 0;
+        assert (Utils.getMoveToIndex(getMoveFromSearchResult(searchResult)) & 0x88) == 0;
         return searchResult;
     }
 
@@ -318,6 +320,10 @@ public final class Engine {
         if (bestMove != 0) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
         }
+        assert (Utils.getMoveFromIndex(bestMove) & 0x88) == 0;
+        assert (Utils.getMoveToIndex(bestMove) & 0x88) == 0;
+        assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0;
+        assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0;
         return getSearchResult(bestMove > 0? bestMove: ttMove, alpha);
     }
 
@@ -573,6 +579,10 @@ public final class Engine {
         if (bestMove != 0) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
         }
+        assert (Utils.getMoveFromIndex(bestMove) & 0x88) == 0;
+        assert (Utils.getMoveToIndex(bestMove) & 0x88) == 0;
+        assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0;
+        assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0;
         return alpha;
     }
 

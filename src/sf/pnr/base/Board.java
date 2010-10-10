@@ -142,7 +142,8 @@ public final class Board {
         assert piece != EMPTY: "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
 		final int moveType = (moveBase & MOVE_TYPE);
         final int signum = Integer.signum(piece);
-        assert (((state & WHITE_TO_MOVE) << 1) - 1) == signum;
+        assert (((state & WHITE_TO_MOVE) << 1) - 1) == signum:
+            "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
         final int absPiece = signum * piece;
         final int toIndex = getMoveToIndex(moveBase);
         assert fromIndex != toIndex;

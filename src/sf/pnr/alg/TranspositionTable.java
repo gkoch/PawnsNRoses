@@ -2,6 +2,7 @@ package sf.pnr.alg;
 
 import sf.pnr.base.Configurable;
 import sf.pnr.base.Configuration;
+import sf.pnr.base.Utils;
 
 import java.util.Arrays;
 
@@ -73,6 +74,9 @@ public final class TranspositionTable {
 
     public void set(final long zobrist, final long type, final int move, final int depth, final int value,
                     final int age) {
+        assert (Utils.getMoveFromIndex(move) & 0x88) == 0;
+        assert (Utils.getMoveToIndex(move) & 0x88) == 0;
+        assert move != 0;
         final int hashed = hash(zobrist);
         final int startIndex = hashed << 1;
         final long[] array = getArraySegment(zobrist);

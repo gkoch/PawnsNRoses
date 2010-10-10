@@ -103,8 +103,6 @@ public final class Engine {
                 result = negascoutRoot(board, depth << SHIFT_PLY, beta, INITIAL_BETA, 0);
                 value = getValueFromSearchResult(result);
             }
-            assert cancelled || value == 0 || getMoveFromSearchResult(result) != 0:
-                "FEN: " + StringUtils.toFen(board) + ", score: " + value + ", depth: " + depth;
             if (cancelled) {
                 final int move = getMoveFromSearchResult(result);
                 if (move != 0) {
@@ -112,10 +110,12 @@ public final class Engine {
                 }
                 break;
             }
+            assert value == 0 || getMoveFromSearchResult(result) != 0 || value < -VAL_MATE_THRESHOLD:
+                "FEN: " + StringUtils.toFen(board) + ", score: " + value + ", depth: " + depth;
             searchResult = result;
             if (listener != null) {
                 final int bestMove = getMoveFromSearchResult(result);
-                assert bestMove != 0;
+                assert bestMove != 0: StringUtils.toFen(board) + " / depth: " + depth + " / value: " + getValueFromSearchResult(result);
                 if (bestMove != 0) {
                     listener.bestMoveChanged(depth, bestMove, value, System.currentTimeMillis() - searchStartTime,
                         getBestLine(board, bestMove), nodeCount);
@@ -129,8 +129,6 @@ public final class Engine {
             }
         }
         assert getMoveFromSearchResult(searchResult) != 0 || getValueFromSearchResult(searchResult) == 0;
-        assert (Utils.getMoveFromIndex(getMoveFromSearchResult(searchResult)) & 0x88) == 0;
-        assert (Utils.getMoveToIndex(getMoveFromSearchResult(searchResult)) & 0x88) == 0;
         return searchResult;
     }
 
@@ -171,7 +169,8 @@ public final class Engine {
 
         moveGenerator.pushFrame();
         int b = beta;
-        int bestMove = 0;
+        final int origAlpha = alpha;
+        int bestMove = ttMove;
         int legalMoveCount = 0;
         int quietMoveCount = 0;
         for (SearchStage searchStage: searchStages) {
@@ -224,7 +223,7 @@ public final class Engine {
                         if (cancelled) {
                             moveGenerator.popFrame();
                             board.takeBack(undo);
-                            return alpha;
+                            return bestMove > 0 && (depth <= PLY || legalMoveCount > 5)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                         }
                         if (qscore < b) {
                             board.takeBack(undo);
@@ -241,7 +240,7 @@ public final class Engine {
                         if (cancelled) {
                             board.takeBack(undo);
                             moveGenerator.popFrame();
-                            return depth <= PLY || legalMoveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
+                            return bestMove > 0 && (depth <= PLY || legalMoveCount > 5)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                         }
                     }
                 }
@@ -252,7 +251,7 @@ public final class Engine {
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return depth <= PLY || legalMoveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
+                        return bestMove > 0 && (depth <= PLY || legalMoveCount > 5)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                     }
 
                     // the other player has a better option, beta cut off
@@ -274,7 +273,7 @@ public final class Engine {
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return depth <= PLY || legalMoveCount > 5? getSearchResult(bestMove, alpha): getSearchResult(0, alpha);
+                        return bestMove > 0 && (depth <= PLY || legalMoveCount > 5)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                     }
                     if (a >= beta) {
                         board.takeBack(undo);
@@ -300,6 +299,9 @@ public final class Engine {
                         break;
                     }
                 } else {
+                    if (bestMove == 0) {
+                        bestMove = move;
+                    }
                     quietMoveCount++;
                 }
 
@@ -312,19 +314,15 @@ public final class Engine {
         moveGenerator.popFrame();
         if (legalMoveCount == 0) {
             if (inCheck) {
-                return ((long) -Evaluation.VAL_MATE) & 0xFFFFFFFFL;
+                return getSearchResult(0, -Evaluation.VAL_MATE);
             } else {
-                return 0;
+                return getSearchResult(0, 0);
             }
         }
-        if (bestMove != 0) {
+        if (bestMove != 0 && alpha > origAlpha) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
         }
-        assert (Utils.getMoveFromIndex(bestMove) & 0x88) == 0;
-        assert (Utils.getMoveToIndex(bestMove) & 0x88) == 0;
-        assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0;
-        assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0;
-        return getSearchResult(bestMove > 0? bestMove: ttMove, alpha);
+        return bestMove > 0? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
     }
 
     public int negascout(final Board board, final int depth, int alpha, int beta, final boolean quiescence,
@@ -385,7 +383,7 @@ public final class Engine {
             }
             if (value >= beta) {
                 board.nullMove(prevState);
-                transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, 0, depth >> SHIFT_PLY, value - VAL_MIN, age);
+//                transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, 0, depth >> SHIFT_PLY, value - VAL_MIN, age);
                 return beta;
             }
             // TODO: mate threat detection
@@ -394,10 +392,14 @@ public final class Engine {
         }
 
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
+        assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+        assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
         if (depth > 3 * PLY && ttMove == 0) {
             // internal iterative deepening
             final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, searchedPly);
             ttMove = getMoveFromSearchResult(searchResult);
+            assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+            assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
         }
 
         // futility pruning
@@ -579,10 +581,10 @@ public final class Engine {
         if (bestMove != 0) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
         }
-        assert (Utils.getMoveFromIndex(bestMove) & 0x88) == 0;
-        assert (Utils.getMoveToIndex(bestMove) & 0x88) == 0;
-        assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0;
-        assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0;
+        assert (Utils.getMoveFromIndex(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
+        assert (Utils.getMoveToIndex(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
+        assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+        assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
         return alpha;
     }
 
@@ -738,9 +740,11 @@ public final class Engine {
     }
 
     private void addMoveToKillers(final int searchedPly, final SearchStage searchStage, final int move) {
-        if (searchStage == SearchStage.NORMAL) {
+        if (searchStage == SearchStage.NORMAL && (move & MOVE_TYPE) == MT_NORMAL) {
             final int fromTo = move & FROM_TO;
             if (killerMoves[searchedPly][0] != fromTo) {
+                assert (Utils.getMoveFromIndex(fromTo) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
+                assert (Utils.getMoveToIndex(fromTo) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
                 killerMoves[searchedPly][1] = killerMoves[searchedPly][0];
                 killerMoves[searchedPly][0] = fromTo;
             }
@@ -779,7 +783,7 @@ public final class Engine {
                     if (board.isCheckingMove(ttMove)) {
                         moves[1] = ttMove | CHECKING;
                     } else {
-                        moves[1] = ttMove;
+                        moves[1] = ttMove & ~CHECKING;
                     }
                 } else {
                     moves = NO_MOVE_ARRAY;
@@ -798,7 +802,11 @@ public final class Engine {
                 int killerCount = 0;
                 for (int move: killerMoves[searchedPly]) {
                     if (isValidKillerMove(board, getMoveFromIndex(move), getMoveToIndex(move))) {
-                        moves[++killerCount] = move | (board.isCheckingMove(move)? CHECKING: 0);
+                        if (board.isCheckingMove(move)) {
+                            moves[++killerCount] = move | CHECKING;
+                        } else {
+                            moves[++killerCount] = move & ~CHECKING;
+                        }
                     }
                 }
                 moves[0] = killerCount;
@@ -869,6 +877,7 @@ public final class Engine {
                 }
                 moves[i] = move | checkingBit |
                     ((historyValue + checkBonus + valPositional + pawnBonus) << SHIFT_MOVE_VALUE);
+                assert (moves[i] & (1 << 31)) == 0: Integer.toHexString(moves[i]); 
             } else {
                 moves[i] = moves[moves[0]];
                 moves[0]--;
@@ -983,10 +992,15 @@ public final class Engine {
     }
 
     public static int getMoveFromSearchResult(final long result) {
-        return (int) (result >>> 32);
+        final int move = (int) (result >> 32);
+        assert (Utils.getMoveFromIndex(move) & 0x88) == 0: Long.toHexString(result) + "/" + StringUtils.toSimple(move);
+        assert (Utils.getMoveToIndex(move) & 0x88) == 0: Long.toHexString(result) + "/" + StringUtils.toSimple(move);
+        return move;
     }
 
     public static long getSearchResult(final int move, final int value) {
+        assert (Utils.getMoveFromIndex(move) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
+        assert (Utils.getMoveToIndex(move) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
         return (((long) (move & BASE_INFO)) << 32) | (((long) value) & 0xFFFFFFFFL);
     }
 
@@ -1010,7 +1024,7 @@ public final class Engine {
             final int fromRank = getRank(fromIndex);
             final int toRank = getRank(toIndex);
             return toRank != 0 && toRank != 7 && (toIndex == squareInFront ||
-                (board[squareInFront] == EMPTY && toIndex == squareInFront + signum * UP && (fromRank == 1 || fromRank == 7)));
+                (board[squareInFront] == EMPTY && toIndex == squareInFront + signum * UP && (fromRank == 1 || fromRank == 6)));
         } else {
             return boardObj.isAttackedByNonSliding(toIndex, ATTACK_BITS[absPiece], fromIndex);
         }

@@ -328,6 +328,10 @@ public final class Engine {
     public int negascout(final Board board, final int depth, int alpha, int beta, final boolean quiescence,
                          final boolean allowNull, final int searchedPly) {
         nodeCount++;
+        if (board.getRepetitionCount() == 3 || Evaluation.drawByInsufficientMaterial(board)) {
+            // three-fold repetition
+            return VAL_DRAW;
+        }
         if (depth < PLY) {
             final int eval;
             if (!quiescence) {
@@ -336,10 +340,6 @@ public final class Engine {
                 eval = quiescence(board, alpha, beta);
             }
             return eval;
-        }
-        if (board.getRepetitionCount() == 3 || Evaluation.drawByInsufficientMaterial(board)) {
-            // three-fold repetition
-            return VAL_DRAW;
         }
 
         // check the time

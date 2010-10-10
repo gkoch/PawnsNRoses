@@ -1,17 +1,32 @@
 package sf.pnr.base;
 
+import sf.pnr.io.PrefixOutputStream;
+import sf.pnr.io.TeeInputStream;
 import sf.pnr.io.TeeOutputStream;
 import sf.pnr.io.UciProcess;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class UciRunner {
+
+    private static final ScheduledExecutorService THREAD_POOL = Executors.newScheduledThreadPool(2);
+
     private final String name;
     private final Map<String, String> uciOptions;
     private final Map<String, String> postSearchOptions;
@@ -23,7 +38,9 @@ public class UciRunner {
     private int score;
     private String bestMove;
     private long moveTime;
-    private boolean debug = false;
+    private String bestMoveLine;
+    private OutputStream debugOs;
+    private String prefix;
 
     public UciRunner(final String name, final Map<String, String> uciOptions, final UciProcess process) throws IOException {
         this(name, uciOptions, null, process);
@@ -35,19 +52,54 @@ public class UciRunner {
         this.uciOptions = uciOptions;
         this.postSearchOptions = postSearchOptions;
         this.process = process;
-        final OutputStream os;
-        if (debug) {
-            os = new TeeOutputStream(this.process.getOutputStream(), System.out);
-        } else {
-            os = this.process.getOutputStream();
+        reader = null;
+        writer = null;
+    }
+
+    public void setDebugOutputStream(final OutputStream debugOs, final String prefix) {
+        this.debugOs = debugOs;
+        this.prefix = prefix;
+    }
+
+    public OutputStream getDebugOutputStream() {
+        return debugOs;
+    }
+
+    private void initializeProcess() throws IOException {
+        if (reader == null) {
+            final OutputStream os;
+            final InputStream is;
+            if (debugOs != null) {
+                final String outPrefix;
+                final String inPrefix;
+                if (prefix != null) {
+                    outPrefix = prefix + ">>> ";
+                    inPrefix = prefix + "<<< ";
+                } else {
+                    outPrefix = ">>> ";
+                    inPrefix = "<<< ";
+                }
+                os = new TeeOutputStream(process.getOutputStream(), new PrefixOutputStream(debugOs, '\n', outPrefix));
+                is = new TeeInputStream(process.getInputStream(), new PrefixOutputStream(debugOs, '\n', inPrefix));
+            } else {
+                os = process.getOutputStream();
+                is = process.getInputStream();
+            }
+            writer = new BufferedWriter(new OutputStreamWriter(os));
+            reader = new BufferedReader(new InputStreamReader(is));
+            emptyInputStream(is);
+            sendCommand("uci");
+            if (!waitResponse("uciok")) {
+                throw new IllegalStateException(String.format("%s is not a UCI engine", name));
+            }
+            ensureReady();
         }
-        writer = new BufferedWriter(new OutputStreamWriter(os));
-        reader = new BufferedReader(new InputStreamReader(this.process.getInputStream()));
-        sendCommand("uci");
-        if (!waitResponse("uciok")) {
-            throw new IllegalStateException(String.format("%s is not a UCI engine", name));
+    }
+
+    private void emptyInputStream(final InputStream is) throws IOException {
+        while (is.available() > 0) {
+            is.read();
         }
-        ensureReady();
     }
 
     public String getName() {
@@ -61,6 +113,7 @@ public class UciRunner {
     }
 
     public void position(final Board board) throws IOException {
+        initializeProcess();
         final String fen = StringUtils.toFen(board);
         sendCommand("position fen " + fen);
         ensureReady();
@@ -80,20 +133,26 @@ public class UciRunner {
             command.append(" movetime ");
             command.append(time);
         }
-        go(command.toString());
+        go(command.toString(), -1);
     }
 
-    public void go(final int wtime, final int btime, final int winc, final int binc) throws IOException {
+    public void go(final int wtime, final int btime, final int winc, final int binc, final int timeout) throws IOException {
         final StringBuilder command = new StringBuilder();
         command.append("go");
         command.append(" wtime ").append(wtime);
         command.append(" btime ").append(btime);
         command.append(" winc ").append(winc);
         command.append(" binc ").append(binc);
-        go(command.toString());
+        go(command.toString(), timeout);
     }
 
-    private void go(final String command) throws IOException {
+    private void go(final String command, final int timeout) throws IOException {
+        final ScheduledFuture<Boolean> future;
+        if (timeout > 0) {
+            future = THREAD_POOL.schedule(new TimeBomb(process), timeout, TimeUnit.MILLISECONDS);
+        } else {
+            future = null;
+        }
         sendCommand(command);
         final long startTime = System.currentTimeMillis();
         waitBestMove();
@@ -101,7 +160,13 @@ public class UciRunner {
         moveTime = endTime - startTime;
         ensureReady();
         setOptions(postSearchOptions);
+        if (future != null) {
+            if (!future.cancel(false)) {
+                throw new IOException("Timeout!");
+            }
+        }
     }
+
 
     private void setOptions(final Map<String, String> options) throws IOException {
         if (options != null) {
@@ -128,11 +193,18 @@ public class UciRunner {
         return bestMove;
     }
 
+    public String getBestMoveLine() {
+        return bestMoveLine;
+    }
+
     public long getMoveTime() {
         return moveTime;
     }
 
     private void waitBestMove() throws IOException {
+        initializeProcess();
+        bestMove = "";
+        bestMoveLine = "";
         depth = 0;
         String line = reader.readLine();
         for (; line != null && !line.startsWith("bestmove "); line = reader.readLine()) {
@@ -140,9 +212,6 @@ public class UciRunner {
                 continue;
             }
             if (line.startsWith("info")) {
-                if (debug) {
-                    System.out.println(line);
-                }
                 final String[] parts = line.split(" ");
                 boolean resetFields = true;
                 for (int i = 0; i < parts.length; i++) {
@@ -169,9 +238,7 @@ public class UciRunner {
             }
         }
         if (line != null && line.startsWith("bestmove ")) {
-            if (debug) {
-                System.out.println(line);
-            }
+            bestMoveLine = line;
             bestMove = line.substring("bestmove ".length()).split(" ")[0].trim();
         }
     }
@@ -183,15 +250,13 @@ public class UciRunner {
     }
 
     public void close() throws IOException {
-        try {
-            writer.close();
-            reader.close();
-        } finally {
-            process.destroy();
-        }
+        process.destroy();
+        writer.close();
+        reader.close();
     }
 
     private void sendCommand(final String command) throws IOException {
+        initializeProcess();
         writer.write(command);
         writer.newLine();
         writer.flush();
@@ -203,16 +268,36 @@ public class UciRunner {
     }
 
     private boolean waitResponse(final String expected) throws IOException {
+        initializeProcess();
         String line = reader.readLine();
         while (line != null && !expected.equals(line)) {
-            if (debug) {
-                System.out.println(line);
-            }
             line = reader.readLine();
         }
-        if (line != null && debug) {
-            System.out.println(line);
-        }
         return line != null;
+    }
+
+    public void restart() throws IOException {
+        process.restart();
+        reader = null;
+        writer = null;
+        initializeProcess();
+    }
+
+    private static class TimeBomb implements Callable<Boolean> {
+        private final UciProcess process;
+
+        public TimeBomb(final UciProcess process) {
+            this.process = process;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            try {
+                process.destroy();
+            } catch (IOException e) {
+                throw new UndeclaredThrowableException(e);
+            }
+            return Boolean.TRUE;
+        }
     }
 }

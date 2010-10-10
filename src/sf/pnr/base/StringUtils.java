@@ -8,6 +8,8 @@ public class StringUtils {
     // helpers
     public static final char[] FILE = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
     public static final char[] FEN_CHARS = new char[6 * 2];
+    public static final int[] CODE_TO_TYPE = new int[20];
+    public static final int[] CODE_TO_PROMOTION_TYPE = new int[20];
 
     static {
 		FEN_CHARS[(KING * 2) - 2] = 'K';
@@ -22,6 +24,17 @@ public class StringUtils {
 		FEN_CHARS[(KNIGHT * 2) - 1] = 'n';
 		FEN_CHARS[(PAWN * 2) - 2] = 'P';
 		FEN_CHARS[(PAWN * 2) - 1] = 'p';
+
+        CODE_TO_TYPE['B' - 'A'] = BISHOP;
+        CODE_TO_TYPE['K' - 'A'] = KING;
+        CODE_TO_TYPE['N' - 'A'] = KNIGHT;
+        CODE_TO_TYPE['Q' - 'A'] = QUEEN;
+        CODE_TO_TYPE['R' - 'A'] = ROOK;
+
+        CODE_TO_PROMOTION_TYPE['B' - 'A'] = MT_PROMOTION_BISHOP;
+        CODE_TO_PROMOTION_TYPE['N' - 'A'] = MT_PROMOTION_KNIGHT;
+        CODE_TO_PROMOTION_TYPE['Q' - 'A'] = MT_PROMOTION_QUEEN;
+        CODE_TO_PROMOTION_TYPE['R' - 'A'] = MT_PROMOTION_ROOK;
     }
 
     public static String toFen(final Board board) {
@@ -393,7 +406,7 @@ public class StringUtils {
             final int toIndex = getMoveToIndex(move);
             final int[] board = boardObj.getBoard();
             final int piece = board[fromIndex];
-            assert piece != EMPTY;
+            assert piece != EMPTY: StringUtils.toFen(boardObj) + "/" + StringUtils.toSimple(move);
             final int absPiece = Integer.signum(piece) * piece;
             if (absPiece != PAWN) {
                 builder.append(FEN_CHARS[absPiece * 2 - 2]);
@@ -485,6 +498,122 @@ public class StringUtils {
         return builder.toString();
     }
 
+    public static int fromShort(final Board board, final String moveStr) {
+        final int state = board.getState();
+        if (moveStr.startsWith("0-0-0") || moveStr.startsWith("O-O-O")) {
+            if ((state & WHITE_TO_MOVE) > 0) {
+                return (C[0] << SHIFT_TO) | E[0] | MT_CASTLING_QUEENSIDE;
+            } else {
+                return (C[7] << SHIFT_TO) | E[7] | MT_CASTLING_QUEENSIDE;
+            }
+        } else if (moveStr.startsWith("0-0") || moveStr.startsWith("O-O")) {
+            if ((state & WHITE_TO_MOVE) > 0) {
+                return (G[0] << SHIFT_TO) | E[0] | MT_CASTLING_KINGSIDE;
+            } else {
+                return (G[7] << SHIFT_TO) | E[7] | MT_CASTLING_KINGSIDE;
+            }
+        }
+
+        int fromFile = -1;
+        int fromRank = -1;
+        int toFile = -1;
+        int toRank = -1;
+        int pieceType = PAWN;
+        int moveType = MT_NORMAL;
+        boolean capture = false;
+        for (int i = 0; i < moveStr.length(); i++) {
+            final char ch = moveStr.charAt(i);
+            if (ch >= 'B' && ch <= 'R') {
+                pieceType = CODE_TO_TYPE[ch - 'A'];
+                assert pieceType != 0;
+            } else if (ch >= 'a' && ch <= 'h') {
+                if (toFile >= 0) {
+                    fromFile = toFile;
+                }
+                toFile = ch - 'a';
+            } else if (ch >= '1' && ch <= '8') {
+                if (toRank >= 0) {
+                    fromRank = toRank;
+                }
+                toRank = ch - '1';
+            } else if (ch == 'x') {
+                capture = true;
+            } else if (ch == '=') {
+                final char promotedTo = moveStr.charAt(++i);
+                moveType |= CODE_TO_PROMOTION_TYPE[promotedTo - 'A'];
+            } else if (ch == '+' || ch == '#') {
+                // ignore
+            } else {
+                throw new IllegalStateException(String.format("Unexpected character '%s' in %s", ch, moveStr));
+            }
+        }
+        assert toFile != -1;
+        assert toRank != -1;
+
+        final int toIndex = getIndex(toFile, toRank);
+        final int[] pieces = board.getPieces(state & WHITE_TO_MOVE, pieceType);
+        if (pieceType == PAWN) {
+            final int signum = ((state & WHITE_TO_MOVE) << 1) - 1;
+            final int[] squares = board.getBoard();
+            for (int i = 1; i <= pieces[0]; i++) {
+                final int piecePos = pieces[i];
+                final int pieceFile = getFile(piecePos);
+                final int pieceRank = getRank(piecePos);
+                if (fromFile >= 0 && pieceFile != fromFile) {
+                    continue;
+                }
+                if (fromRank >= 0 && pieceRank != fromRank) {
+                    continue;
+                }
+                final int delta = signum * UP;
+                final int squareInFront = piecePos + delta;
+                if (toIndex == squareInFront ||
+                    (squares[squareInFront] == EMPTY && toIndex == squareInFront + delta && (pieceRank == 1 || pieceRank == 6))) {
+                    fromFile = pieceFile;
+                    fromRank = pieceRank;
+                    break;
+                } else if (toIndex == squareInFront - 1 || toIndex == squareInFront + 1) {
+                    if (squares[toIndex] != EMPTY) {
+                        fromFile = pieceFile;
+                        fromRank = pieceRank;
+                        break;
+                    } else if (((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1 == toFile) {
+                        fromFile = pieceFile;
+                        fromRank = pieceRank;
+                        moveType = MT_EN_PASSANT;
+                        break;
+                    }
+                }
+            }
+        } else {
+            for (int i = 1; i <= pieces[0]; i++) {
+                final int piecePos = pieces[i];
+                final int pieceFile = getFile(piecePos);
+                final int pieceRank = getRank(piecePos);
+                if (fromFile >= 0 && pieceFile != fromFile) {
+                    continue;
+                }
+                if (fromRank >= 0 && pieceRank != fromRank) {
+                    continue;
+                }
+                if (board.isSliding(pieceType)) {
+                    if (board.isAttackedBySliding(toIndex, ATTACK_BITS[pieceType], piecePos)) {
+                        fromFile = pieceFile;
+                        fromRank = pieceRank;
+                        break;
+                    }
+                } else {
+                    if (board.isAttackedByNonSliding(toIndex, ATTACK_BITS[pieceType], piecePos)) {
+                        fromFile = pieceFile;
+                        fromRank = pieceRank;
+                        break;
+                    }
+                }
+            }
+        }
+        return toIndex << SHIFT_TO | getIndex(fromFile, fromRank) | moveType;
+    }
+
     public static String toString0x88(final int pos) {
         final StringBuilder builder = new StringBuilder();
         builder.append((char) ('a' + getFile(pos)));
@@ -507,4 +636,46 @@ public class StringUtils {
         return false;
     }
 
+    public static String createPgnEntry(final String key, final String value) {
+        return String.format("[%s \"%s\"]\r\n", key, value);
+    }
+
+    public static Board fromPgn(final String pgn) {
+        final Board board = new Board();
+        board.restart();
+        boolean inHeader = false;
+        boolean inQuotes = false;
+        final StringBuilder builder = new StringBuilder(5);
+        for (int i = 0; i < pgn.length(); i++) {
+            final char ch = pgn.charAt(i);
+            if (ch == '"') {
+                if (inHeader) {
+                    inQuotes = !inQuotes;
+                } else {
+                    throw new IllegalStateException("Quote outside PGN header: " + pgn);
+                }
+            } else if (inQuotes) {
+                // ignore
+            } else if (ch == ']') {
+                inHeader = false;
+            } else if (inHeader) {
+                // ignore
+            } else if (ch == '[') {
+                inHeader = true;
+            } else if (Character.isWhitespace(ch)) {
+                if (builder.length() > 0) {
+                    board.move(fromShort(board, builder.toString()));
+                    builder.delete(0, builder.length());
+                }
+            } else if (builder.length() == 0 && (Character.isDigit(ch) || ch == '.' || ch == '-' || ch == '/')) {
+                // ignore
+            } else {
+                builder.append(ch);
+            }
+        }
+        if (builder.length() > 0) {
+            board.move(fromShort(board, builder.toString()));
+        }
+        return board;
+    }
 }

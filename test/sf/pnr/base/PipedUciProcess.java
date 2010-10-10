@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.PrintStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -16,42 +17,57 @@ import java.util.concurrent.Future;
 
 public class PipedUciProcess implements UciProcess {
 
-    private final PipedOutputStream fromEngineOut;
-    private final PipedInputStream toEngineIn;
-    private final ExecutorService executor;
+    private PipedOutputStream fromEngineOut;
+    private PipedInputStream toEngineIn;
     private Future<Boolean> future;
 
-    public PipedUciProcess() throws IOException, ExecutionException, InterruptedException {
-        final PipedOutputStream toEngineOut = new PipedOutputStream();
-        toEngineIn = new PipedInputStream(toEngineOut);
-        final PipedInputStream fromEngineIn = new PipedInputStream();
-        fromEngineOut = new PipedOutputStream(fromEngineIn);
-        executor = Executors.newSingleThreadExecutor();
-        future = executor.submit(new UciCallable(fromEngineIn, toEngineOut));
-        executor.shutdown();
+    private void create() throws IOException {
+        if (future == null) {
+            final PipedOutputStream toEngineOut = new PipedOutputStream();
+            toEngineIn = new PipedInputStream(toEngineOut);
+            final PipedInputStream fromEngineIn = new PipedInputStream();
+            fromEngineOut = new PipedOutputStream(fromEngineIn);
+            final ExecutorService executor = Executors.newSingleThreadExecutor();
+            future = executor.submit(new UciCallable(fromEngineIn, toEngineOut));
+            executor.shutdown();
+        }
     }
 
     @Override
-    public OutputStream getOutputStream() {
+    public OutputStream getOutputStream() throws IOException {
+        create();
         return fromEngineOut;
     }
 
     @Override
-    public InputStream getInputStream() {
+    public InputStream getInputStream() throws IOException {
+        create();
         return toEngineIn;
     }
 
     @Override
-    public void destroy() {
-        executor.shutdownNow();
-        try {
-            future.get();
-        } catch (InterruptedException e) {
-            // no need to rethrow it at this point
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            // no need to rethrow it at this point
-            e.printStackTrace();
+    public void restart() throws IOException {
+        destroy();
+        create();
+    }
+
+    @Override
+    public void destroy() throws IOException {
+        if (future != null) {
+            final PrintStream printStream = new PrintStream(getOutputStream());
+            printStream.print("\r\nquit\r\n");
+            printStream.flush();
+            printStream.close();
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                // no need to rethrow it at this point
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                // no need to rethrow it at this point
+                e.printStackTrace();
+            }
+            future = null;
         }
     }
 

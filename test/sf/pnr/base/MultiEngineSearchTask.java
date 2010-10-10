@@ -132,12 +132,12 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     private void printStats() {
         System.out.printf("Statistics after %d tests (elapsed time: %2.1fs):\r\n",
             testCount, ((double) System.currentTimeMillis() - startTime) / 1000);
-        System.out.printf("%40s\t%5s\t%5s\t%9s\t%5s\t%7s\r\n", "Engine name", "%", "ply", "nodes", "msec", "nodes/sec");
+        System.out.printf("%40s\t%6s\t%5s\t%8s\t%6s\t%9s\r\n", "Engine name", "%", "ply", "nodes", "msec", "nodes/sec");
         final Stats[] sorted = new Stats[stats.length];
         System.arraycopy(stats, 0, sorted, 0, stats.length);
         Arrays.sort(sorted, FAILURE_COUNT_COMPARATOR);
         for (Stats stats: sorted) {
-            System.out.printf("%40s\t%5.1f\t%5.1f\t%9.1f\t%3.2f\t%9.1f\r\n", stats.getName(), stats.getPassRate() * 100,
+            System.out.printf("%40s\t%6.2f\t%5.2f\t%8.0f\t%6.1f\t%9.0f\r\n", stats.getName(), stats.getPassRate() * 100,
                 stats.getAvgDepth(), stats.getAvgNodeCount(), stats.getAvgMoveTime(), stats.getNodesPerSec());
         }
     }

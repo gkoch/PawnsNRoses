@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
  */
 public class UCI implements UciProcess {
 
-    private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private static final int CANCEL_THRESHOLD = 50;
     private static final Pattern POSITION_PATTERN = Pattern.compile(
         "(fen [1-8/pnbrqkPNBRQK]+ [wb] [KQkq-]+ [-a-h1-8]+ [0-9]+ [0-9]+|startpos)( moves( [a-h][1-8][a-h][1-8][nbrq]?)+)?");
@@ -37,6 +36,7 @@ public class UCI implements UciProcess {
 
     private enum State {START, UCI_RECEIVED, SEARCHING, SEARCHING_PONDER}
 
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final BufferedReader in;
     private final InputStream inputStream;
     private final PrintStream out;
@@ -173,6 +173,7 @@ public class UCI implements UciProcess {
                 break;
             }
         }
+        threadPool.shutdownNow();
     }
 
     private void processGo(final String paramsStr) throws ExecutionException, InterruptedException {
@@ -237,7 +238,7 @@ public class UCI implements UciProcess {
         if (searchTime != 0) {
             chess.setTime(Math.max(searchTime - CANCEL_THRESHOLD, 10));
         }
-        future = THREAD_POOL.submit(new Callable<String>() {
+        future = threadPool.submit(new Callable<String>() {
             @Override
             public String call() throws Exception {
                 try {
@@ -358,8 +359,14 @@ public class UCI implements UciProcess {
     }
 
     @Override
+    public void restart() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void destroy() {
         try {
+            threadPool.shutdownNow();
             ensureReady();
         } catch (InterruptedException e) {
             e.printStackTrace();

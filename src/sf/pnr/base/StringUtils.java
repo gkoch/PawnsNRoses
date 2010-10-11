@@ -500,14 +500,15 @@ public class StringUtils {
 
     public static int fromShort(final Board board, final String moveStr) {
         final int state = board.getState();
+        final int whiteToMove = state & WHITE_TO_MOVE;
         if (moveStr.startsWith("0-0-0") || moveStr.startsWith("O-O-O")) {
-            if ((state & WHITE_TO_MOVE) > 0) {
+            if (whiteToMove > 0) {
                 return (C[0] << SHIFT_TO) | E[0] | MT_CASTLING_QUEENSIDE;
             } else {
                 return (C[7] << SHIFT_TO) | E[7] | MT_CASTLING_QUEENSIDE;
             }
         } else if (moveStr.startsWith("0-0") || moveStr.startsWith("O-O")) {
-            if ((state & WHITE_TO_MOVE) > 0) {
+            if (whiteToMove > 0) {
                 return (G[0] << SHIFT_TO) | E[0] | MT_CASTLING_KINGSIDE;
             } else {
                 return (G[7] << SHIFT_TO) | E[7] | MT_CASTLING_KINGSIDE;
@@ -551,9 +552,9 @@ public class StringUtils {
         assert toRank != -1;
 
         final int toIndex = getIndex(toFile, toRank);
-        final int[] pieces = board.getPieces(state & WHITE_TO_MOVE, pieceType);
+        final int[] pieces = board.getPieces(whiteToMove, pieceType);
         if (pieceType == PAWN) {
-            final int signum = ((state & WHITE_TO_MOVE) << 1) - 1;
+            final int signum = (whiteToMove << 1) - 1;
             final int[] squares = board.getBoard();
             for (int i = 1; i <= pieces[0]; i++) {
                 final int piecePos = pieces[i];
@@ -577,7 +578,8 @@ public class StringUtils {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         break;
-                    } else if (((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1 == toFile) {
+                    } else if (((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1 == toFile &&
+                            toRank == 3 + whiteToMove * 3) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         moveType = MT_EN_PASSANT;

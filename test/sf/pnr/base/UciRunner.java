@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -116,6 +117,20 @@ public class UciRunner {
         initializeProcess();
         final String fen = StringUtils.toFen(board);
         sendCommand("position fen " + fen);
+        ensureReady();
+    }
+
+    public void position(final List<Integer> moves) throws IOException {
+        initializeProcess();
+        final StringBuilder builder = new StringBuilder();
+        builder.append("position startpos");
+        if (!moves.isEmpty()) {
+            builder.append(" moves");
+            for (int move: moves) {
+                builder.append(' ').append(StringUtils.toLong(move));
+            }
+        }
+        sendCommand(builder.toString());
         ensureReady();
     }
 

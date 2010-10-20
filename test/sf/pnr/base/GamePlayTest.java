@@ -17,9 +17,12 @@ public class GamePlayTest {
         options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE), "128");
         options.put(UCI.toUciOption(Configurable.Key.EVAL_TABLE_SIZE), "8");
         final UciRunner pnrLatest = new UciRunner("Pawns N' Roses Latest", options, new PipedUciProcess());
-        final UciRunner pnrV0029 = new UciRunner("Pawns N' Roses v0.029b", null,
-            new ExternalUciProcess(new String[]{"\"" + engineDir + "/PawnsNRoses/v0.02x/PawnsNRoses v0.029b.bat\""},
-                new File(engineDir + "/PawnsNRoses/v0.02x/")));
+        final UciRunner pnrV0054 = new UciRunner("Pawns N' Roses v0.054", null,
+            new ExternalUciProcess(new String[]{"\"" + engineDir + "/PawnsNRoses/v0.05x/PawnsNRoses v0.054.bat\""},
+                new File(engineDir + "/PawnsNRoses/v0.05x/")));
+        final UciRunner pnrV0055 = new UciRunner("Pawns N' Roses v0.055", null,
+            new ExternalUciProcess(new String[]{"\"" + engineDir + "/PawnsNRoses/v0.05x/PawnsNRoses v0.055.bat\""},
+                new File(engineDir + "/PawnsNRoses/v0.05x/")));
         final UciRunner rybka22 = new UciRunner("Rybka 2.2 - 2 cores", null,
             new ExternalUciProcess(new String[]{"\"" + engineDir + "/Rybka/Rybka v2.2n2.mp.w32.exe\""},
                 new File(engineDir)));
@@ -32,16 +35,20 @@ public class GamePlayTest {
             debugOs = new FileOutputStream(debugFile);
             final UncloseableOutputStream os = new UncloseableOutputStream(debugOs);
             pnrLatest.setDebugOutputStream(os, "pnr ");
-            pnrV0029.setDebugOutputStream(os, "v29 ");
+            pnrV0054.setDebugOutputStream(os, "v54 ");
+            pnrV0055.setDebugOutputStream(os, "v55 ");
             mediocre.setDebugOutputStream(os, "med ");
             rybka22.setDebugOutputStream(os, "ryb ");
         }
-        final GameManager manager = new GameManager(3000, 300, 30);
-        manager.play(pnrLatest, pnrV0029);
+        final GameManager manager = new GameManager(1000, 100, 30);
+        manager.play(pnrLatest, pnrV0055, pnrV0054, rybka22);
         if (debugOs != null) {
             debugOs.close();
         }
         pnrLatest.close();
+        pnrV0054.close();
+        pnrV0055.close();
+        mediocre.close();
         rybka22.close();
     }
 }

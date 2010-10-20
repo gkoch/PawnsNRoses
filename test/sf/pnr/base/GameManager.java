@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 public class GameManager {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy.MM.dd");
@@ -40,6 +44,8 @@ public class GameManager {
                     play(i, index++, tournamentResult, players[second], players[first]);
                 }
             }
+            System.out.printf("[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\r\n%2$s\r\n",
+                System.currentTimeMillis(), tournamentResult.toString());
         }
         return tournamentResult;
     }
@@ -67,7 +73,7 @@ public class GameManager {
             int currentPlayer = 0;
             while (true) {
                 final UciRunner player = players[currentPlayer];
-                player.position(board);
+                player.position(moves);
                 player.go(times[0], times[1], increments, increments, times[currentPlayer] + increments);
                 final long moveTime = player.getMoveTime();
                 times[currentPlayer] += increments - moveTime;
@@ -268,7 +274,7 @@ public class GameManager {
 
     public static class TournamentResult {
         private final Map<UciRunner, Map<UciRunner, GameSeries>> games =
-            new HashMap<UciRunner, Map<UciRunner, GameSeries>>();
+            new LinkedHashMap<UciRunner, Map<UciRunner, GameSeries>>();
 
 
         public void registerResult(final UciRunner white, final UciRunner black, final GameDetails gameDetails) {
@@ -308,6 +314,134 @@ public class GameManager {
             final double opponentsScore = series.getScore(opponent);
             builder.append(String.format("%.1f:%.1f (%s)", playersScore, opponentsScore, series.toStringShort(player)));
             return builder.toString();
+        }
+
+        public String toString() {
+            int maxNameLen = 0;
+            for (UciRunner player: games.keySet()) {
+                final String name = player.getName();
+                if (name.length() > maxNameLen) {
+                    maxNameLen = name.length();
+                }
+            }
+            int maxResultLen = 3;
+            for (Map<UciRunner, GameSeries> results: games.values()) {
+                for (Map.Entry<UciRunner, GameSeries> entry: results.entrySet()) {
+                    final UciRunner opponent = entry.getKey();
+                    final GameSeries series = entry.getValue();
+                    final String result = series.toStringShort(opponent);
+                    if (result.length() > maxResultLen) {
+                        maxResultLen = result.length();
+                    }
+                }
+            }
+
+            final Map<UciRunner, Score> scores = new HashMap<UciRunner, Score>();
+            for (Map.Entry<UciRunner, Map<UciRunner, GameSeries>> entry: games.entrySet()) {
+                final UciRunner player = entry.getKey();
+                double score = 0.0;
+                for (GameSeries series: entry.getValue().values()) {
+                    score += series.getScore(player);
+                }
+                scores.put(player, new Score(player, score));
+            }
+            for (Map.Entry<UciRunner, Map<UciRunner, GameSeries>> entry: games.entrySet()) {
+                final UciRunner player = entry.getKey();
+                double sbScore = 0.0;
+                for (Map.Entry<UciRunner, GameSeries> entry2: entry.getValue().entrySet()) {
+                    final UciRunner opponent = entry2.getKey();
+                    final GameSeries series = entry2.getValue();
+                    sbScore += series.getScore(player) * scores.get(opponent).getScore();
+                }
+                scores.get(player).setSonnebornBerger(sbScore);
+            }
+
+            final Set<Score> ranking = new TreeSet<Score>(new Comparator<Score>() {
+                @Override
+                public int compare(final Score s1, final Score s2) {
+                    int result = Double.compare(s2.getScore(), s1.getScore());
+                    if (result == 0) {
+                        result = Double.compare(s2.getSonnebornBerger(), s1.getSonnebornBerger());
+                    }
+                    if (result == 0) {
+                        result = s1.getPlayer().getName().compareTo(s2.getPlayer().getName());
+                    }
+                    return result;
+                }
+            });
+            ranking.addAll(scores.values());
+
+            final StringBuilder builder = new StringBuilder();
+            appendPadded(builder, "", maxNameLen, true);
+            for (Score score: ranking) {
+                builder.append("  ");
+                final String name = score.getPlayer().getName();
+                if (name.length() > maxResultLen) {
+                    builder.append(name.substring(0, maxResultLen));
+                } else {
+                    appendPadded(builder, name, maxResultLen, false);
+                }
+            }
+            builder.append("\r\n");
+            for (Score score: ranking) {
+                final UciRunner player = score.getPlayer();
+                final String name = player.getName();
+                appendPadded(builder, name, maxNameLen, true);
+                final Map<UciRunner, GameSeries> map = games.get(player);
+                for (Score opponentScore: ranking) {
+                    builder.append("  ");
+                    final UciRunner opponent = opponentScore.getPlayer();
+                    if (opponent == player) {
+                        appendPadded(builder, "...", maxResultLen, false);
+                    } else {
+                        final GameSeries series = map.get(opponent);
+                        appendPadded(builder, series.toStringShort(player), maxResultLen, false);
+                    }
+                }
+                builder.append(String.format("  %.1f  %.2f\r\n", score.getScore(), score.getSonnebornBerger()));
+            }
+            return builder.toString();
+        }
+
+        private void appendPadded(final StringBuilder builder, final String str, final int maxLen, final boolean leftPadded) {
+            if (leftPadded) {
+                for (int i = 0; i < maxLen - str.length(); i++) {
+                    builder.append(' ');
+                }
+            }
+            builder.append(str);
+            if (!leftPadded) {
+                for (int i = 0; i < maxLen - str.length(); i++) {
+                    builder.append(' ');
+                }
+            }
+        }
+    }
+
+    private static class Score {
+        private final UciRunner player;
+        private final double score;
+        private double sonnebornBerger;
+
+        private Score(final UciRunner player, final double score) {
+            this.player = player;
+            this.score = score;
+        }
+
+        public UciRunner getPlayer() {
+            return player;
+        }
+
+        public double getScore() {
+            return score;
+        }
+
+        public double getSonnebornBerger() {
+            return sonnebornBerger;
+        }
+
+        public void setSonnebornBerger(final double sonnebornBerger) {
+            this.sonnebornBerger = sonnebornBerger;
         }
     }
 }

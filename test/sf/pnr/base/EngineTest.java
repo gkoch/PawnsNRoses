@@ -1,6 +1,7 @@
 package sf.pnr.base;
 
 import junit.framework.TestCase;
+import sf.pnr.alg.TranspositionTable;
 
 import static sf.pnr.base.Engine.*;
 import static sf.pnr.base.Evaluation.*;
@@ -468,6 +469,88 @@ public class EngineTest extends TestCase {
         final long result = engine.negascoutRoot(board, searchDepth, INITIAL_ALPHA, INITIAL_BETA, 0);
         final int move = Engine.getMoveFromSearchResult(result);
         assertEquals("Re8+", StringUtils.toShort(board, move));
+    }
+
+    public void testThreefoldRepetition() {
+        final Board board = StringUtils.fromPgn("[Date \"2010.10.13\"]\n" +
+            "[Round \"0\"]\n" +
+            "[Game \"1\"]\n" +
+            "[White \"Pawns N' Roses Latest\"]\n" +
+            "[Black \"Pawns N' Roses v0.054\"]\n" +
+            "[Result \"1/2-1/2\"]\n" +
+            "[Time \"19:26:48\"]\n" +
+            "[PlyCount \"153\"]\n" +
+            "[Termination \"normal\"]\n" +
+            "[RemainingTimeWhite \"00:01.872\"]\n" +
+            "[RemainingTimeBlack \"00:01.842\"]\n" +
+            "\n" +
+            "1. Nf3 Nf6 2. Nc3 d5 3. d3 Nc6 4. e4 d4 5. Na4 e5 6. c3 Bd6 7. cxd4 exd4 8. Qc2 a6 \n" +
+            "9. Be2 Bb4+ 10. Kf1 Qd6 11. a3 Ba5 12. b4 Nxb4 13. axb4 Bxb4 14. e5 Qd8 15. exf6 Qxf6 16. Qxc7 O-O \n" +
+            "17. Qc4 Bc3 18. Nxc3 dxc3 19. d4 Qc6 20. Qxc6 bxc6 21. Ba3 Rd8 22. Rc1 Bg4 23. Rxc3 Bxf3 24. Bxf3 Rxd4 \n" +
+            "25. Rxc6 Rb8 26. Rxa6 Rd2 27. Ke1 Ra2 28. Ra7 Re8+ 29. Re7 Ra1+ 30. Bd1 Rd8 31. Bc1 Rxc1 32. Ke2 Rb1 \n" +
+            "33. Rc7 Re8+ 34. Kd2 Reb8 35. Re1 h6 36. h3 Kf8 37. Ree7 Rd8+ 38. Red7 Rxd7+ 39. Rxd7 Rb2+ 40. Bc2 g5 \n" +
+            "41. Kc3 Rb8 42. Bb3 Ke8 43. Rd6 h5 44. Rh6 Ke7 45. Rxh5 Rg8 46. Rh7 Rf8 47. Kb2 Kf6 48. Kc3 Kg6 \n" +
+            "49. Bc2+ f5 50. Rb7 Kf6 51. Kb2 Ke5 52. Bb3 Kd6 53. Rg7 g4 54. hxg4 fxg4 55. Bf7 Kc7 56. Bb3+ Kb8 \n" +
+            "57. Rg8 Rxg8 58. Bxg8 Kc7 59. Be6 g3 60. fxg3 Kd6 61. Bc4 Kc5 62. Bd3 Kd4 63. g4 Kxd3 64. g5 Ke4 \n" +
+            "65. g6 Ke5 66. g7 Kd6 67. Kb1 Kc7 68. g8=Q Kb7 69. Qf7+ Kb8 70. Qd7 Ka8 71. Qd5+ Ka7 72. Qa5+ Kb7 \n" +
+            "73. Qc5 Kb8 74. Kc2 Kb7 75. Kb1 Kb8 76. Kc2 Kb7");
+        engine.getTranspositionTable().set(board.getZobristKey(), TranspositionTable.TT_TYPE_EXACT,
+            StringUtils.fromShort(board, "Kb1"), 10, 1000, (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
+        assertEquals(0, engine.removeThreefoldRepetition(board, engine.getTranspositionTable().read(board.getZobristKey())));
+    }
+
+    public void testThreefoldRepetition2() {
+        final Board board = StringUtils.fromPgn("[Date \"2010.10.16\"]\n" +
+            "[Round \"22\"]\n" +
+            "[Game \"45\"]\n" +
+            "[White \"Pawns N' Roses Latest\"]\n" +
+            "[Black \"Pawns N' Roses v0.054\"]\n" +
+            "[Result \"1/2-1/2\"]\n" +
+            "[Time \"21:37:50\"]\n" +
+            "[PlyCount \"103\"]\n" +
+            "[Termination \"normal\"]\n" +
+            "[RemainingTimeWhite \"00:02.025\"]\n" +
+            "[RemainingTimeBlack \"00:02.063\"]\n" +
+            "\n" +
+            "1. Nf3 Nf6 2. Nc3 d5 3. e3 Nbd7 4. Bb5 e6 5. d4 Bd6 6. O-O O-O 7. Qe2 Qe7 8. a3 e5 \n" +
+            "9. Ng5 e4 10. Bd2 h6 11. Nh3 a6 12. Ba4 c5 13. Bb3 Qe6 14. Rfd1 cxd4 15. exd4 Nb6 16. Nf4 Qg4 \n" +
+            "17. Qxg4 Bxg4 18. Re1 Nc4 19. Bxc4 dxc4 20. Ncd5 Nxd5 21. Nxd5 Rae8 22. Nb6 Bc7 23. Nxc4 Be6 24. Ne5 Rc8 \n" +
+            "25. Bc3 Bd5 26. h3 Bd6 27. Nd7 Rxc3 28. bxc3 Rc8 29. Nb6 Rxc3 30. Nxd5 Rxc2 31. Rxe4 Kh7 32. Rb1 Rd2 \n" +
+            "33. a4 h5 34. g3 f5 35. Rh4 g5 36. Rxb7+ Kg6 37. Rb6 gxh4 38. Rxd6+ Kf7 39. Rxa6 hxg3 40. fxg3 Rd1+ \n" +
+            "41. Kg2 Rxd4 42. Rf6+ Kg7 43. Rxf5 h4 44. gxh4 Rxa4 45. h5 Rd4 46. Rg5+ Kh6 47. Re5 Rd2+ 48. Kg1 Rd1+ \n" +
+            "49. Kf2 Rd2+ 50. Kg1 Rd1+ 51. Kf2 Rd2+");
+        engine.getTranspositionTable().set(board.getZobristKey(), TranspositionTable.TT_TYPE_EXACT,
+            StringUtils.fromShort(board, "Kg1"), 1, 1000, (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
+        assertEquals(0, engine.removeThreefoldRepetition(board, engine.getTranspositionTable().read(board.getZobristKey())));
+    }
+
+    public void testThreefoldRepetition3() {
+        final Board board = StringUtils.fromPgn("[Date \"2010.10.16\"]\n" +
+            "[Round \"3\"]\n" +
+            "[Game \"8\"]\n" +
+            "[White \"Pawns N' Roses v0.054\"]\n" +
+            "[Black \"Pawns N' Roses Latest\"]\n" +
+            "[Result \"1/2-1/2\"]\n" +
+            "[Time \"22:11:38\"]\n" +
+            "[PlyCount \"172\"]\n" +
+            "[Termination \"normal\"]\n" +
+            "[RemainingTimeWhite \"00:01.904\"]\n" +
+            "[RemainingTimeBlack \"00:01.884\"]\n" +
+            "\n" +
+            "1. Nf3 Nf6 2. Nc3 Nc6 3. e4 e5 4. Bd3 d5 5. O-O Bb4 6. Bb5 d4 7. Ne2 Bd7 8. d3 O-O \n" +
+            "9. Bxc6 Bxc6 10. Nxe5 Be8 11. c3 dxc3 12. Nxc3 Qe7 13. Qb3 Qxe5 14. Qxb4 Bc6 15. d4 Qd6 16. Qxd6 cxd6 \n" +
+            "17. d5 Bd7 18. Bf4 Ne8 19. Be3 Nf6 20. Bf4 Ne8 21. Be3 f5 22. f3 f4 23. Bd2 Nc7 24. a4 b6 \n" +
+            "25. Ne2 Bc8 26. Rac1 Ne8 27. Nxf4 Rf7 28. Be3 Ba6 29. Rf2 Bb7 30. Rc4 Nc7 31. h4 Rc8 32. h5 h6 \n" +
+            "33. g4 Re7 34. Bxb6 axb6 35. Ne2 Rce8 36. Nd4 Rf7 37. Rfc2 Na6 38. b4 Ree7 39. Nf5 Rd7 40. Kg2 Rf8 \n" +
+            "41. Kg1 Ra8 42. Rg2 Rad8 43. Kf1 Kh7 44. Kg1 Rf7 45. Rf2 Nc7 46. Rfc2 Ne8 47. Nd4 Rb8 48. Nf5 Rd8 \n" +
+            "49. b5 Kg8 50. Rf2 Nf6 51. Rg2 Ba8 52. f4 Nxd5 53. exd5 Bxd5 54. Rcc2 Bxg2 55. Kxg2 Ra8 56. Ra2 Kh7 \n" +
+            "57. Kg1 Rfa7 58. Nxd6 Rxa4 59. Rf2 Rd8 60. Nf5 Rb4 61. Ne7 Rxb5 62. Nc6 Rd1+ 63. Rf1 Rd2 64. f5 Rc5 \n" +
+            "65. f6 gxf6 66. Ne7 Rd4 67. Rxf6 Rxg4+ 68. Kf2 Rxh5 69. Rxb6 Rh2+ 70. Kf1 Rh1+ 71. Kf2 Rh2+ 72. Kf1 Ra4 \n" +
+            "73. Kg1 Re2 74. Rb1 Rg4+ 75. Kh1 Rxe7 76. Rb2 Rh4+ 77. Kg1 Re1+ 78. Kg2 Reh1 79. Rb7+ Kg8 80. Rb8+ Kg7 \n" +
+            "81. Rb7+ Kf8 82. Rb8+ Kg7 83. Rb7+ Kf8 84. Rb8+ Kf7 85. Rb7+ Kg8 86. Rb8+");
+        engine.getTranspositionTable().set(board.getZobristKey(), TranspositionTable.TT_TYPE_EXACT,
+            StringUtils.fromShort(board, "Kg7"), 3, 1000, (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
+        assertEquals(0, engine.removeThreefoldRepetition(board, engine.getTranspositionTable().read(board.getZobristKey())));
     }
 
     public void no_testScore() {

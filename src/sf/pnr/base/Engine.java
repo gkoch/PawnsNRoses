@@ -139,7 +139,7 @@ public final class Engine {
         }
         
         final long zobristKey = board.getZobristKey();
-        final long ttValue = transpositionTable.read(zobristKey);
+        final long ttValue = removeThreefoldRepetition(board, transpositionTable.read(zobristKey));
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
         final int ttDepth = (int) (((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH) << SHIFT_PLY);
         if (ttValue != 0 && ttDepth >= depth) {
@@ -218,7 +218,8 @@ public final class Engine {
                 if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && b == alpha + 1) {
                     final int value = -board.getMaterialValue();
                     if (value < beta - VAL_RAZORING_THRESHOLD) {
-                        final int qscore = -quiescence(board, -b, -alpha);
+//                        final int qscore = -quiescence(board, -b, -alpha);
+                        final int qscore = board.getRepetitionCount() < 3? -quiescence(board, -b, -alpha): 0;
 //                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
                         if (cancelled) {
                             moveGenerator.popFrame();
@@ -291,6 +292,7 @@ public final class Engine {
                 if (a > alpha) {
                     bestMove = move;
                     alpha = a;
+                    assert board.getRepetitionCount() < 3 || a == 0;
                     quietMoveCount = 0;
                     transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, move);
@@ -351,7 +353,7 @@ public final class Engine {
         }
 
         final long zobristKey = board.getZobristKey();
-        final long ttValue = transpositionTable.read(zobristKey);
+        final long ttValue = removeThreefoldRepetition(board, transpositionTable.read(zobristKey));
         final int ttDepth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
         if (ttValue != 0 && ttDepth >= (depth >> SHIFT_PLY)) {
             final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
@@ -474,7 +476,8 @@ public final class Engine {
                 if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && b == alpha + 1) {
                     final int value = -board.getMaterialValue();
                     if (value < beta - VAL_RAZORING_THRESHOLD) {
-                        final int qscore = -quiescence(board, -b, -alpha);
+//                        final int qscore = -quiescence(board, -b, -alpha);
+                        final int qscore = board.getRepetitionCount() < 3? -quiescence(board, -b, -alpha): 0;
 //                        final int qscore = -negascout(board, PLY, -b, -alpha, false, false, searchedPly + 1);
                         if (cancelled) {
                             moveGenerator.popFrame();
@@ -588,6 +591,18 @@ public final class Engine {
         return alpha;
     }
 
+    public long removeThreefoldRepetition(final Board board, long ttValue) {
+        int move = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
+        if (move != 0) {
+            final long undo = board.move(move);
+            if (board.getRepetitionCount() >= 3) {
+                ttValue = 0;
+            }
+            board.takeBack(undo);
+        }
+        return ttValue;
+    }
+
     public int quiescence(final Board board, int alpha, int beta) {
         nodeCount++;
 
@@ -615,7 +630,7 @@ public final class Engine {
         }
 
         final long zobristKey = board.getZobristKey();
-        final long ttValue = transpositionTable.read(zobristKey);
+        final long ttValue = removeThreefoldRepetition(board, transpositionTable.read(zobristKey));
         if (ttValue != 0) {
             final long ttType = ttValue & TT_TYPE;
             if (ttType == TT_TYPE_EXACT) {

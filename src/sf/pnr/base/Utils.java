@@ -2,8 +2,6 @@ package sf.pnr.base;
 
 import java.util.Arrays;
 
-import static sf.pnr.base.Evaluation.*;
-
 public class Utils {
 	public static final int FULL_INT = 0xFFFFFFFF;
     public static final int MAX_SEARCH_DEPTH = 150;

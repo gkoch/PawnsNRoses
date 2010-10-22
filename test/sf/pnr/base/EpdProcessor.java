@@ -42,6 +42,14 @@ public class EpdProcessor {
                         continue;
                     }
                     final Board board = StringUtils.fromFen(fen);
+                    final Set<String> problems = StringUtils.checkBoard(board);
+                    if (!problems.isEmpty()) {
+                        System.out.printf("Skipping FEN '%s' because of the following problem(s):\r\n", fen);
+                        for (String problem: problems) {
+                            System.out.println("  - " + problem);
+                        }
+                        continue;
+                    }
                     final Map<String, String> commands = new HashMap<String, String>();
                     if (firstSegments.length >= 6) {
                         commands.put(firstSegments[firstSegments.length - 2], firstSegments[firstSegments.length - 1]);

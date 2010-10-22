@@ -1583,7 +1583,6 @@
 2r1k2r/1p3pp1/p3pn1p/8/1BP2qPP/3B4/PP2Q3/1K1R4 w k - bm Qxe6+; id "Holmes Middlegame Pos. 0592"; c0 "white pieces=10 black pieces=11"; c1 "material balance: -2,5";
 2r1k2r/1pq1bppp/p3bn2/4N3/2pPN3/2P5/P3QPPP/R1B1R1K1 w k - bm Nxf6+; id "Holmes Middlegame Pos. 0593"; c0 "white pieces=13 black pieces=13"; c1 "material balance: 0,0";
 2r1k2r/2pn1pp1/1p3n1p/p3PP2/4q2B/P1P5/2Q1N1PP/R4RK1 w k - bm exf6; id "Holmes Middlegame Pos. 0594"; c0 "white pieces=12 black pieces=12"; c1 "material balance: 0,0";
-2r1k2r/2pn1pp1/1p3n1p/p3PP2/4q2B/P1P5/2Q1N1PP/R4RK1 w q - bm exf6; id "Holmes Middlegame Pos. 0595"; c0 "white pieces=12 black pieces=12"; c1 "material balance: 0,0";
 2r1k2r/3b1pb1/p2ppp2/2q2P2/2p1P2p/P1N2N2/1PP1Q1PP/3R1R1K w k - bm e5; id "Holmes Middlegame Pos. 0596"; c0 "white pieces=13 black pieces=13"; c1 "material balance: 0,0";
 2r1k2r/3nbppp/1q2pn2/pB2N3/Pp2PB2/8/NP3PPP/R1R3K1 w k - bm c1c8; id "Holmes Middlegame Pos. 0597"; c0 "white pieces=13 black pieces=13"; c1 "material balance: -5,5";
 2r1k2r/5ppp/p1pRp3/8/8/4P3/PPP3PP/2KR4 b k - bm h5; id "Holmes Middlegame Pos. 0598"; c0 "white pieces=9 black pieces=9"; c1 "material balance: 0,0";

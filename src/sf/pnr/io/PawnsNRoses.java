@@ -50,6 +50,7 @@ public class PawnsNRoses {
 
     public void restartBoard() {
         board.restart();
+        ensureEngineIsAvailable();
     }
 
     public Board getBoard() {
@@ -58,6 +59,7 @@ public class PawnsNRoses {
 
     public void setBoard(final String fen) {
         board = StringUtils.fromFen(fen);
+        ensureEngineIsAvailable();
     }
 
     public int getDepth() {

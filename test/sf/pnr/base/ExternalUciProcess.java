@@ -14,9 +14,9 @@ public class ExternalUciProcess implements UciProcess {
     private String[] command;
     private File workDir;
 
-    public ExternalUciProcess(final String[] command, final File workDir) throws IOException {
-        this.command = command;
-        this.workDir = workDir;
+    public ExternalUciProcess(final String executable) throws IOException {
+        command = new String[]{"\"" + executable + "\""};
+        workDir = new File(executable).getParentFile();
     }
 
     private void createProcess() throws IOException {

@@ -43,6 +43,10 @@ public class UciRunner {
     private OutputStream debugOs;
     private String prefix;
 
+    public UciRunner(final String name, final UciProcess process) throws IOException {
+        this(name, null, null, process);
+    }
+
     public UciRunner(final String name, final Map<String, String> uciOptions, final UciProcess process) throws IOException {
         this(name, uciOptions, null, process);
     }
@@ -164,7 +168,7 @@ public class UciRunner {
     private void go(final String command, final int timeout) throws IOException {
         final ScheduledFuture<Boolean> future;
         if (timeout > 0) {
-            future = THREAD_POOL.schedule(new TimeBomb(process), timeout, TimeUnit.MILLISECONDS);
+            future = THREAD_POOL.schedule(new TimeBomb(process), timeout + 5000, TimeUnit.MILLISECONDS);
         } else {
             future = null;
         }

@@ -103,6 +103,11 @@ public class MateTest extends TestCase {
             testCount++;
         }
 
+        @Override
+        public void completed() {
+            // no nothing
+        }
+
         private boolean containsString(final String[] strings, final String str) {
             for (String string: strings) {
                 if (str.equals(string)) {

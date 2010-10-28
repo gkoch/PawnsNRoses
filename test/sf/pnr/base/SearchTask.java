@@ -109,6 +109,14 @@ public class SearchTask implements EpdProcessorTask {
         }
     }
 
+    @Override
+    public void completed() {
+        if (testCount % debugPrintInterval != 0) {
+            System.out.printf("Pass ratio after %d tests is %.2f%% with %d nodes processed\r\n", testCount,
+                ((double)(testCount - failureCount) * 100) / testCount, totalNodeCount);
+        }
+    }
+
     protected boolean additionalChecks(final Engine engine, final Board board, final long result,
                                        final Map<String, String> commands) {
         return true;

@@ -73,9 +73,18 @@ public class ConfigurationTest {
         }
         try {
             final int depth = Integer.parseInt(System.getProperty("searchTest.maxDepth", "0"));
-            final int time = Integer.parseInt(System.getProperty("searchTest.maxTime", "500"));
+            final int time = Integer.parseInt(System.getProperty("searchTest.maxTime", "100"));
             final int printInterval = Integer.parseInt(System.getProperty("searchTest.printInterval", "20"));
-            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(runners, depth, time, printInterval));
+            final MultiEngineSearchTask searchTask = new MultiEngineSearchTask(runners, depth, time, printInterval);
+            searchTask.setEliminateInterval(Integer.parseInt(System.getProperty("searchTask.eliminateInterval",
+                Integer.toString(searchTask.getEliminateInterval()))));
+            searchTask.setEliminateCount(Integer.parseInt(System.getProperty("searchTask.eliminateCount",
+                Integer.toString(searchTask.getEliminateCount()))));
+            searchTask.setEliminateMinRemaining(Integer.parseInt(System.getProperty("searchTask.eliminateMinRemaining",
+                Integer.toString(searchTask.getEliminateMinRemaining()))));
+            searchTask.setEliminateMinPercentageDiff(Double.parseDouble(System.getProperty("searchTask.eliminateMinPercentageDiff",
+                Double.toString(searchTask.getEliminateMinPercentageDiff()))));
+            new EpdProcessor().process(testFiles, searchTask);
         } finally {
             for (UciRunner runner : runners) {
                 runner.close();

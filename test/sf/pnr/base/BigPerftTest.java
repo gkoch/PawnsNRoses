@@ -61,6 +61,11 @@ public class BigPerftTest extends TestCase {
             }
         }
 
+        @Override
+         public void completed() {
+            // do nothing
+        }
+
         public List<PerftFailure> getFailures() {
             return failures;
         }

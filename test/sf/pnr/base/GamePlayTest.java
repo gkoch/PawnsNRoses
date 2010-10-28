@@ -21,7 +21,7 @@ public class GamePlayTest {
                 player.setDebugOutputStream(os, player.getName() + " ");
             }
         }
-        final GameManager manager = new GameManager(3000, 300, 30);
+        final GameManager manager = new GameManager(120000, 6000, 30);
         manager.play(players);
         if (debugOs != null) {
             debugOs.close();

@@ -1,0 +1,27 @@
+Statistics after 20200 tests (elapsed time: 452142.5s):
+                             Engine name             		%    ply      nodes          msec  		nodes/sec
+Pawns N' Roses - depthExt-2-check@16-7thRankPawn@12.ini  47.58   6.69     100565         893.2     112590
+Pawns N' Roses - depthExt-2-check@16-7thRankPawn@4.ini   47.27   6.70      98195         893.3     109919
+Pawns N' Roses - depthExt-2-check@24-7thRankPawn@12.ini  47.26   6.24      94712         892.9     106071
+Pawns N' Roses - depthExt-2-check@24-7thRankPawn@8.ini   47.25   6.26      96176         892.0     107824
+Pawns N' Roses - depthExt-2-check@16-7thRankPawn@8.ini   47.21   6.70     101500         893.5     113603
+Pawns N' Roses - depthExt-2-check@20-7thRankPawn@0.ini   47.17   6.56      93245         892.9     104428
+Pawns N' Roses - depthExt-2-check@20-7thRankPawn@12.ini  47.16   6.56      97591         892.7     109316
+Pawns N' Roses - depthExt-2-check@16-7thRankPawn@0.ini   47.15   6.69      99180         893.5     110997
+Pawns N' Roses - depthExt-2-check@20-7thRankPawn@8.ini   47.10   6.60     100117         892.4     112183
+Pawns N' Roses - depthExt-2-check@20-7thRankPawn@4.ini   47.09   6.61      98304         892.1     110196
+Pawns N' Roses - depthExt-2-check@24-7thRankPawn@16.ini  47.00   6.19      96181         893.1     107697
+Pawns N' Roses - depthExt-2-check@24-7thRankPawn@4.ini   47.00   6.30      96035         892.9     107557
+Pawns N' Roses - depthExt-2-check@24-7thRankPawn@0.ini   47.00   6.31      96075         892.7     107623
+Pawns N' Roses - depthExt-2-check@20-7thRankPawn@16.ini  47.00   6.51      98418         892.4     110285
+Pawns N' Roses - depthExt-2-check@16-7thRankPawn@16.ini  46.91   6.60     101945         893.5     114090
+Pawns N' Roses - depthExt-2-check@12-7thRankPawn@8.ini   46.46   6.98      97327         897.6     108426
+Pawns N' Roses - depthExt-2-check@12-7thRankPawn@12.ini  46.34   7.00     103745         896.3     115749
+Pawns N' Roses - depthExt-2-check@12-7thRankPawn@16.ini  46.34   6.98     106944         896.6     119278
+Pawns N' Roses - depthExt-2-check@12-7thRankPawn@4.ini   46.29   7.05     105516         896.3     117726
+Pawns N' Roses - depthExt-2-check@12-7thRankPawn@0.ini   46.17   7.04     101388         896.9     113044
+Pawns N' Roses - depthExt-2-check@8-7thRankPawn@8.ini    45.73   7.05     101016         900.4     112192
+Pawns N' Roses - depthExt-2-check@8-7thRankPawn@12.ini   45.67   7.07     103110         899.9     114575
+Pawns N' Roses - depthExt-2-check@8-7thRankPawn@16.ini   45.66   7.03     106310         899.8     118146
+Pawns N' Roses - depthExt-2-check@8-7thRankPawn@4.ini    45.65   7.10     103021         899.7     114508
+Pawns N' Roses - depthExt-2-check@8-7thRankPawn@0.ini    45.60   7.12     104725         900.1     116349

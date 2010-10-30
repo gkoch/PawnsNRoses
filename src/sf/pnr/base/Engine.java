@@ -215,7 +215,7 @@ public final class Engine {
                 }
 
                 // razoring
-                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && b == alpha + 1) {
+                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && legalMoveCount > 1 && beta < VAL_MATE_THRESHOLD) {
                     final int value = -board.getMaterialValue();
                     if (value < beta - VAL_RAZORING_THRESHOLD) {
 //                        final int qscore = -quiescence(board, -b, -alpha);

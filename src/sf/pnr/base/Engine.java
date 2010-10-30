@@ -19,9 +19,9 @@ public final class Engine {
     private static final int VAL_BLOCKED_CHECK_BONUS = 100;
     private static final int VAL_7TH_RANK_PAWN = 300;
     @Configurable(Configurable.Key.ENGINE_FUTILITY_THRESHOLD)
-    private static int VAL_FUTILITY_THRESHOLD = 400;
+    private static int VAL_FUTILITY_THRESHOLD = 300;
     @Configurable(Configurable.Key.ENGINE_DEEP_FUTILITY_THRESHOLD)
-    private static int VAL_DEEP_FUTILITY_THRESHOLD = 675;
+    private static int VAL_DEEP_FUTILITY_THRESHOLD = 550;
     @Configurable(Configurable.Key.ENGINE_RAZORING_THRESHOLD)
     private static int VAL_RAZORING_THRESHOLD = 400;
     @Configurable(Configurable.Key.ENGINE_LMR_MIN_DEPTH)
@@ -30,9 +30,9 @@ public final class Engine {
     private static int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
 
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_CHECK)
-    private static int DEPTH_EXT_CHECK = PLY / 2;
+    private static int DEPTH_EXT_CHECK = 16;
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_7TH_RANK_PAWN)
-    private static int DEPTH_EXT_7TH_RANK_PAWN = PLY / 4;
+    private static int DEPTH_EXT_7TH_RANK_PAWN = 12;
     @Configurable(Configurable.Key.ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT)
     private static double ITERATIVE_DEEPENING_TIME_LIMIT = 0.9;
 

@@ -20,6 +20,7 @@ public @interface Configurable {
         EVAL_BONUS_DISTANCE_ROOK("evaluation.bonus.distanceRook"),
         EVAL_BONUS_DISTANCE_QUEEN("evaluation.bonus.distanceQueen"),
         ENGINE_DEPTH_EXT_CHECK("engine.depthExt.check"), ENGINE_DEPTH_EXT_7TH_RANK_PAWN("engine.depthExt.7thRankPawn"),
+        ENGINE_DEPTH_EXT_MATE_THREAT("engine.depthExt.mateThreat"),
         ENGINE_FUTILITY_THRESHOLD("engine.futility.threshold"), ENGINE_DEEP_FUTILITY_THRESHOLD("engine.deepFutility.threshold"),
         ENGINE_RAZORING_THRESHOLD("engine.razoring.threshold"),
         ENGINE_LMR_MIN_DEPTH("engine.lmr.minDepth"), ENGINE_LMR_MIN_MOVE("engine.lmr.minMove"),

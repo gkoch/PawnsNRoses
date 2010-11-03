@@ -33,6 +33,8 @@ public final class Engine {
     private static int DEPTH_EXT_CHECK = 16;
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_7TH_RANK_PAWN)
     private static int DEPTH_EXT_7TH_RANK_PAWN = 12;
+    @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_MATE_THREAT)
+    private static int DEPTH_EXT_MATE_THREAT = 16;
     @Configurable(Configurable.Key.ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT)
     private static double ITERATIVE_DEEPENING_TIME_LIMIT = 0.9;
 
@@ -374,9 +376,10 @@ public final class Engine {
         final boolean inCheck = board.attacksKing(1 - toMove);
 
         // null-move pruning
+        int initialDepthExt = 0;
         if (depth > (3 << SHIFT_PLY) && !inCheck && allowNull && beta < VAL_MATE_THRESHOLD &&
                 board.getMinorMajorPieceCount(toMove) > 0) {
-            final int r = (depth > (6 << SHIFT_PLY)? 3: 2) << SHIFT_PLY;
+            final int r = depth > (6 << SHIFT_PLY)? (3 << SHIFT_PLY): (2 << SHIFT_PLY);
             final int prevState = board.nullMove();
             final int value = -negascout(board, depth - r, -beta, -beta + 1, false, false, searchedPly + 1);
             if (cancelled) {
@@ -388,8 +391,10 @@ public final class Engine {
 //                transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, 0, depth >> SHIFT_PLY, value - VAL_MIN, age);
                 return beta;
             }
-            // TODO: mate threat detection
-//            final int value2 = -negascout(board, depth - r, -VAL_MATE / 2, -VAL_MATE, false, false);
+            final int value2 = -negascout(board, depth - r, -VAL_MATE, -VAL_MATE / 2, false, false, searchedPly + 1);
+            if (value2 > VAL_MATE_THRESHOLD) {
+                initialDepthExt += DEPTH_EXT_MATE_THREAT;
+            }
             board.nullMove(prevState);
         }
 
@@ -458,7 +463,7 @@ public final class Engine {
                     break;
                 }
 
-                int depthExt = 0;
+                int depthExt = initialDepthExt;
                 if (opponentInCheck) {
                     depthExt += DEPTH_EXT_CHECK;
                 }

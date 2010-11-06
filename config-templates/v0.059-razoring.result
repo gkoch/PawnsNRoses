@@ -1,0 +1,28 @@
+Statistics after 22300 tests (elapsed time: 225939.9s):
+                        Engine name          %    ply      nodes          msec  nodes/sec       eliminated
+  Pawns N' Roses - razoring-125.ini      47.59   6.86      87773         899.6      97567       alive
+  Pawns N' Roses - razoring-175.ini      47.50   6.80      87214         901.5      96744       alive
+  Pawns N' Roses - razoring-225.ini      47.28   6.72      83988         902.5      93065       alive
+  Pawns N' Roses - razoring-200.ini      47.13   6.78      87469         901.4      97033       alive
+  Pawns N' Roses - razoring-500.ini      47.00   6.52      79318         904.5      87696       alive
+  Pawns N' Roses - razoring-300.ini      46.93   6.66      82933         901.8      91969       alive
+  Pawns N' Roses - razoring-350.ini      46.78   6.60      81081         904.4      89650       alive
+  Pawns N' Roses - razoring-525.ini      46.71   6.52      80618         903.9      89185       alive
+  Pawns N' Roses - razoring-425.ini      46.67   6.57      80875         903.9      89473       alive
+  Pawns N' Roses - razoring-550.ini      46.53   6.49      78189         905.8      86324       alive
+  Pawns N' Roses - razoring-325.ini      49.36   7.15     121731         818.7     148680       @3750
+  Pawns N' Roses - razoring-600.ini      49.77   6.89     109922         814.6     134939       @3500
+  Pawns N' Roses - razoring-275.ini      49.38   7.05     113562         811.9     139876       @3250
+  Pawns N' Roses - razoring-400.ini      48.83   6.86     105894         816.1     129756       @3000
+  Pawns N' Roses - razoring-625.ini      48.58   6.80     107130         819.7     130696       @2750
+  Pawns N' Roses - razoring-475.ini      47.68   6.83     109573         821.1     133448       @2500
+  Pawns N' Roses - razoring-675.ini      47.69   6.73     106226         818.3     129815       @2250
+  Pawns N' Roses - razoring-700.ini      47.05   6.67     102954         819.2     125684       @2000
+  Pawns N' Roses - razoring-100.ini      47.20   6.95     103354         812.4     127222       @1750
+  Pawns N' Roses - razoring-450.ini      46.00   6.73     100325         822.5     121969       @1500
+  Pawns N' Roses - razoring-375.ini      47.36   6.74      97771         810.8     120592       @1250
+  Pawns N' Roses - razoring-575.ini      48.30   6.75     105986         807.8     131211       @1000
+  Pawns N' Roses - razoring-650.ini      45.73   6.72     102662         818.9     125372       @750
+  Pawns N' Roses - razoring-150.ini      45.80   7.08     113189         815.6     138774       @500
+  Pawns N' Roses - razoring-250.ini      44.40   7.48     123460         829.9     148762       @250
+Processed all files in 226359.3s

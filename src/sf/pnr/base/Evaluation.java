@@ -44,13 +44,13 @@ public final class Evaluation {
     public static final int[] SHIFT_POSITION_BONUS = new int[]{0, 8};
 
     @Configurable(Configurable.Key.EVAL_PENALTY_DOUBLE_PAWN)
-    public static int PENALTY_DOUBLE_PAWN = -20;
+    public static int PENALTY_DOUBLE_PAWN = -10;
     @Configurable(Configurable.Key.EVAL_PENALTY_TRIPLE_PAWN)
-    public static int PENALTY_TRIPLE_PAWN = -30;
+    public static int PENALTY_TRIPLE_PAWN = -35;
     @Configurable(Configurable.Key.EVAL_PENALTY_ISOLATED_PAWN)
-    public static int PENALTY_ISOLATED_PAWN = -30;
+    public static int PENALTY_ISOLATED_PAWN = -15;
     @Configurable(Configurable.Key.EVAL_PENALTY_WEAK_PAWN)
-    public static int PENALTY_WEAK_PAWN = -30;
+    public static int PENALTY_WEAK_PAWN = -10;
 
     @Configurable(Configurable.Key.EVAL_BONUS_PAWN_SHIELD)
     public static int BONUS_PAWN_SHIELD = 30;

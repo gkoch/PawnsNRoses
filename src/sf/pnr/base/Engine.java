@@ -15,9 +15,9 @@ public final class Engine {
     public static final int ASPIRATION_WINDOW = 50;
 
     private static final int[] NO_MOVE_ARRAY = new int[] {0};
-    private static final int VAL_CHECK_BONUS = 500;
-    private static final int VAL_BLOCKED_CHECK_BONUS = 100;
-    private static final int VAL_7TH_RANK_PAWN = 300;
+    private static final int MOVE_ORDER_CHECK_BONUS = 500;
+    private static final int MOVE_ORDER_BLOCKED_CHECK_BONUS = 100;
+    private static final int MOVE_ORDER_7TH_RANK_PAWN = 300;
     @Configurable(Configurable.Key.ENGINE_FUTILITY_THRESHOLD)
     private static int VAL_FUTILITY_THRESHOLD = 300;
     @Configurable(Configurable.Key.ENGINE_DEEP_FUTILITY_THRESHOLD)
@@ -870,33 +870,30 @@ public final class Engine {
                 final int historyValue = history[piece + 7][fromIndex64][toIndex64] >>> shift;
                 final int absPiece = piece * signum;
                 final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromIndex, toIndex, stage);
-                final int valPositional;
-                if (positionalGain < 0) {
-                    valPositional = 0;
-                } else {
-                    valPositional = (positionalGain >> 2);
-                }
+                final int valPositional = ((positionalGain + 100) >> 2);
                 final int checkBonus;
                 final int checkingBit;
                 if (board.isCheckingMove(move)) {
-                    checkBonus = VAL_CHECK_BONUS;
+                    checkBonus = MOVE_ORDER_CHECK_BONUS;
                     checkingBit = CHECKING;
                 } else {
                     checkingBit = 0;
                     if (SLIDING[absPiece] && (ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_BITS[absPiece]) > 0) {
-                        checkBonus = VAL_BLOCKED_CHECK_BONUS;
+                        checkBonus = MOVE_ORDER_BLOCKED_CHECK_BONUS;
                     } else {
                         checkBonus = 0;
                     }
                 }
+                final int toRank = getRank(toIndex);
                 final int pawnBonus;
-                if (absPiece == PAWN && (getRank(toIndex) == 1 || getRank(toIndex) == 6)) {
-                    pawnBonus = VAL_7TH_RANK_PAWN;
+                if (absPiece == PAWN && (toRank == 1 || toRank == 6)) {
+                    pawnBonus = MOVE_ORDER_7TH_RANK_PAWN;
                 } else {
                     pawnBonus = 0;
                 }
-                moves[i] = move | checkingBit |
-                    ((historyValue + checkBonus + valPositional + pawnBonus) << SHIFT_MOVE_VALUE);
+                final int moveValue =
+                    ((move & MOVE_VALUE) >> SHIFT_MOVE_VALUE) + historyValue + checkBonus + valPositional + pawnBonus;
+                moves[i] = (move & ~MOVE_VALUE) | checkingBit | (moveValue << SHIFT_MOVE_VALUE);
                 assert (moves[i] & (1 << 31)) == 0: Integer.toHexString(moves[i]); 
             } else {
                 moves[i] = moves[moves[0]];

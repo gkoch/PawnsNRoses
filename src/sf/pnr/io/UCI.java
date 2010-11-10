@@ -294,12 +294,7 @@ public class UCI implements UciProcess {
             final Executable annotation = method.getAnnotation(Executable.class);
             method.invoke(chess, getArgs(annotation, args));
         } catch (Exception e) {
-            out.printf("Failed to execute command '%s': %s\r\n", fullCommand, e.getMessage());
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else {
-                throw new UndeclaredThrowableException(e);
-            }
+            out.printf("info string Failed to execute command '%s': %s\r\n", fullCommand, e.getMessage());
         }
     }
 

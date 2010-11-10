@@ -94,6 +94,7 @@ public class EpdProcessor {
             }
             System.out.println();
         }
+        task.completed();
         System.out.printf("Processed all files in %.1fs\r\n",
             ((double) System.currentTimeMillis() - globalStartTime) / 1000);
     }

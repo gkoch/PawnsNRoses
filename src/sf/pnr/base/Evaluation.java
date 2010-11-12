@@ -62,11 +62,11 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_DEFENSE)
     public static int BONUS_DEFENSE = 2;
     @Configurable(Configurable.Key.EVAL_BONUS_ATTACK)
-    public static int BONUS_ATTACK = 3;
+    public static int BONUS_ATTACK = 1;
     @Configurable(Configurable.Key.EVAL_BONUS_HUNG_PIECE)
     public static int BONUS_HUNG_PIECE = 3;
     @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY)
-    public static int BONUS_MOBILITY = 1;
+    public static int BONUS_MOBILITY = 2;
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_KNIGHT)
     public static int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 5, 3, 2, 2, 1, 1, 0};
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_BISHOP)

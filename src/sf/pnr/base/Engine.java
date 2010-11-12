@@ -27,14 +27,14 @@ public final class Engine {
     @Configurable(Configurable.Key.ENGINE_LMR_MIN_DEPTH)
     private static int LATE_MOVE_REDUCTION_MIN_DEPTH = 2 << SHIFT_PLY;
     @Configurable(Configurable.Key.ENGINE_LMR_MIN_MOVE)
-    private static int LATE_MOVE_REDUCTION_MIN_MOVE = 2; //4?
+    private static int LATE_MOVE_REDUCTION_MIN_MOVE = 3; //4?
 
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_CHECK)
     private static int DEPTH_EXT_CHECK = 16;
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_7TH_RANK_PAWN)
-    private static int DEPTH_EXT_7TH_RANK_PAWN = 12;
+    private static int DEPTH_EXT_7TH_RANK_PAWN = 8;
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_MATE_THREAT)
-    private static int DEPTH_EXT_MATE_THREAT = 16;
+    private static int DEPTH_EXT_MATE_THREAT = 20;
     @Configurable(Configurable.Key.ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT)
     private static double ITERATIVE_DEEPENING_TIME_LIMIT = 0.9;
 

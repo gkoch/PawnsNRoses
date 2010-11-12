@@ -44,8 +44,6 @@ public class GameManager {
                     play(i, index++, tournamentResult, players[second], players[first]);
                 }
             }
-            System.out.printf("[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\r\n%2$s\r\n",
-                System.currentTimeMillis(), tournamentResult.toString());
         }
         return tournamentResult;
     }
@@ -133,6 +131,8 @@ public class GameManager {
         System.out.printf("[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL] %s\r\n",
             System.currentTimeMillis(), tournamentResult.toString(white, black));
         System.out.println(details.toPgn());
+        System.out.printf("[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\r\n%2$s\r\n",
+            System.currentTimeMillis(), tournamentResult.toString());
     }
 
     private static enum GameResult {
@@ -270,6 +270,10 @@ public class GameManager {
             }
             return score;
         }
+
+        public int getNumberOfGames() {
+            return series.size();
+        }
     }
 
     public static class TournamentResult {
@@ -340,10 +344,12 @@ public class GameManager {
             for (Map.Entry<UciRunner, Map<UciRunner, GameSeries>> entry: games.entrySet()) {
                 final UciRunner player = entry.getKey();
                 double score = 0.0;
+                int numberOfGames = 0;
                 for (GameSeries series: entry.getValue().values()) {
                     score += series.getScore(player);
+                    numberOfGames += series.getNumberOfGames();
                 }
-                scores.put(player, new Score(player, score));
+                scores.put(player, new Score(player, score, numberOfGames));
             }
             for (Map.Entry<UciRunner, Map<UciRunner, GameSeries>> entry: games.entrySet()) {
                 final UciRunner player = entry.getKey();
@@ -359,9 +365,14 @@ public class GameManager {
             final Set<Score> ranking = new TreeSet<Score>(new Comparator<Score>() {
                 @Override
                 public int compare(final Score s1, final Score s2) {
-                    int result = Double.compare(s2.getScore(), s1.getScore());
+                    final double score1 = s1.getScore() / Math.max(s1.getNumberOfGames(), 1);
+                    final double score2 = s2.getScore() / Math.max(s2.getNumberOfGames(), 1);
+                    int result = Double.compare(score2, score1);
                     if (result == 0) {
                         result = Double.compare(s2.getSonnebornBerger(), s1.getSonnebornBerger());
+                    }
+                    if (result == 0) {
+                        result = Double.compare(s2.getScore(), s1.getScore());
                     }
                     if (result == 0) {
                         result = s1.getPlayer().getName().compareTo(s2.getPlayer().getName());
@@ -395,10 +406,17 @@ public class GameManager {
                         appendPadded(builder, "...", maxResultLen, false);
                     } else {
                         final GameSeries series = map.get(opponent);
-                        appendPadded(builder, series.toStringShort(player), maxResultLen, false);
+                        final String seriesResult;
+                        if (series != null) {
+                            seriesResult = series.toStringShort(player);
+                        } else {
+                            seriesResult = "";
+                        }
+                        appendPadded(builder, seriesResult, maxResultLen, false);
                     }
                 }
-                builder.append(String.format("  %.1f  %.2f\r\n", score.getScore(), score.getSonnebornBerger()));
+                builder.append(String.format("\t%.1f\t(/%d=%.2f)\t%.2f\r\n", score.getScore(), score.getNumberOfGames(),
+                    score.getScore() / Math.max(score.getNumberOfGames(), 1), score.getSonnebornBerger()));
             }
             return builder.toString();
         }
@@ -421,11 +439,13 @@ public class GameManager {
     private static class Score {
         private final UciRunner player;
         private final double score;
+        private final int numberOfGames;
         private double sonnebornBerger;
 
-        private Score(final UciRunner player, final double score) {
+        private Score(final UciRunner player, final double score, final int numberOfGames) {
             this.player = player;
             this.score = score;
+            this.numberOfGames = numberOfGames;
         }
 
         public UciRunner getPlayer() {
@@ -434,6 +454,10 @@ public class GameManager {
 
         public double getScore() {
             return score;
+        }
+
+        public int getNumberOfGames() {
+            return numberOfGames;
         }
 
         public double getSonnebornBerger() {

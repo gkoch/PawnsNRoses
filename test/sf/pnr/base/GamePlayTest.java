@@ -16,8 +16,12 @@ public class GamePlayTest {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         final UciRunner[] players = getPlayers();
 //        final UciRunner[] players = getTestPlayers();
+        System.out.println("Running tournament with the following engines:");
+        for (UciRunner player: players) {
+            System.out.println("  - " + player.getName());
+        }
         FileOutputStream debugOs = null;
-        final String debugFile = System.getProperty("searchTest.debugFile");
+        final String debugFile = System.getProperty("searchTask.debugFile");
         if (debugFile != null) {
             debugOs = new FileOutputStream(debugFile);
             final UncloseableOutputStream os = new UncloseableOutputStream(debugOs);
@@ -25,7 +29,10 @@ public class GamePlayTest {
                 player.setDebugOutputStream(os, player.getName() + " ");
             }
         }
-        final GameManager manager = new GameManager(120000, 6000, 30);
+        final int initialTime = Integer.parseInt(System.getProperty("searchTask.initialTime", "120000"));
+        final int increment = Integer.parseInt(System.getProperty("searchTask.incrementTime", "6000"));
+        final int rounds = Integer.parseInt(System.getProperty("searchTask.rounds", "20"));
+        final GameManager manager = new GameManager(initialTime, increment, rounds);
         manager.play(players);
         if (debugOs != null) {
             debugOs.close();
@@ -36,8 +43,8 @@ public class GamePlayTest {
     }
 
     private static UciRunner[] getPlayers() throws IOException {
-        final String engineDir = System.getProperty("searchTest.engineDir");
-        final String patternStr = System.getProperty("searchTest.enginePattern");
+        final String engineDir = System.getProperty("searchTask.engineDir");
+        final String patternStr = System.getProperty("searchTask.enginePattern", ".*");
         final Pattern executablePattern = Pattern.compile(patternStr);
         final File[] executables = new File(engineDir).listFiles(new FileFilter() {
             @Override
@@ -48,9 +55,21 @@ public class GamePlayTest {
         final UciRunner[] players = new UciRunner[executables.length];
         for (int i = 0, executablesLength = executables.length; i < executablesLength; i++) {
             final File executable = executables[i];
-            players[i] = new UciRunner(executable.getName(), new ExternalUciProcess(executable.getAbsolutePath()));
+            players[i] = new UciRunner(getPlayerName(executable), new ExternalUciProcess(executable.getAbsolutePath()));
         }
         return players;
+    }
+
+    private static String getPlayerName(final File executable) {
+        final String fileName = executable.getName();
+        final int pos = fileName.lastIndexOf('.');
+        final String name;
+        if (pos != -1 && pos >= fileName.length() - 4) {
+            name = fileName.substring(0, pos);
+        } else {
+            name = fileName;
+        }
+        return name;
     }
 
     private static UciRunner[] getTestPlayers() throws IOException {

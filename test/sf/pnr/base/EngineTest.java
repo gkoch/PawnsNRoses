@@ -552,36 +552,4 @@ public class EngineTest extends TestCase {
             StringUtils.fromShort(board, "Kg7"), 3, 1000, (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
         assertEquals(0, engine.removeThreefoldRepetition(board, engine.getTranspositionTable().read(board.getZobristKey())));
     }
-
-    public void no_testScore() {
-        final Board board = fromFen("r1b1k2r/ppp1qppp/2npp3/3P4/2P1n3/2B2NP1/PP2PP1P/2RQKB1R b Kkq - 0 9");
-        engine.setBestMoveListener(new BestMoveListener() {
-            @Override
-            public void bestMoveChanged(final int depth, final int bestMove, final int value, final long time, final int[] bestLine, final long nodes) {
-                final String message = String.format("info depth %d currmove %s score cp %d time %d pv %s nodes %d",
-                    depth, StringUtils.toLong(bestMove), value, time, StringUtils.toLong(bestLine, " "), nodes);
-                System.out.println(message);
-            }
-        });
-        engine.search(board, 8, 0);
-    }
-
-    public void no_testScore2() {
-        final Board board = fromFen("2rn1rk1/2p1qppp/pn1p1bb1/1P6/1P1PPB2/2NQ1N1P/2B2PP1/R3R2K b - - 0 25");
-//        final Board board = fromFen("r4rk1/p1pn1pp1/1p1qp2p/1B6/3Pb3/4PN2/PP3PPP/2RQ1RK1 w - - 2 15");
-        engine.setBestMoveListener(new BestMoveListener() {
-            @Override
-            public void bestMoveChanged(final int depth, final int bestMove, final int value, final long time, final int[] bestLine, final long nodes) {
-                final String message = String.format("info depth %d currmove %s score cp %d time %d pv %s nodes %d",
-                    depth, StringUtils.toLong(bestMove), value, time, StringUtils.toLong(bestLine, " "), nodes);
-                System.out.println(message);
-            }
-        });
-        engine.search(board, 11, 0);
-//        System.out.println(new Evaluation().evaluate(board));
-//        board.move(fromLong(board, "b5d7"));
-//        System.out.println(new Evaluation().evaluate(board));
-//        board.move(fromLong(board, "e4f3"));
-//        System.out.println(new Evaluation().evaluate(board));
-    }
 }

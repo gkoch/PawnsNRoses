@@ -1,6 +1,8 @@
 package sf.pnr.base;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static sf.pnr.base.Utils.*;
@@ -682,6 +684,54 @@ public class StringUtils {
             board.move(fromShort(board, builder.toString()));
         }
         return board;
+    }
+
+    public static int[] fromPgnToMoves(final String pgn) {
+        final Board board = new Board();
+        board.restart();
+        boolean inHeader = false;
+        boolean inQuotes = false;
+        final StringBuilder builder = new StringBuilder(5);
+        final List<Integer> moveList = new ArrayList<Integer>(150);
+        for (int i = 0; i < pgn.length(); i++) {
+            final char ch = pgn.charAt(i);
+            if (ch == '"') {
+                if (inHeader) {
+                    inQuotes = !inQuotes;
+                } else {
+                    throw new IllegalStateException("Quote outside PGN header: " + pgn);
+                }
+            } else if (inQuotes) {
+                // ignore
+            } else if (ch == ']') {
+                inHeader = false;
+            } else if (inHeader) {
+                // ignore
+            } else if (ch == '[') {
+                inHeader = true;
+            } else if (Character.isWhitespace(ch)) {
+                if (builder.length() > 0) {
+                    final int move = fromShort(board, builder.toString());
+                    moveList.add(move);
+                    board.move(move);
+                    builder.delete(0, builder.length());
+                }
+            } else if (builder.length() == 0 && (Character.isDigit(ch) || ch == '.' || ch == '-' || ch == '/')) {
+                // ignore
+            } else {
+                builder.append(ch);
+            }
+        }
+        if (builder.length() > 0) {
+            final int move = fromShort(board, builder.toString());
+            moveList.add(move);
+            board.move(move);
+        }
+        final int[] moves = new int[moveList.size()];
+        for (int i = 0; i < moves.length; i++){
+            moves[i] = moveList.get(i);
+        }
+        return moves;
     }
 
     public static Set<String> checkBoard(final Board board) {

@@ -38,9 +38,15 @@ public class GameManager {
         final TournamentResult tournamentResult = new TournamentResult();
         int index = 1;
         for (int i = 0; i < rounds; i++) {
-            for (int first = 0; first < players.length - 1; first++) {
-                for (int second = first + 1; second < players.length; second++) {
+            for (int diff = 1; diff < players.length; diff++) {
+                for (int first = 0; first < players.length - diff; first++) {
+                    final int second = first + diff;
                     play(i, index++, tournamentResult, players[first], players[second]);
+                }
+            }
+            for (int diff = 1; diff < players.length; diff++) {
+                for (int first = 0; first < players.length - diff; first++) {
+                    final int second = first + diff;
                     play(i, index++, tournamentResult, players[second], players[first]);
                 }
             }

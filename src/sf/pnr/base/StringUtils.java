@@ -81,49 +81,49 @@ public class StringUtils {
     }
 
     public static Board fromFen(final String fen) {
-        final Board boardObj = new Board();
-        boardObj.clear();
-        final int[] board = boardObj.getBoard();
+        final Board board = new Board();
+        board.clear();
+        final int[] squares = board.getBoard();
 
         int i = 0;
         for (int idx = 112; idx >= 0; idx++, i++) {
             final char ch = fen.charAt(i);
             switch (ch) {
                 case 'K':
-                    board[idx] = KING;
+                    squares[idx] = KING;
                     break;
                 case 'Q':
-                    board[idx] = QUEEN;
+                    squares[idx] = QUEEN;
                     break;
                 case 'R':
-                    board[idx] = ROOK;
+                    squares[idx] = ROOK;
                     break;
                 case 'B':
-                    board[idx] = BISHOP;
+                    squares[idx] = BISHOP;
                     break;
                 case 'N':
-                    board[idx] = KNIGHT;
+                    squares[idx] = KNIGHT;
                     break;
                 case 'P':
-                    board[idx] = PAWN;
+                    squares[idx] = PAWN;
                     break;
                 case 'k':
-                    board[idx] = -KING;
+                    squares[idx] = -KING;
                     break;
                 case 'q':
-                    board[idx] = -QUEEN;
+                    squares[idx] = -QUEEN;
                     break;
                 case 'r':
-                    board[idx] = -ROOK;
+                    squares[idx] = -ROOK;
                     break;
                 case 'b':
-                    board[idx] = -BISHOP;
+                    squares[idx] = -BISHOP;
                     break;
                 case 'n':
-                    board[idx] = -KNIGHT;
+                    squares[idx] = -KNIGHT;
                     break;
                 case 'p':
-                    board[idx] = -PAWN;
+                    squares[idx] = -PAWN;
                     break;
                 case ' ':
                 case '/':
@@ -135,17 +135,17 @@ public class StringUtils {
             if ("KQRBNPkqrbnp".indexOf(ch) >= 0) {
                 final int side;
                 final int absPiece;
-                if (board[idx] > 0) {
+                if (squares[idx] > 0) {
                     side = WHITE_TO_MOVE;
-                    absPiece = board[idx];
+                    absPiece = squares[idx];
                 } else {
                     side = BLACK_TO_MOVE;
-                    absPiece = -board[idx];
+                    absPiece = -squares[idx];
                 }
-                final int[] pieces = boardObj.getPieces(side, absPiece);
+                final int[] pieces = board.getPieces(side, absPiece);
                 pieces[0]++;
                 pieces[pieces[0]] = idx;
-                boardObj.getPieceArrayPositions()[idx] = pieces[0];
+                board.getPieceArrayPositions()[idx] = pieces[0];
             }
         }
 
@@ -183,9 +183,9 @@ public class StringUtils {
         state |= Integer.parseInt(moves[0]) << SHIFT_HALF_MOVES;
         state |= Integer.parseInt(moves[1]) << SHIFT_FULL_MOVES;
 
-        boardObj.setState(state);
-        boardObj.recompute();
-        return boardObj;
+        board.setState(state);
+        board.recompute();
+        return board;
     }
 
     public static String toString(final Board board) {
@@ -398,9 +398,9 @@ public class StringUtils {
         return builder.toString();
     }
 
-    public static String toShort(final Board boardObj, final int move) {
+    public static String toShort(final Board board, final int move) {
         final StringBuilder builder = new StringBuilder();
-        final int toMove = boardObj.getState() & WHITE_TO_MOVE;
+        final int toMove = board.getState() & WHITE_TO_MOVE;
         final int moveType = move & MOVE_TYPE;
         if (moveType == MT_CASTLING_KINGSIDE) {
             builder.append("O-O");
@@ -409,9 +409,9 @@ public class StringUtils {
         } else {
             final int fromIndex = getMoveFromIndex(move);
             final int toIndex = getMoveToIndex(move);
-            final int[] board = boardObj.getBoard();
-            final int piece = board[fromIndex];
-            assert piece != EMPTY: StringUtils.toFen(boardObj) + "/" + StringUtils.toSimple(move);
+            final int[] squares = board.getBoard();
+            final int piece = squares[fromIndex];
+            assert piece != EMPTY: StringUtils.toFen(board) + "/" + StringUtils.toSimple(move);
             final int absPiece = Integer.signum(piece) * piece;
             if (absPiece != PAWN) {
                 builder.append(FEN_CHARS[absPiece * 2 - 2]);
@@ -420,7 +420,7 @@ public class StringUtils {
                 boolean needsExtraInfo = false;
                 boolean needsFromFile = false;
                 boolean needsFromRank = false;
-                final int[] pieces = boardObj.getPieces(toMove, absPiece);
+                final int[] pieces = board.getPieces(toMove, absPiece);
                 if (absPiece == KNIGHT) {
                     for (int i = pieces[0]; i > 0; i--) {
                         final int index = pieces[i];
@@ -437,7 +437,7 @@ public class StringUtils {
                     for (int i = pieces[0]; i > 0; i--) {
                         final int index = pieces[i];
                         if (index != fromIndex) {
-                            if (boardObj.isAttackedBySliding(toIndex, attackBits, index)) {
+                            if (board.isAttackedBySliding(toIndex, attackBits, index)) {
                                 needsExtraInfo = true;
                                 needsFromRank |= getFile(index) == fromFile;
                                 needsFromFile |= getRank(index) == fromRank;
@@ -454,7 +454,7 @@ public class StringUtils {
             }
 
             assert fromIndex != toIndex;
-            final boolean capture = (moveType == MT_EN_PASSANT) || (board[toIndex] != EMPTY);
+            final boolean capture = (moveType == MT_EN_PASSANT) || (squares[toIndex] != EMPTY);
             if (capture) {
                 if (absPiece == PAWN) {
                     builder.append((char) ('a' + getFile(fromIndex)));
@@ -480,18 +480,18 @@ public class StringUtils {
         }
 
         // check if it is a check or mate
-        final long undo = boardObj.move(move);
-        final int kingIndex = boardObj.getKing(1 - toMove);
-        if (boardObj.isAttacked(kingIndex, toMove)) {
+        final long undo = board.move(move);
+        final int kingIndex = board.getKing(1 - toMove);
+        if (board.isAttacked(kingIndex, toMove)) {
             final MoveGenerator moveGenerator = new MoveGenerator();
             moveGenerator.pushFrame();
-            moveGenerator.generatePseudoLegalMoves(boardObj);
-            boolean hasLegalMove = boardObj.hasLegalMove(moveGenerator.getWinningCaptures()) ||
-                boardObj.hasLegalMove(moveGenerator.getLoosingCaptures());
+            moveGenerator.generatePseudoLegalMoves(board);
+            boolean hasLegalMove = board.hasLegalMove(moveGenerator.getWinningCaptures()) ||
+                board.hasLegalMove(moveGenerator.getLoosingCaptures());
             if (!hasLegalMove) {
-                moveGenerator.generatePseudoLegalMovesNonAttacking(boardObj);
-                hasLegalMove = boardObj.hasLegalMove(moveGenerator.getMoves()) ||
-                    boardObj.hasLegalMove(moveGenerator.getPromotions());
+                moveGenerator.generatePseudoLegalMovesNonAttacking(board);
+                hasLegalMove = board.hasLegalMove(moveGenerator.getMoves()) ||
+                    board.hasLegalMove(moveGenerator.getPromotions());
             }
             if (hasLegalMove) {
                 builder.append('+');
@@ -499,7 +499,7 @@ public class StringUtils {
                 builder.append('#');
             }
         }
-        boardObj.takeBack(undo);
+        board.takeBack(undo);
         return builder.toString();
     }
 

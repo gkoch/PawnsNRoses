@@ -372,19 +372,19 @@ public class BoardTest extends TestCase {
         }
     }
 
-    public static void checkPieceListConsistency(final Board boardObj) {
-		checkPieceListConsistency(boardObj, PAWN);
-		checkPieceListConsistency(boardObj, KNIGHT);
-		checkPieceListConsistency(boardObj, BISHOP);
-		checkPieceListConsistency(boardObj, ROOK);
-		checkPieceListConsistency(boardObj, QUEEN);
-		checkPieceListConsistency(boardObj, KING);
-        assertTrue(boardObj.getPieces(WHITE_TO_MOVE, PAWN)[0] <= 8);
-        assertTrue(boardObj.getPieces(BLACK_TO_MOVE, PAWN)[0] <= 8);
-        final int[] board = boardObj.getBoard();
-        final int[] pieceArrayPos = boardObj.getPieceArrayPositions();
-        for (int i = 0; i < board.length; i++) {
-            assertTrue(board[i] != EMPTY && pieceArrayPos[i] != EMPTY || board[i] == EMPTY && pieceArrayPos[i] == EMPTY);
+    public static void checkPieceListConsistency(final Board board) {
+		checkPieceListConsistency(board, PAWN);
+		checkPieceListConsistency(board, KNIGHT);
+		checkPieceListConsistency(board, BISHOP);
+		checkPieceListConsistency(board, ROOK);
+		checkPieceListConsistency(board, QUEEN);
+		checkPieceListConsistency(board, KING);
+        assertTrue(board.getPieces(WHITE_TO_MOVE, PAWN)[0] <= 8);
+        assertTrue(board.getPieces(BLACK_TO_MOVE, PAWN)[0] <= 8);
+        final int[] squares = board.getBoard();
+        final int[] pieceArrayPos = board.getPieceArrayPositions();
+        for (int i = 0; i < squares.length; i++) {
+            assertTrue(squares[i] != EMPTY && pieceArrayPos[i] != EMPTY || squares[i] == EMPTY && pieceArrayPos[i] == EMPTY);
         }
 	}
 
@@ -393,13 +393,13 @@ public class BoardTest extends TestCase {
 		checkPieceListConsistency(board, piece, BLACK_TO_MOVE);
 	}
 
-	private static void checkPieceListConsistency(final Board boardObj, final int piece, final int toMove) {
-		final int[] pieces = boardObj.getPieces(toMove, piece);
-		final int[] board = boardObj.getBoard();
-		final int[] pieceArrayPositions = boardObj.getPieceArrayPositions();
+	private static void checkPieceListConsistency(final Board board, final int piece, final int toMove) {
+		final int[] pieces = board.getPieces(toMove, piece);
+		final int[] squares = board.getBoard();
+		final int[] pieceArrayPositions = board.getPieceArrayPositions();
 		final int signum = toMove == WHITE_TO_MOVE? 1: -1;
 		for (int i = 1; i <= pieces[0]; i++) {
-			assertEquals(signum * piece, board[pieces[i]]);
+			assertEquals(signum * piece, squares[pieces[i]]);
 			assertEquals(i, pieceArrayPositions[pieces[i]]);
 		}
 	}

@@ -18,6 +18,14 @@ public final class Engine {
     private static final int MOVE_ORDER_CHECK_BONUS = 500;
     private static final int MOVE_ORDER_BLOCKED_CHECK_BONUS = 100;
     private static final int MOVE_ORDER_7TH_RANK_PAWN = 300;
+    @Configurable(Configurable.Key.ENGINE_NULL_MOVE_MIN_DEPTH)
+    private static int NULL_MOVE_MIN_DEPTH = 3 * PLY;
+    @Configurable(Configurable.Key.ENGINE_NULL_MOVE_DEPTH_CHANGE_THRESHOLD)
+    private static int NULL_MOVE_DEPTH_CHANGE_THRESHOLD = 6 * PLY;
+    @Configurable(Configurable.Key.ENGINE_NULL_MOVE_DEPTH_HIGH)
+    private static int NULL_MOVE_DEPTH_HIGH = 3 * PLY;
+    @Configurable(Configurable.Key.ENGINE_NULL_MOVE_DEPTH_LOW)
+    private static int NULL_MOVE_DEPTH_LOW = 2 * PLY;
     @Configurable(Configurable.Key.ENGINE_FUTILITY_THRESHOLD)
     private static int VAL_FUTILITY_THRESHOLD = 300;
     @Configurable(Configurable.Key.ENGINE_DEEP_FUTILITY_THRESHOLD)
@@ -377,9 +385,9 @@ public final class Engine {
 
         // null-move pruning
         int initialDepthExt = 0;
-        if (depth > (3 << SHIFT_PLY) && !inCheck && allowNull && beta < VAL_MATE_THRESHOLD &&
+        if (depth > NULL_MOVE_MIN_DEPTH && !inCheck && allowNull && beta < VAL_MATE_THRESHOLD &&
                 board.getMinorMajorPieceCount(toMove) > 0) {
-            final int r = depth > (6 << SHIFT_PLY)? (3 << SHIFT_PLY): (2 << SHIFT_PLY);
+            final int r = depth > NULL_MOVE_DEPTH_CHANGE_THRESHOLD? NULL_MOVE_DEPTH_HIGH: NULL_MOVE_DEPTH_HIGH;
             final int prevState = board.nullMove();
             final int value = -negascout(board, depth - r, -beta, -beta + 1, false, false, searchedPly + 1);
             if (cancelled) {

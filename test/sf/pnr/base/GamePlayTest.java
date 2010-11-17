@@ -52,10 +52,19 @@ public class GamePlayTest {
                 return file.isFile() && executablePattern.matcher(file.getName()).matches();
             }
         });
-        final UciRunner[] players = new UciRunner[executables.length];
+        final boolean includeLatest = Boolean.parseBoolean(System.getProperty("searchTask.includeLatest", "false"));
+        final int shift = includeLatest? 1: 0;
+        final UciRunner[] players = new UciRunner[executables.length + shift];
+        if (includeLatest) {
+            final Map<String, String> options = new HashMap<String, String>();
+            options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE), "128");
+            options.put(UCI.toUciOption(Configurable.Key.EVAL_TABLE_SIZE), "8");
+            players[0] = new UciRunner("Pawns N' Roses Latest", options, new PipedUciProcess());
+        }
         for (int i = 0, executablesLength = executables.length; i < executablesLength; i++) {
             final File executable = executables[i];
-            players[i] = new UciRunner(getPlayerName(executable), new ExternalUciProcess(executable.getAbsolutePath()));
+            players[i + shift] =
+                new UciRunner(getPlayerName(executable), new ExternalUciProcess(executable.getAbsolutePath()));
         }
         return players;
     }

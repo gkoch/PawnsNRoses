@@ -180,7 +180,8 @@ public final class Engine {
         moveGenerator.pushFrame();
         int b = beta;
         final int origAlpha = alpha;
-        int bestMove = ttMove;
+        int bestMove = 0;
+        int bestScore = Integer.MIN_VALUE;
         int legalMoveCount = 0;
         int quietMoveCount = 0;
         for (SearchStage searchStage: searchStages) {
@@ -301,6 +302,7 @@ public final class Engine {
                 board.takeBack(undo);
                 if (a > alpha) {
                     bestMove = move;
+                    bestScore = a;
                     alpha = a;
                     assert board.getRepetitionCount() < 3 || a == 0;
                     quietMoveCount = 0;
@@ -311,8 +313,9 @@ public final class Engine {
                         break;
                     }
                 } else {
-                    if (bestMove == 0) {
+                    if (bestScore < a) {
                         bestMove = move;
+                        bestScore = a;
                     }
                     quietMoveCount++;
                 }
@@ -331,8 +334,12 @@ public final class Engine {
                 return getSearchResult(0, 0);
             }
         }
-        if (bestMove != 0 && alpha > origAlpha) {
-            transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
+        if (bestMove != 0) {
+            if (alpha > origAlpha) {
+                transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
+            }
+        } else {
+            bestMove = ttMove;
         }
         return bestMove > 0? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
     }

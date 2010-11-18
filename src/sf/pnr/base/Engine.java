@@ -399,11 +399,14 @@ public final class Engine {
 //                transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, 0, depth >> SHIFT_PLY, value - VAL_MIN, age);
                 return beta;
             }
-            final int value2 = -negascout(board, depth - r, -VAL_MATE, -VAL_MATE / 2, false, false, searchedPly + 1);
-            if (value2 > VAL_MATE_THRESHOLD) {
+            final int value2 = -negascout(board, depth - r, VAL_MATE_THRESHOLD, VAL_MATE_THRESHOLD + 1, false, false, searchedPly + 1);
+            board.nullMove(prevState);
+            if (cancelled) {
+                return alpha;
+            }
+            if (value2 < -VAL_MATE_THRESHOLD) {
                 initialDepthExt += DEPTH_EXT_MATE_THREAT;
             }
-            board.nullMove(prevState);
         }
 
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);

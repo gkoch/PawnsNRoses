@@ -53,7 +53,7 @@ public final class Engine {
     private final Evaluation evaluation = new Evaluation();
     private final TranspositionTable transpositionTable = new TranspositionTable();
     private final int[][][] history = new int[14][64][64];
-    private final int[][] killerMoves = new int[MAX_SEARCH_DEPTH][2]; 
+    private final int[][] killerMoves = new int[MAX_SEARCH_DEPTH << 2][2]; 
     private long searchStartTime;
     private long searchEndTime;
     private long lastCheckTime;

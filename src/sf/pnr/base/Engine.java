@@ -113,22 +113,21 @@ public final class Engine {
                 result = negascoutRoot(board, depth << SHIFT_PLY, beta, INITIAL_BETA, 0);
                 value = getValueFromSearchResult(result);
             }
+            final int move = getMoveFromSearchResult(result);
+            if (move != 0) {
+                searchResult = result;
+            }
             if (cancelled) {
-                final int move = getMoveFromSearchResult(result);
-                if (move != 0) {
-                    searchResult = result;
-                }
                 break;
             }
-            assert value == 0 || getMoveFromSearchResult(result) != 0 || value < -VAL_MATE_THRESHOLD:
+            assert value == 0 || move != 0 || value < -VAL_MATE_THRESHOLD:
                 "FEN: " + StringUtils.toFen(board) + ", score: " + value + ", depth: " + depth;
             searchResult = result;
             if (listener != null) {
-                final int bestMove = getMoveFromSearchResult(result);
-                assert bestMove != 0: StringUtils.toFen(board) + " / depth: " + depth + " / value: " + getValueFromSearchResult(result);
-                if (bestMove != 0) {
-                    listener.bestMoveChanged(depth, bestMove, value, System.currentTimeMillis() - searchStartTime,
-                        getBestLine(board, bestMove), nodeCount);
+                assert move != 0: StringUtils.toFen(board) + " / depth: " + depth + " / value: " + getValueFromSearchResult(result);
+                if (move != 0) {
+                    listener.bestMoveChanged(depth, move, value, System.currentTimeMillis() - searchStartTime,
+                        getBestLine(board, move), nodeCount);
                 }
             }
             if (value > VAL_MATE_THRESHOLD) {
@@ -145,7 +144,7 @@ public final class Engine {
     public long negascoutRoot(final Board board, final int depth, int alpha, final int beta, final int searchedPly) {
         if (board.getRepetitionCount() == 3 || Evaluation.drawByInsufficientMaterial(board)) {
             // three-fold repetition
-            return VAL_DRAW;
+            return getSearchResult(0, VAL_DRAW);
         }
         
         final long zobristKey = board.getZobristKey();

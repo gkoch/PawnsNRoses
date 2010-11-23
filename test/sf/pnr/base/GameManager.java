@@ -59,8 +59,8 @@ public class GameManager {
         System.out.printf("[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\t%2$s - %3$s\r\n",
             System.currentTimeMillis(), white.getName(), black.getName());
         System.out.printf(
-            "[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\t%2$s\t%3$6s\t%4$6s\t%5$6s\t%6$7s\t%7$7s\t%8$9s\t%9$5s\t%10$5s\r\n",
-            System.currentTimeMillis(), "mc", "white", "black", "mt[ms]", "rtw[ms]", "rtb[ms]", "nps", "ply", "cp");
+            "[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\t%2$s\t%3$6s\t%4$6s\t%5$6s\t%6$7s\t%7$7s\t%8$9s\t%9$5s\t%10$7s\t%11$5s\r\n",
+            System.currentTimeMillis(), "mc", "white", "black", "mt[ms]", "rtw[ms]", "rtb[ms]", "nps", "ply", "nodes", "cp");
         final UciRunner[] players = new UciRunner[] {white, black};
         final int[] times = new int[]{initialTimes, initialTimes};
         GameResult result;
@@ -76,6 +76,7 @@ public class GameManager {
             black.uciNewGame();
             int currentPlayer = 0;
             final int[] depths = new int[2];
+            final long[] nodes = new long[2];
             while (true) {
                 final UciRunner player = players[currentPlayer];
                 player.position(moves);
@@ -101,11 +102,14 @@ public class GameManager {
                     blackMove = StringUtils.toShort(board, move);
                 }
                 depths[currentPlayer] += player.getDepth();
+                nodes[currentPlayer] += player.getNodeCount();
+                final int fullMoveCount = board.getFullMoveCount();
                 System.out.printf(
-                    "[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\t%2$d.\t%3$6s\t%4$6s\t%5$6d\t%6$7d\t%7$7d\t%8$9.0f\t%9$5.2f\t%10$5d\r\n",
-                    System.currentTimeMillis(), board.getFullMoveCount(), whiteMove, blackMove, moveTime,
-                    times[0], times[1], ((double) player.getNodeCount() * 1000) / times[currentPlayer],
-                    ((double) depths[currentPlayer]) / board.getFullMoveCount(), player.getScore());
+                    "[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\t%2$d.\t%3$6s\t%4$6s\t%5$6d\t%6$7d\t%7$7d\t%8$9.0f\t%9$5.2f\t%10$7d\t%11$5d\r\n",
+                    System.currentTimeMillis(), fullMoveCount, whiteMove, blackMove, moveTime, times[0], times[1],
+                    ((double) player.getNodeCount() * 1000) / times[currentPlayer],
+                    ((double) depths[currentPlayer]) / fullMoveCount, nodes[currentPlayer] / fullMoveCount,
+                    player.getScore());
                 board.move(move);
                 moves.add(move);
                 if (board.isMate()) {

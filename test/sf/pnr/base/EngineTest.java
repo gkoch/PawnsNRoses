@@ -552,4 +552,26 @@ public class EngineTest extends TestCase {
             StringUtils.fromShort(board, "Kg7"), 3, 1000, (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
         assertEquals(0, engine.removeThreefoldRepetition(board, engine.getTranspositionTable().read(board.getZobristKey())));
     }
+
+    public void testAvoidThreefoldRepetition() {
+        final Board board = StringUtils.fromPgn("[Date \"2010.11.22\"]\n" +
+            "[Round \"1\"]\n" +
+            "[Game \"3\"]\n" +
+            "[White \"Pawns N' Roses Latest\"]\n" +
+            "[Black \"PawnsNRoses v0.063\"]\n" +
+            "[Result \"1/2-1/2\"]\n" +
+            "[Time \"19:47:38\"]\n" +
+            "[PlyCount \"74\"]\n" +
+            "[Termination \"normal\"]\n" +
+            "[RemainingTimeWhite \"00:03.110\"]\n" +
+            "[RemainingTimeBlack \"00:03.063\"]\n" +
+            "\n" +
+            "1. Nf3 Nf6 2. Nc3 d5 3. e3 Nc6 4. Bb5 Qd6 5. d4 Bf5 6. Ne5 a6 7. Bxc6+ bxc6 8. O-O c5 \n" +
+            "9. Bd2 cxd4 10. exd4 Qb6 11. Bc1 Rd8 12. Na4 Qd6 13. Be3 Ne4 14. Re1 Qb4 15. Qf3 g6 16. b3 Qb5 \n" +
+            "17. Nc5 Nxc5 18. dxc5 d4 19. g4 Be6 20. Bf4 Qxc5 21. Qc6+ Qxc6 22. Nxc6 Ra8 23. Be5 Rg8 24. g5 Bd5 \n" +
+            "25. Nxd4 c5 26. Ne2 Be4 27. Rac1 e6 28. Ng3 Bf3 29. Ne4 Be7 30. Nf6+ Bxf6 31. Bxf6 Rb8 32. Re3 Bg4 \n" +
+            "33. Re4 Rb4 34. Re5 Rb5 35. Re4 Rb4 36. Re5 Rb5"); // 37. Re4 Rb4
+        final long result = engine.search(board, 6, 0);
+        assertTrue(!"Re5".equals(StringUtils.toShort(board, Engine.getMoveFromSearchResult(result))));
+    }
 }

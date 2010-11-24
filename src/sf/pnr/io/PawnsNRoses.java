@@ -143,6 +143,17 @@ public class PawnsNRoses {
         }
     }
 
+    @Executable()
+    public String getFen() {
+        final String fen;
+        if (board != null) {
+            fen = StringUtils.toFen(board);
+        } else {
+            fen = "";
+        }
+        return fen;
+    }
+
     public boolean useBook() {
         return useBook;
     }

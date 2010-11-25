@@ -476,6 +476,15 @@ public final class Engine {
                 // register that we had a legal move
                 legalMoveCount++;
 
+                if (board.getRepetitionCount() == 0) {
+                    if (alpha < 0) {
+                        alpha = 0;
+                        bestMove = move;
+                    }
+                    hasEvaluatedMove = true;
+                    continue;
+                }
+
                 final boolean opponentInCheck = (move & CHECKING) > 0;
                 if (!allowToRecurseDown && !opponentInCheck) {
                     board.takeBack(undo);
@@ -615,16 +624,32 @@ public final class Engine {
         return alpha;
     }
 
-    public long removeThreefoldRepetition(final Board board, long ttValue) {
-        int move = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        if (move != 0) {
-            final long undo = board.move(move);
+    public long removeThreefoldRepetition(final Board board, final long ttValue1) {
+        long result = ttValue1;
+        final int move1 = (int) ((ttValue1 & TT_MOVE) >> TT_SHIFT_MOVE);
+        if (move1 != 0) {
+            final long undo1 = board.move(move1);
             if (board.getRepetitionCount() >= 3) {
-                ttValue = 0;
+                result = 0;
+            } else {
+                final long zobristKey = board.getZobristKey();
+                final long ttValue2 = transpositionTable.read(zobristKey);
+                final int move2 = (int) ((ttValue2 & TT_MOVE) >> TT_SHIFT_MOVE);
+                if (move2 != 0) {
+                    final long undo2 = board.move(move2);
+                    if (board.getRepetitionCount() >= 3) {
+                        final int value = ((int) ((ttValue1 & TT_VALUE) >> TT_SHIFT_VALUE)) + VAL_MIN;
+                        if (value > 0) {
+                            // opponent can force a three-fold repetition
+                            result = 0;
+                        }
+                    }
+                    board.takeBack(undo2);
+                }
             }
-            board.takeBack(undo);
+            board.takeBack(undo1);
         }
-        return ttValue;
+        return result;
     }
 
     public int quiescence(final Board board, int alpha, int beta) {

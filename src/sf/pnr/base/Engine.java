@@ -968,7 +968,7 @@ public final class Engine {
         long ttValue = transpositionTable.read(zobristKey);
         final int depth = (int) ((ttValue & TT_DEPTH) >> TT_SHIFT_DEPTH);
         int move = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        if (move == 0 || depth == 0) {
+        if (move == 0 || depth == 0 || (defaultMove != 0 && ((defaultMove & BASE_INFO) != (move & BASE_INFO)))) {
             if (defaultMove == 0) {
                 throw new IllegalStateException("Failed to extract valid first move");
             } else {

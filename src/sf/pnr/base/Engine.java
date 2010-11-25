@@ -395,7 +395,7 @@ public final class Engine {
         int initialDepthExt = 0;
         if (depth > NULL_MOVE_MIN_DEPTH && !inCheck && allowNull && beta < VAL_MATE_THRESHOLD &&
                 board.getMinorMajorPieceCount(toMove) > 0) {
-            final int r = depth > NULL_MOVE_DEPTH_CHANGE_THRESHOLD? NULL_MOVE_DEPTH_HIGH: NULL_MOVE_DEPTH_HIGH;
+            final int r = depth > NULL_MOVE_DEPTH_CHANGE_THRESHOLD? NULL_MOVE_DEPTH_HIGH: NULL_MOVE_DEPTH_LOW;
             final int prevState = board.nullMove();
             final int value = -negascout(board, depth - r, -beta, -beta + 1, false, false, searchedPly + 1);
             if (cancelled) {

@@ -36,28 +36,28 @@ public class MoveGenerator {
         }
 	}
 
-    private void generatePseudoLegalMovesKing(final Board boardObj, final Frame frame) {
-        final int state = boardObj.getState();
+    private void generatePseudoLegalMovesKing(final Board board, final Frame frame) {
+        final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
-        final int kingIndex = boardObj.getKing(toMove);
-        final int[] board = boardObj.getBoard();
-        final int signum = Integer.signum(board[kingIndex]);
+        final int kingPos = board.getKing(toMove);
+        final int[] squares = board.getBoard();
+        final int signum = Integer.signum(squares[kingPos]);
         final int[] moves = frame.getMoves();
         int idx = moves[0];
         final int[] winningCaptures = frame.getWinningCaptures();
         int winningCaptureIdx = winningCaptures[0];
         final int opponent = 1 - toMove;
         for (int delta : DELTA_KING) {
-            final int pos = kingIndex + delta;
+            final int pos = kingPos + delta;
             if ((pos & 0x88) == 0) {
-                final int attacked = board[pos];
+                final int attacked = squares[pos];
                 if (attacked == EMPTY) {
-                    if (!boardObj.isAttacked(pos, opponent)) {
-                        moves[++idx] = (pos << SHIFT_TO) + kingIndex;
+                    if (!board.isAttacked(pos, opponent)) {
+                        moves[++idx] = (pos << SHIFT_TO) + kingPos;
                     }
                 } else if (signum != Integer.signum(attacked)) {
-                    if (!boardObj.isAttacked(pos, opponent)) {
-                        final int move = (pos << SHIFT_TO) | kingIndex |
+                    if (!board.isAttacked(pos, opponent)) {
+                        final int move = (pos << SHIFT_TO) | kingPos |
                             (VAL_PIECES[-signum * attacked] << SHIFT_MOVE_VALUE);
                         winningCaptures[++winningCaptureIdx] = move;
                     }
@@ -68,25 +68,25 @@ public class MoveGenerator {
         winningCaptures[0] = winningCaptureIdx;
     }
 
-    public static void generateEnPassantMoves(final Board boardObj, final int[] captures) {
-        final int state = boardObj.getState();
+    public static void generateEnPassantMoves(final Board board, final int[] captures) {
+        final int state = board.getState();
         final int enPassant = ((state & EN_PASSANT ) >> SHIFT_EN_PASSANT) - 1;
         final int toMove = state & WHITE_TO_MOVE;
         final int signum = (toMove << 1) - 1;
         final int pawn = signum * PAWN;
         final int delta = (toMove << 5) - 16;
-        final int rankIndex = (3 + toMove) << 4;
-        final int toIndex = rankIndex + enPassant + delta;
-        final int[] board = boardObj.getBoard();
-        final int leftIndex = rankIndex + enPassant - 1;
-        if ((leftIndex & 0x88) == 0 && board[leftIndex] == pawn) {
+        final int rankStartPos = (3 + toMove) << 4;
+        final int toPos = rankStartPos + enPassant + delta;
+        final int[] squares = board.getBoard();
+        final int leftPos = rankStartPos + enPassant - 1;
+        if ((leftPos & 0x88) == 0 && squares[leftPos] == pawn) {
             final int value = VAL_PAWN;
-            captures[++captures[0]] = (toIndex << SHIFT_TO) | leftIndex | MT_EN_PASSANT | (value << SHIFT_MOVE_VALUE);
+            captures[++captures[0]] = (toPos << SHIFT_TO) | leftPos | MT_EN_PASSANT | (value << SHIFT_MOVE_VALUE);
         }
-        final int rightIndex = leftIndex + 2;
-        if ((rightIndex & 0x88) == 0 && board[rightIndex] == pawn) {
+        final int rightPos = leftPos + 2;
+        if ((rightPos & 0x88) == 0 && squares[rightPos] == pawn) {
             final int value = VAL_PAWN;
-            captures[++captures[0]] = (toIndex << SHIFT_TO) | rightIndex | MT_EN_PASSANT | (value << SHIFT_MOVE_VALUE);
+            captures[++captures[0]] = (toPos << SHIFT_TO) | rightPos | MT_EN_PASSANT | (value << SHIFT_MOVE_VALUE);
         }
     }
 
@@ -117,10 +117,10 @@ public class MoveGenerator {
 		}
 	}
 
-    public static void generatePseudoLegalMovesSliding(final Board boardObj, final int[] deltas, final int startingPos,
+    public static void generatePseudoLegalMovesSliding(final Board board, final int[] deltas, final int startingPos,
                                                        final Frame frame) {
-        final int[] board = boardObj.getBoard();
-        final int side = board[startingPos] >>> 31;
+        final int[] squares = board.getBoard();
+        final int side = squares[startingPos] >>> 31;
         final int[] moves = frame.getMoves();
         int idx = moves[0];
         final int[] winningCaptures = frame.getWinningCaptures();
@@ -128,11 +128,11 @@ public class MoveGenerator {
         for (int delta : deltas) {
             assert delta != 0;
             for (int pos = startingPos + delta; (pos & 0x88) == 0; pos += delta) {
-                final int attacked = board[pos];
+                final int attacked = squares[pos];
                 if (attacked == EMPTY) {
                     moves[++idx] = (pos << SHIFT_TO) | startingPos;
                 } else if (side != (attacked >>> 31)) {
-                    final int value = staticExchangeEvaluation(boardObj, startingPos, pos);
+                    final int value = staticExchangeEvaluation(board, startingPos, pos);
                     if (value >= 0) {
                         final int move = (pos << SHIFT_TO) | startingPos | (value << SHIFT_MOVE_VALUE);
                         winningCaptures[++winningCaptures[0]] = move;
@@ -149,10 +149,10 @@ public class MoveGenerator {
         moves[0] = idx;
     }
 
-    public static void generatePseudoLegalMovesNonSliding(final Board boardObj, final int[] deltas, final int startingPos,
+    public static void generatePseudoLegalMovesNonSliding(final Board board, final int[] deltas, final int startingPos,
                                                           final Frame frame) {
-        final int[] board = boardObj.getBoard();
-		final int signum = Integer.signum(board[startingPos]);
+        final int[] squares = board.getBoard();
+		final int signum = Integer.signum(squares[startingPos]);
         final int[] moves = frame.getMoves();
         int idx = moves[0];
         final int[] winningCaptures = frame.getWinningCaptures();
@@ -162,11 +162,11 @@ public class MoveGenerator {
         for (int delta : deltas) {
             final int pos = startingPos + delta;
             if ((pos & 0x88) == 0) {
-                final int attacked = board[pos];
+                final int attacked = squares[pos];
                 if (attacked == EMPTY) {
                     moves[++idx] = (pos << SHIFT_TO) + startingPos;
                 } else if (signum != Integer.signum(attacked)) {
-                    final int value = staticExchangeEvaluation(boardObj, startingPos, pos);
+                    final int value = staticExchangeEvaluation(board, startingPos, pos);
                     if (value >= 0) {
                         final int move = (pos << SHIFT_TO) | startingPos | (value << SHIFT_MOVE_VALUE);
                         winningCaptures[++winningCaptureIdx] = move;
@@ -182,24 +182,24 @@ public class MoveGenerator {
         loosingCaptures[0] = loosingCaptureIdx;
 	}
 
-    public static void generatePseudoLegalMovesPawnCapture(final Board boardObj, final int[] captures) {
-        final int[] board = boardObj.getBoard();
-        final int state = boardObj.getState();
+    public static void generatePseudoLegalMovesPawnCapture(final Board board, final int[] captures) {
+        final int[] squares = board.getBoard();
+        final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
         final int signumOpponent = 1 - (toMove << 1);
-        final int[] pawns = boardObj.getPieces(toMove, PAWN);
+        final int[] pawns = board.getPieces(toMove, PAWN);
         final int pawnCount = pawns[0];
         assert pawnCount <= 8;
         final int[] deltas = DELTA_PAWN_ATTACK[toMove];
         int capturesIdx = captures[0];
         for (int i = 1; i <= pawnCount; i++) {
-            final int fromIndex = pawns[i];
+            final int fromPos = pawns[i];
             for (int delta: deltas) {
-                final int toIndex = fromIndex + delta;
-                if ((toIndex & 0x88) == 0 && Integer.signum(board[toIndex]) == signumOpponent) {
-                    final int move = (toIndex << SHIFT_TO) + fromIndex;
-                    final int toRank = getRank(toIndex);
-                    final int captureValue = staticExchangeEvaluation(boardObj, fromIndex, toIndex);
+                final int toPos = fromPos + delta;
+                if ((toPos & 0x88) == 0 && Integer.signum(squares[toPos]) == signumOpponent) {
+                    final int move = (toPos << SHIFT_TO) + fromPos;
+                    final int toRank = getRank(toPos);
+                    final int captureValue = staticExchangeEvaluation(board, fromPos, toPos);
                     if (toRank == 0 || toRank == 7) {
                         captures[++capturesIdx] = move | MT_PROMOTION_QUEEN |
                             ((VAL_QUEEN - VAL_PAWN + captureValue) << SHIFT_MOVE_VALUE);
@@ -230,16 +230,16 @@ public class MoveGenerator {
 		}
 	}
 
-    public static void generatePseudoLegalMovesPawn(final int[] board, final int fromIndex, final int delta,
+    public static void generatePseudoLegalMovesPawn(final int[] board, final int fromPos, final int delta,
                                                     final int[] moves, final int[] promotions) {
         int idx = moves[0];
         int promotionsIdx = promotions[0];
-        final int toIndex = fromIndex + delta;
-        if ((toIndex & 0x88) == 0) {
-            final int attacked = board[toIndex];
+        final int toPos = fromPos + delta;
+        if ((toPos & 0x88) == 0) {
+            final int attacked = board[toPos];
             if (attacked == EMPTY) {
-                final int move = (toIndex << SHIFT_TO) + fromIndex;
-                final int toRank = getRank(toIndex);
+                final int move = (toPos << SHIFT_TO) + fromPos;
+                final int toRank = getRank(toPos);
                 if (toRank == 0 || toRank == 7) {
                     promotions[++promotionsIdx] = move | MT_PROMOTION_QUEEN | ((VAL_QUEEN - VAL_PAWN) << SHIFT_MOVE_VALUE);
                     promotions[++promotionsIdx] = move | MT_PROMOTION_ROOK | ((VAL_ROOK - VAL_PAWN) << SHIFT_MOVE_VALUE);
@@ -248,11 +248,11 @@ public class MoveGenerator {
                 } else {
                     moves[++idx] = move;
                 }
-                final int rank = getRank(fromIndex);
+                final int rank = getRank(fromPos);
                 if (rank == 1 && delta == UP || rank == 6 && delta == DN) {
-                    final int enPassantIndex = toIndex + delta;
-                    if (board[enPassantIndex] == EMPTY) {
-                        moves[++idx] = (enPassantIndex << SHIFT_TO) + fromIndex;
+                    final int enPassantPos = toPos + delta;
+                    if (board[enPassantPos] == EMPTY) {
+                        moves[++idx] = (enPassantPos << SHIFT_TO) + fromPos;
                     }
                 }
                 moves[0] = idx;
@@ -261,35 +261,35 @@ public class MoveGenerator {
         }
     }
 
-    public static void generateCastling(final Board boardObj, final int[] moves) {
-        final int state = boardObj.getState();
+    public static void generateCastling(final Board board, final int[] moves) {
+        final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
-        final int[] board = boardObj.getBoard();
+        final int[] squares = board.getBoard();
         if (toMove == WHITE_TO_MOVE) {
-            if ((state & CASTLING_WHITE_QUEENSIDE) > 0 && board[B[0]] == EMPTY && board[C[0]] == EMPTY &&
-                    board[D[0]] == EMPTY) {
-                if (!boardObj.isAttacked(C[0], BLACK_TO_MOVE) && !boardObj.isAttacked(D[0], BLACK_TO_MOVE) &&
-                        !boardObj.isAttacked(E[0], BLACK_TO_MOVE)) {
+            if ((state & CASTLING_WHITE_QUEENSIDE) > 0 && squares[B[0]] == EMPTY && squares[C[0]] == EMPTY &&
+                    squares[D[0]] == EMPTY) {
+                if (!board.isAttacked(C[0], BLACK_TO_MOVE) && !board.isAttacked(D[0], BLACK_TO_MOVE) &&
+                        !board.isAttacked(E[0], BLACK_TO_MOVE)) {
                     moves[++moves[0]] = (C[0] << SHIFT_TO) | E[0] | MT_CASTLING_QUEENSIDE;
                 }
             }
-            if ((state & CASTLING_WHITE_KINGSIDE) > 0 && board[F[0]] == EMPTY && board[G[0]] == EMPTY) {
-                if (!boardObj.isAttacked(E[0], BLACK_TO_MOVE) && !boardObj.isAttacked(F[0], BLACK_TO_MOVE) &&
-                        !boardObj.isAttacked(G[0], BLACK_TO_MOVE)) {
+            if ((state & CASTLING_WHITE_KINGSIDE) > 0 && squares[F[0]] == EMPTY && squares[G[0]] == EMPTY) {
+                if (!board.isAttacked(E[0], BLACK_TO_MOVE) && !board.isAttacked(F[0], BLACK_TO_MOVE) &&
+                        !board.isAttacked(G[0], BLACK_TO_MOVE)) {
                     moves[++moves[0]] = (G[0] << SHIFT_TO) | E[0] | MT_CASTLING_KINGSIDE;
                 }
             }
         } else {
-            if ((state & CASTLING_BLACK_QUEENSIDE) > 0 && board[B[7]] == EMPTY && board[C[7]] == EMPTY &&
-                    board[D[7]] == EMPTY) {
-                if (!boardObj.isAttacked(C[7], WHITE_TO_MOVE) && !boardObj.isAttacked(D[7], WHITE_TO_MOVE) &&
-                        !boardObj.isAttacked(E[7], WHITE_TO_MOVE)) {
+            if ((state & CASTLING_BLACK_QUEENSIDE) > 0 && squares[B[7]] == EMPTY && squares[C[7]] == EMPTY &&
+                    squares[D[7]] == EMPTY) {
+                if (!board.isAttacked(C[7], WHITE_TO_MOVE) && !board.isAttacked(D[7], WHITE_TO_MOVE) &&
+                        !board.isAttacked(E[7], WHITE_TO_MOVE)) {
                     moves[++moves[0]] = (C[7] << SHIFT_TO) | E[7] | MT_CASTLING_QUEENSIDE;
                 }
             }
-            if ((state & CASTLING_BLACK_KINGSIDE) > 0 && board[F[7]] == EMPTY && board[G[7]] == EMPTY) {
-                if (!boardObj.isAttacked(E[7], WHITE_TO_MOVE) && !boardObj.isAttacked(F[7], WHITE_TO_MOVE) &&
-                        !boardObj.isAttacked(G[7], WHITE_TO_MOVE)) {
+            if ((state & CASTLING_BLACK_KINGSIDE) > 0 && squares[F[7]] == EMPTY && squares[G[7]] == EMPTY) {
+                if (!board.isAttacked(E[7], WHITE_TO_MOVE) && !board.isAttacked(F[7], WHITE_TO_MOVE) &&
+                        !board.isAttacked(G[7], WHITE_TO_MOVE)) {
                     moves[++moves[0]] = (G[7] << SHIFT_TO) | E[7] | MT_CASTLING_KINGSIDE;
                 }
             }
@@ -324,34 +324,34 @@ public class MoveGenerator {
         return frame.getPromotions();
 	}
 
-    public static int staticExchangeEvaluation(final Board boardObj, final int fromIndex, final int toIndex) {
-        final int[] board = boardObj.getBoard();
-        assert board[fromIndex] != EMPTY;
-        assert board[toIndex] != EMPTY;
-        assert board[fromIndex] * board[toIndex] < 0;
-        final int piece = board[fromIndex];
+    public static int staticExchangeEvaluation(final Board board, final int fromPos, final int toPos) {
+        final int[] squares = board.getBoard();
+        assert squares[fromPos] != EMPTY;
+        assert squares[toPos] != EMPTY;
+        assert squares[fromPos] * squares[toPos] < 0;
+        final int piece = squares[fromPos];
         final int signum = Integer.signum(piece);
         final int absPiece = signum * piece;
-        final int captured = board[toIndex];
+        final int captured = squares[toPos];
         final int signumOpponent = -signum;
         final int absCaptured = signumOpponent * captured;
         final int[] defenders = new int[32];
         final int toMove = (signum + 1) >> 1;
-        boardObj.getAttackers(toIndex, 1 - toMove, defenders);
+        board.getAttackers(toPos, 1 - toMove, defenders);
         if (defenders[0] == 0) {
             return VAL_PIECES[absCaptured];
         }
         int[] seeList = new int[32];
-        int exchangeIndex = 0;
-        seeList[exchangeIndex++] = VAL_PIECES[absCaptured];
+        int exchangePos = 0;
+        seeList[exchangePos++] = VAL_PIECES[absCaptured];
         final int[] attackers = new int[32];
-        boardObj.getAttackers(toIndex, toMove, attackers);
+        board.getAttackers(toPos, toMove, attackers);
 
-        // remove first attacker standing on fromIndex
+        // remove first attacker standing on fromPos
         final int count = attackers[0];
-        if (attackers[count] != fromIndex) {
+        if (attackers[count] != fromPos) {
             int tmp = attackers[count];
-            for (int i = count - 1; i > 0 && tmp != fromIndex; i--) {
+            for (int i = count - 1; i > 0 && tmp != fromPos; i--) {
                 final int tmp2 = attackers[i];
                 attackers[i] = tmp;
                 tmp = tmp2;
@@ -362,53 +362,53 @@ public class MoveGenerator {
         // populate value arrays
         final int[] valDefenders = new int[32];
         for (int i = defenders[0]; i > 0; i--) {
-            assert board[defenders[i]] != EMPTY;
-            valDefenders[i] = VAL_PIECES[signumOpponent * board[defenders[i]]];
+            assert squares[defenders[i]] != EMPTY;
+            valDefenders[i] = VAL_PIECES[signumOpponent * squares[defenders[i]]];
         }
         valDefenders[0] = defenders[0];
         final int[] valAttackers = new int[32];
         for (int i = attackers[0]; i > 0; i--) {
-            assert board[attackers[i]] != EMPTY;
-            valAttackers[i] = VAL_PIECES[signum * board[attackers[i]]];
+            assert squares[attackers[i]] != EMPTY;
+            valAttackers[i] = VAL_PIECES[signum * squares[attackers[i]]];
         }
         valAttackers[0] = attackers[0];
 
         addHiddenAttackers(
-            boardObj, toIndex, attackers, valAttackers, defenders, valDefenders, signum, fromIndex, absPiece);
+            board, toPos, attackers, valAttackers, defenders, valDefenders, signum, fromPos, absPiece);
         int captureVal = VAL_PIECES[absPiece];
-        int[] currentIdxArray = defenders;
+        int[] currentPosArray = defenders;
         int[] currentValArray = valDefenders;
-        int[] opponentIdxArray = attackers;
+        int[] opponentPosArray = attackers;
         int[] opponentValArray = valAttackers;
         int currentSignum = signumOpponent;
         int valSignum = -1;
-        while (currentIdxArray[0] > 0) {
+        while (currentPosArray[0] > 0) {
             final int currentVal = currentValArray[1];
             if (currentVal == VAL_KING && opponentValArray[0] > 0) {
                 // can't capture with king as we'd move into check
                 break;
             }
-            final int currentIndex = currentIdxArray[1];
-            final int currentAbsPiece = currentSignum * board[currentIndex];
-            final int currentLen = currentIdxArray[0];
+            final int currentPos = currentPosArray[1];
+            final int currentAbsPiece = currentSignum * squares[currentPos];
+            final int currentLen = currentPosArray[0];
 
             // remove current attacker
-            System.arraycopy(currentIdxArray, 2, currentIdxArray, 1, currentLen - 1);
+            System.arraycopy(currentPosArray, 2, currentPosArray, 1, currentLen - 1);
             System.arraycopy(currentValArray, 2, currentValArray, 1, currentLen - 1);
-            currentIdxArray[0] = currentLen - 1;
+            currentPosArray[0] = currentLen - 1;
             currentValArray[0] = currentLen - 1;
 
             // add discovered attacker
-            addHiddenAttackers(boardObj, toIndex, currentIdxArray, currentValArray, opponentIdxArray, opponentValArray,
-                currentSignum, currentIndex, currentAbsPiece);
+            addHiddenAttackers(board, toPos, currentPosArray, currentValArray, opponentPosArray, opponentValArray,
+                currentSignum, currentPos, currentAbsPiece);
 
-            seeList[exchangeIndex] = captureVal - seeList[exchangeIndex - 1];
-            exchangeIndex++;
+            seeList[exchangePos] = captureVal - seeList[exchangePos - 1];
+            exchangePos++;
 
             // swap roles
-            int[] tmp = currentIdxArray;
-            currentIdxArray = opponentIdxArray;
-            opponentIdxArray = tmp;
+            int[] tmp = currentPosArray;
+            currentPosArray = opponentPosArray;
+            opponentPosArray = tmp;
             tmp = currentValArray;
             currentValArray = opponentValArray;
             opponentValArray = tmp;
@@ -417,33 +417,33 @@ public class MoveGenerator {
             captureVal = currentVal;
         }
 
-        for (exchangeIndex--; exchangeIndex > 0; exchangeIndex--) {
-            seeList[exchangeIndex - 1] = Math.min(-seeList[exchangeIndex], seeList[exchangeIndex - 1]);
+        for (exchangePos--; exchangePos > 0; exchangePos--) {
+            seeList[exchangePos - 1] = Math.min(-seeList[exchangePos], seeList[exchangePos - 1]);
         }
         return seeList[0];
     }
 
-    private static void addHiddenAttackers(final Board boardObj, final int toIndex,
-                                           final int[] currentIdxArray, final int[] currentValArray,
-                                           final int[] opponentIdxArray, final int[] opponentValArray,
-                                           final int currentSignum, final int currentIndex, final int currentAbsPiece) {
+    private static void addHiddenAttackers(final Board board, final int toPos,
+                                           final int[] currentPosArray, final int[] currentValArray,
+                                           final int[] opponentPosArray, final int[] opponentValArray,
+                                           final int currentSignum, final int currentPos, final int currentAbsPiece) {
         if (currentAbsPiece != KNIGHT) {
-            final int[] board = boardObj.getBoard();
-            // from toIndex to currentIndex
-            final int attackValue = ATTACK_ARRAY[currentIndex - toIndex + 120];
+            final int[] squares = board.getBoard();
+            // from toPos to currentPos
+            final int attackValue = ATTACK_ARRAY[currentPos - toPos + 120];
             assert currentAbsPiece == PAWN || (attackValue & ATTACK_BITS[currentAbsPiece]) > 0;
             final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
-            int foundIndex = currentIndex + delta;
-            while ((foundIndex & 0x88) == 0 && board[foundIndex] == EMPTY) {
-                foundIndex += delta;
+            int foundPos = currentPos + delta;
+            while ((foundPos & 0x88) == 0 && squares[foundPos] == EMPTY) {
+                foundPos += delta;
             }
-            if ((foundIndex & 0x88) == 0) {
+            if ((foundPos & 0x88) == 0) {
                 // found a piece
-                final int foundPiece = board[foundIndex];
+                final int foundPiece = squares[foundPos];
                 final int foundSignum = Integer.signum(foundPiece);
                 final int foundAbsPiece = foundSignum * foundPiece;
-                if (!boardObj.isSliding(foundAbsPiece) || (attackValue & ATTACK_BITS[foundAbsPiece]) == 0) {
-                    // this piece cannot attack the target index
+                if (!board.isSliding(foundAbsPiece) || (attackValue & ATTACK_BITS[foundAbsPiece]) == 0) {
+                    // this piece cannot attack the target position
                     // (sliding pieces so it's OK not to recompute the attackValue)
                     return;
                 }
@@ -452,11 +452,11 @@ public class MoveGenerator {
                 final int[] insertValArray;
                 if (foundSignum == currentSignum) {
                     // friend
-                    insertIdxArray = currentIdxArray;
+                    insertIdxArray = currentPosArray;
                     insertValArray = currentValArray;
                 } else {
                     // foe
-                    insertIdxArray = opponentIdxArray;
+                    insertIdxArray = opponentPosArray;
                     insertValArray = opponentValArray;
                 }
                 final int insertArrLen = insertValArray[0];
@@ -464,7 +464,7 @@ public class MoveGenerator {
                     final int tmpVal = insertValArray[i];
                     if (tmpVal <= foundVal) {
                         insertValArray[i + 1] = foundVal;
-                        insertIdxArray[i + 1] = foundIndex;
+                        insertIdxArray[i + 1] = foundPos;
                         break;
                     }
                     insertValArray[i + 1] = insertValArray[i];
@@ -475,30 +475,30 @@ public class MoveGenerator {
                 if (insertValArray[0] == 1 || insertValArray[1] > foundVal) {
                     // we haven't inserted it yet
                     insertValArray[1] = foundVal;
-                    insertIdxArray[1] = foundIndex;
+                    insertIdxArray[1] = foundPos;
                 }
             }
         }
     }
 
     public static boolean isCapture(final Board board, final int move) {
-        final int toIndex = getMoveToIndex(move);
+        final int toPos = getToPosition(move);
         final int[] boardArray = board.getBoard();
-        final int attacked = boardArray[toIndex];
+        final int attacked = boardArray[toPos];
         if (attacked != EMPTY) {
             return true;
         }
-        final int fromIndex = getMoveFromIndex(move);
-        final int piece = boardArray[fromIndex];
+        final int fromPos = getFromPosition(move);
+        final int piece = boardArray[fromPos];
         final int signum = Integer.signum(piece);
-        return piece * signum == PAWN && getFile(fromIndex) != getFile(toIndex);
+        return piece * signum == PAWN && getFile(fromPos) != getFile(toPos);
     }
 
     public static boolean isPromotion(final Board board, final int move) {
-        final int fromIndex = getMoveFromIndex(move);
-        final int piece = board.getBoard()[fromIndex];
+        final int fromPos = getFromPosition(move);
+        final int piece = board.getBoard()[fromPos];
         if (piece == PAWN || piece == -PAWN) {
-            final int rank = getRank(getMoveToIndex(move));
+            final int rank = getRank(getToPosition(move));
             return rank == 0 || rank == 7;
         }
         return false;

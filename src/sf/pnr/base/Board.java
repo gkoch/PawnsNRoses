@@ -137,24 +137,24 @@ public final class Board {
             "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
         assert bitboardAllPieces[WHITE] == BitBoard.computeAllPieces(this, WHITE);
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
-		final int fromIndex = getMoveFromIndex(moveBase);
-		final int piece = board[fromIndex];
+		final int fromPos = getFromPosition(moveBase);
+		final int piece = board[fromPos];
         assert piece != EMPTY: "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
 		final int moveType = (moveBase & MOVE_TYPE);
         final int signum = Integer.signum(piece);
         assert (((state & WHITE_TO_MOVE) << 1) - 1) == signum:
             "FEN: " + StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
         final int absPiece = signum * piece;
-        final int toIndex = getMoveToIndex(moveBase);
-        assert fromIndex != toIndex;
+        final int toPos = getToPosition(moveBase);
+        assert fromPos != toPos;
 		final int captured;
-		final int captureIndex;
+		final int capturePos;
 		if (moveType == MT_EN_PASSANT) {
 			captured = -signum * PAWN;
-			captureIndex = toIndex - signum * UP;
+			capturePos = toPos - signum * UP;
 		} else {
-			captured = board[toIndex];
-			captureIndex = toIndex;
+			captured = board[toPos];
+			capturePos = toPos;
 		}
         assert piece * captured <= 0;
 		final int absCaptured = -signum * captured;
@@ -177,9 +177,9 @@ public final class Board {
 			}
 		} else {
 			state &= CLEAR_HALF_MOVES;
-            final int direction = toIndex - fromIndex;
+            final int direction = toPos - fromPos;
 			if (direction == 0x20 || direction == -0x20) {
-                final int enPassantFile = getFile(fromIndex) + 1;
+                final int enPassantFile = getFile(fromPos) + 1;
                 assert enPassantFile >= 1 && enPassantFile <= 8;
                 state |= enPassantFile << SHIFT_EN_PASSANT;
 			}
@@ -189,44 +189,44 @@ public final class Board {
 			// remove the captured piece from the piece list
             capturedValue[currentPlayer] +=
                 Evaluation.VAL_PIECE_INCREMENTS[absCaptured][pieces[absCaptured][nextPlayer][0]];
-            removeFromPieceList(nextPlayer, absCaptured, captureIndex);
-            state &= CLEAR_CASTLING[toIndex];
+            removeFromPieceList(nextPlayer, absCaptured, capturePos);
+            state &= CLEAR_CASTLING[toPos];
 		}
 		
-        movePiece(absPiece, currentPlayer, fromIndex, toIndex);
+        movePiece(absPiece, currentPlayer, fromPos, toPos);
 
         switch (moveType) {
         case MT_NORMAL:
-            state &= CLEAR_CASTLING[fromIndex];
+            state &= CLEAR_CASTLING[fromPos];
             break;
         case MT_CASTLING_KINGSIDE:
         case MT_CASTLING_QUEENSIDE:
             {
-                assert getRank(fromIndex) == getRank(toIndex);
+                assert getRank(fromPos) == getRank(toPos);
                 assert captured == EMPTY;
-                assert Math.abs(board[toIndex]) == KING;
-                final int rookFromIndex =
-                    toIndex + CASTLING_TO_ROOK_FROM_DELTA[(moveType & MT_CASTLING) >> SHIFT_MOVE_TYPE];
-                final int rookToIndex =
-                    toIndex + CASTLING_TO_ROOK_TO_DELTA[(moveType & MT_CASTLING) >> SHIFT_MOVE_TYPE];
-                assert Math.abs(board[rookFromIndex]) == ROOK;
-                movePiece(ROOK, currentPlayer, rookFromIndex, rookToIndex);
-                state &= (fromIndex < 8)? (CLEAR_CASTLING_WHITE_KINGSIDE & CLEAR_CASTLING_WHITE_QUEENSIDE):
+                assert Math.abs(board[toPos]) == KING;
+                final int rookFromPos =
+                    toPos + CASTLING_TO_ROOK_FROM_DELTA[(moveType & MT_CASTLING) >> SHIFT_MOVE_TYPE];
+                final int rookToPos =
+                    toPos + CASTLING_TO_ROOK_TO_DELTA[(moveType & MT_CASTLING) >> SHIFT_MOVE_TYPE];
+                assert Math.abs(board[rookFromPos]) == ROOK;
+                movePiece(ROOK, currentPlayer, rookFromPos, rookToPos);
+                state &= (fromPos < 8)? (CLEAR_CASTLING_WHITE_KINGSIDE & CLEAR_CASTLING_WHITE_QUEENSIDE):
                     (CLEAR_CASTLING_BLACK_KINGSIDE & CLEAR_CASTLING_BLACK_QUEENSIDE);
             }
             break;
         case MT_EN_PASSANT:
-            assert captured == -piece; assert getRank(fromIndex) == 4 || getRank(fromIndex) == 3;
-            assert getRank(toIndex) == 5 || getRank(toIndex) == 2;
+            assert captured == -piece; assert getRank(fromPos) == 4 || getRank(fromPos) == 3;
+            assert getRank(toPos) == 5 || getRank(toPos) == 2;
             assert piece == PAWN || piece == -PAWN;
-            board[captureIndex] = EMPTY;
+            board[capturePos] = EMPTY;
             break;
         case MT_PROMOTION_KNIGHT:
         case MT_PROMOTION_BISHOP:
         case MT_PROMOTION_ROOK:
         case MT_PROMOTION_QUEEN:
             assert piece == PAWN || piece == -PAWN;
-            replacePromotedPawn(signum, toIndex, currentPlayer, PROMOTION_TO_PIECE[moveType >> SHIFT_MOVE_TYPE]);
+            replacePromotedPawn(signum, toPos, currentPlayer, PROMOTION_TO_PIECE[moveType >> SHIFT_MOVE_TYPE]);
             break;
         }
         zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
@@ -235,10 +235,10 @@ public final class Board {
         assert zobristPawn == (computeZobrist(this, PAWN) ^ computeZobrist(this, KING));
         assert pieces[PAWN][0][0] <= 8;
         assert pieces[PAWN][1][0] <= 8;
-        assert pieceArrayPos[fromIndex] == EMPTY;
-        assert pieceArrayPos[toIndex] != EMPTY;
-        assert board[fromIndex] == EMPTY;
-        assert board[toIndex] != EMPTY;
+        assert pieceArrayPos[fromPos] == EMPTY;
+        assert pieceArrayPos[toPos] != EMPTY;
+        assert board[fromPos] == EMPTY;
+        assert board[toPos] != EMPTY;
         assert bitboardAllPieces[WHITE] == BitBoard.computeAllPieces(this, WHITE);
         assert bitboardAllPieces[BLACK] == BitBoard.computeAllPieces(this, BLACK);
         assert getMaterialValueAsWhite() == Evaluation.computeMaterialValueAsWhite(this):
@@ -247,73 +247,73 @@ public final class Board {
 		return undo;
 	}
 
-    private void replacePromotedPawn(final int signum, final int toIndex, final int toMove, final int piece) {
-        board[toIndex] = signum * piece;
-        removeFromPieceList(toMove, PAWN, toIndex);
-        addToPieceList(toMove, piece, toIndex);
+    private void replacePromotedPawn(final int signum, final int toPos, final int toMove, final int piece) {
+        board[toPos] = signum * piece;
+        removeFromPieceList(toMove, PAWN, toPos);
+        addToPieceList(toMove, piece, toPos);
     }
 
-    private void movePiece(final int absPiece, final int toMove, final int fromIndex, final int toIndex) {
+    private void movePiece(final int absPiece, final int toMove, final int fromPos, final int toPos) {
         // update zobrist key
-        final int fromIndex64 = convert0x88To64(fromIndex);
-        final int toIndex64 = convert0x88To64(toIndex);
-        final long zobristFrom = ZOBRIST_PIECES[absPiece][toMove][fromIndex64];
-        final long zobristTo = ZOBRIST_PIECES[absPiece][toMove][toIndex64];
+        final int fromPos64 = convert0x88To64(fromPos);
+        final int toPos64 = convert0x88To64(toPos);
+        final long zobristFrom = ZOBRIST_PIECES[absPiece][toMove][fromPos64];
+        final long zobristTo = ZOBRIST_PIECES[absPiece][toMove][toPos64];
         final long zobristMove = zobristFrom ^ zobristTo;
         zobristIncremental ^= zobristMove;
         if (absPiece == PAWN || absPiece == KING) {
             zobristPawn ^= zobristMove;
         }
         // update the board
-        board[toIndex] = board[fromIndex];
-        board[fromIndex] = EMPTY;
+        board[toPos] = board[fromPos];
+        board[fromPos] = EMPTY;
         // update the piece array and the piece list
-        final int pos = pieceArrayPos[fromIndex];
-        pieceArrayPos[toIndex] = pos;
-        pieceArrayPos[fromIndex] = EMPTY;
-        pieces[absPiece][toMove][pos] = toIndex;
-        bitboardAllPieces[toMove] ^= 1L << fromIndex64;
-        bitboardAllPieces[toMove] ^= 1L << toIndex64;
+        final int pos = pieceArrayPos[fromPos];
+        pieceArrayPos[toPos] = pos;
+        pieceArrayPos[fromPos] = EMPTY;
+        pieces[absPiece][toMove][pos] = toPos;
+        bitboardAllPieces[toMove] ^= 1L << fromPos64;
+        bitboardAllPieces[toMove] ^= 1L << toPos64;
     }
 
-    private void removeFromPieceList(final int side, final int absPiece, final int index) {
+    private void removeFromPieceList(final int side, final int absPiece, final int position) {
         assert absPiece != EMPTY;
         final int[] pieceIndices = pieces[absPiece][side];
         final int pieceCount = pieceIndices[0];
         assert pieceCount > 0;
-        assert pieceArrayPos[index] != EMPTY;
+        assert pieceArrayPos[position] != EMPTY;
         final int lastPieceIdx = pieceIndices[pieceCount];
-        final int lastPieceNewPos = pieceArrayPos[index];
+        final int lastPieceNewPos = pieceArrayPos[position];
         pieceIndices[lastPieceNewPos] = lastPieceIdx;
         pieceArrayPos[lastPieceIdx] = lastPieceNewPos;
-        pieceArrayPos[index] = 0;
+        pieceArrayPos[position] = 0;
         pieceIndices[0]--;
         materialValue[side] -= Evaluation.VAL_PIECE_INCREMENTS[absPiece][pieceCount];
-        final int index64 = convert0x88To64(index);
-        final long zobristKey = ZOBRIST_PIECES[absPiece][side][index64];
+        final int position64 = convert0x88To64(position);
+        final long zobristKey = ZOBRIST_PIECES[absPiece][side][position64];
         zobristIncremental ^= zobristKey;
         if (absPiece == PAWN) {
             zobristPawn ^= zobristKey;
         }
-        bitboardAllPieces[side] ^= 1L << index64;
+        bitboardAllPieces[side] ^= 1L << position64;
     }
 
-    private void addToPieceList(final int side, final int absPiece, final int index) {
+    private void addToPieceList(final int side, final int absPiece, final int position) {
         final int[] pieceIndices = pieces[absPiece][side];
         pieceIndices[0]++;
         final int pieceCount = pieceIndices[0];
         assert pieceCount <= 10;
         assert absPiece != PAWN || pieceCount <= 8;
-        pieceIndices[pieceCount] = index;
-        pieceArrayPos[index] = pieceIndices[0];
+        pieceIndices[pieceCount] = position;
+        pieceArrayPos[position] = pieceIndices[0];
         materialValue[side] += Evaluation.VAL_PIECE_INCREMENTS [absPiece][pieceCount];
-        final int index64 = convert0x88To64(index);
-        final long zobristKey = ZOBRIST_PIECES[absPiece][side][index64];
+        final int position64 = convert0x88To64(position);
+        final long zobristKey = ZOBRIST_PIECES[absPiece][side][position64];
         zobristIncremental ^= zobristKey;
         if (absPiece == PAWN) {
             zobristPawn ^= zobristKey;
         }
-        bitboardAllPieces[side] ^= 1L << index64;
+        bitboardAllPieces[side] ^= 1L << position64;
     }
 
     public int getMaterialValue() {
@@ -356,14 +356,14 @@ public final class Board {
         final int move = (int) undo;
 
         // extract the info
-        final int fromIndex = getMoveFromIndex(move);
-		final int toIndex = getMoveToIndex(move);
-        assert board[fromIndex] == EMPTY;
-        assert board[toIndex] != EMPTY;
-        assert pieceArrayPos[fromIndex] == EMPTY;
-        assert pieceArrayPos[toIndex] != EMPTY;
+        final int fromPos = getFromPosition(move);
+		final int toPos = getToPosition(move);
+        assert board[fromPos] == EMPTY;
+        assert board[toPos] != EMPTY;
+        assert pieceArrayPos[fromPos] == EMPTY;
+        assert pieceArrayPos[toPos] != EMPTY;
         final int moveType = move & MOVE_TYPE;
-        final int piece = board[toIndex];
+        final int piece = board[toPos];
         final int signum = Integer.signum(piece);
         final int signumOpponent = -signum;
         final int currentPlayer = state & WHITE_TO_MOVE;
@@ -374,27 +374,27 @@ public final class Board {
 
         if ((moveType & MT_PROMOTION) == 0) {
             final int absPiece = -signumOpponent * piece;
-            movePiece(absPiece, currentPlayer, toIndex, fromIndex);
+            movePiece(absPiece, currentPlayer, toPos, fromPos);
             switch (moveType) {
                 case MT_EN_PASSANT:
-                    final int enPassantIndex = toIndex + signumOpponent * 16;
+                    final int enPassantPosition = toPos + signumOpponent * 16;
                     final int opponent = currentPlayer ^ WHITE_TO_MOVE;
-                    board[enPassantIndex] = signumOpponent * PAWN;
-                    addToPieceList(opponent, PAWN, enPassantIndex);
+                    board[enPassantPosition] = signumOpponent * PAWN;
+                    addToPieceList(opponent, PAWN, enPassantPosition);
                     break;
                 case MT_CASTLING_QUEENSIDE:
-                    movePiece(ROOK, currentPlayer, fromIndex - 1, toIndex - 2);
+                    movePiece(ROOK, currentPlayer, fromPos - 1, toPos - 2);
                     break;
                 case MT_CASTLING_KINGSIDE:
-                    movePiece(ROOK, currentPlayer, fromIndex + 1, toIndex + 1);
+                    movePiece(ROOK, currentPlayer, fromPos + 1, toPos + 1);
                     break;
                 default:
                     final int absCaptured = (move & CAPTURED) >> SHIFT_CAPTURED;
                     if (absCaptured != EMPTY) {
-                        board[toIndex] = signumOpponent * absCaptured;
+                        board[toPos] = signumOpponent * absCaptured;
                         final int toMove = currentPlayer ^ WHITE_TO_MOVE;
                         // return the captured piece to the pieces list of the opponent
-                        addToPieceList(toMove, absCaptured, toIndex);
+                        addToPieceList(toMove, absCaptured, toPos);
                         assert zobristIncremental == computeZobristIncremental(this);
                         capturedValue[currentPlayer] -=
                             Evaluation.VAL_PIECE_INCREMENTS[absCaptured][pieces[absCaptured][toMove][0]];
@@ -404,16 +404,16 @@ public final class Board {
         } else {
             // move was a promotion, need to update the piece list accordingly
             final int absPiece = signum * piece;
-            board[toIndex] = EMPTY;
+            board[toPos] = EMPTY;
             final int pawn = signum * PAWN;
-            board[fromIndex] = pawn;
-            removeFromPieceList(currentPlayer, absPiece, toIndex);
-            addToPieceList(currentPlayer, PAWN, fromIndex);
+            board[fromPos] = pawn;
+            removeFromPieceList(currentPlayer, absPiece, toPos);
+            addToPieceList(currentPlayer, PAWN, fromPos);
             final int absCaptured = (move & CAPTURED) >> SHIFT_CAPTURED;
             if (absCaptured != EMPTY) {
-                board[toIndex] = signumOpponent * absCaptured;
+                board[toPos] = signumOpponent * absCaptured;
                 // return the captured piece to the pieces list of the opponent
-                addToPieceList(currentPlayer ^ WHITE_TO_MOVE, absCaptured, toIndex);
+                addToPieceList(currentPlayer ^ WHITE_TO_MOVE, absCaptured, toPos);
             }
         }
         zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
@@ -473,103 +473,103 @@ public final class Board {
             final int toMove = state & WHITE_TO_MOVE;
             final int signum = (toMove << 1) - 1;
             final int pawn = signum * PAWN;
-            final int rankIndex = (3 + toMove) << 4;
-            final int leftIndex = rankIndex + enPassant - 1;
-            final int rightIndex = leftIndex + 2;
-            if (!((leftIndex & 0x88) == 0 && board[leftIndex] == pawn ||
-                    (rightIndex & 0x88) == 0 && board[rightIndex] == pawn)) {
+            final int rankStartPos = (3 + toMove) << 4;
+            final int leftPos = rankStartPos + enPassant - 1;
+            final int rightPos = leftPos + 2;
+            if (!((leftPos & 0x88) == 0 && board[leftPos] == pawn ||
+                    (rightPos & 0x88) == 0 && board[rightPos] == pawn)) {
                 polyglotZobrist ^= ZOBRIST_EN_PASSANT[(state & EN_PASSANT) >> SHIFT_EN_PASSANT];
             }
         }
         return polyglotZobrist;
     }
 
-    public boolean isAttacked(final int index, final int side) {
+    public boolean isAttacked(final int position, final int side) {
         final int[] knights = pieces[KNIGHT][side];
         for (int i = knights[0]; i > 0; i--) {
-            if ((ATTACK_ARRAY[index - knights[i] + 120] & ATTACK_N) == ATTACK_N) {
+            if ((ATTACK_ARRAY[position - knights[i] + 120] & ATTACK_N) == ATTACK_N) {
                 return true;
             }
         }
         final int kingIdx = pieces[KING][side][1];
-        if ((ATTACK_ARRAY[index - kingIdx + 120] & ATTACK_K) > 0) {
+        if ((ATTACK_ARRAY[position - kingIdx + 120] & ATTACK_K) > 0) {
             return true;
         }
-        if (isAttackedSliding(index, side, ROOK, ATTACK_R)) return true;
-        if (isAttackedSliding(index, side, BISHOP, ATTACK_B)) return true;
-        if (isAttackedSliding(index, side, QUEEN, ATTACK_Q)) return true;
+        if (isAttackedSliding(position, side, ROOK, ATTACK_R)) return true;
+        if (isAttackedSliding(position, side, BISHOP, ATTACK_B)) return true;
+        if (isAttackedSliding(position, side, QUEEN, ATTACK_Q)) return true;
         if (side == WHITE_TO_MOVE) {
-            if (((index + DL) & 0x88) == 0 && board[index + DL] == PAWN) return true;
-            if (((index + DR) & 0x88) == 0 && board[index + DR] == PAWN) return true;
+            if (((position + DL) & 0x88) == 0 && board[position + DL] == PAWN) return true;
+            if (((position + DR) & 0x88) == 0 && board[position + DR] == PAWN) return true;
         } else {
-            if (((index + UL) & 0x88) == 0 && board[index + UL] == -PAWN) return true;
-            if (((index + UR) & 0x88) == 0 && board[index + UR] == -PAWN) return true;
+            if (((position + UL) & 0x88) == 0 && board[position + UL] == -PAWN) return true;
+            if (((position + UR) & 0x88) == 0 && board[position + UR] == -PAWN) return true;
         }
         return false;
     }
 
-    private boolean isAttackedSliding(final int index, final int side, final int absPiece, final int attackBits) {
+    private boolean isAttackedSliding(final int position, final int side, final int absPiece, final int attackBits) {
         final int[] pieceIndices = pieces[absPiece][side];
         for (int i = pieceIndices[0]; i > 0; i--) {
-            if (isAttackedBySliding(index, attackBits, pieceIndices[i])) return true;
+            if (isAttackedBySliding(position, attackBits, pieceIndices[i])) return true;
         }
         return false;
     }
 
-    public void getAttackers(final int index, final int side, final int[] attackers) {
+    public void getAttackers(final int position, final int side, final int[] attackers) {
 
         attackers[0] = 0;
         if (side == WHITE_TO_MOVE) {
-            if (((index + DL) & 0x88) == 0 && board[index + DL] == PAWN) attackers[++attackers[0]] = index + DL;
-            if (((index + DR) & 0x88) == 0 && board[index + DR] == PAWN) attackers[++attackers[0]] = index + DR;
+            if (((position + DL) & 0x88) == 0 && board[position + DL] == PAWN) attackers[++attackers[0]] = position + DL;
+            if (((position + DR) & 0x88) == 0 && board[position + DR] == PAWN) attackers[++attackers[0]] = position + DR;
         } else {
-            if (((index + UL) & 0x88) == 0 && board[index + UL] == -PAWN) attackers[++attackers[0]] = index + UL;
-            if (((index + UR) & 0x88) == 0 && board[index + UR] == -PAWN) attackers[++attackers[0]] = index + UR;
+            if (((position + UL) & 0x88) == 0 && board[position + UL] == -PAWN) attackers[++attackers[0]] = position + UL;
+            if (((position + UR) & 0x88) == 0 && board[position + UR] == -PAWN) attackers[++attackers[0]] = position + UR;
         }
         final int[] knights = pieces[KNIGHT][side];
         for (int i = knights[0]; i > 0; i--) {
-            final int knightIndex = knights[i];
-            if ((ATTACK_ARRAY[index - knightIndex + 120] & ATTACK_N) == ATTACK_N) {
-                attackers[++attackers[0]] = knightIndex;
+            final int knightPos = knights[i];
+            if ((ATTACK_ARRAY[position - knightPos + 120] & ATTACK_N) == ATTACK_N) {
+                attackers[++attackers[0]] = knightPos;
             }
         }
-        getAttackedSliding(index, side, BISHOP, ATTACK_B, attackers);
-        getAttackedSliding(index, side, ROOK, ATTACK_R, attackers);
-        getAttackedSliding(index, side, QUEEN, ATTACK_Q, attackers);
-        final int kingIndex = pieces[KING][side][1];
-        if ((ATTACK_ARRAY[index - kingIndex + 120] & ATTACK_K) > 0) {
-            attackers[++attackers[0]] = kingIndex;
+        getAttackedSliding(position, side, BISHOP, ATTACK_B, attackers);
+        getAttackedSliding(position, side, ROOK, ATTACK_R, attackers);
+        getAttackedSliding(position, side, QUEEN, ATTACK_Q, attackers);
+        final int kingPos = pieces[KING][side][1];
+        if ((ATTACK_ARRAY[position - kingPos + 120] & ATTACK_K) > 0) {
+            attackers[++attackers[0]] = kingPos;
         }
     }
 
-    private void getAttackedSliding(final int index, final int side, final int absPiece, final int attackBits,
+    private void getAttackedSliding(final int targetPos, final int side, final int absPiece, final int attackBits,
                                     final int[] attackers) {
-        final int[] pieceIndices = pieces[absPiece][side];
-        for (int i = pieceIndices[0]; i > 0; i--) {
-            final int pieceIndex = pieceIndices[i];
-            if (isAttackedBySliding(index, attackBits, pieceIndex)) {
-                attackers[++attackers[0]] = pieceIndex;
+        final int[] positions = pieces[absPiece][side];
+        for (int i = positions[0]; i > 0; i--) {
+            final int pos = positions[i];
+            if (isAttackedBySliding(targetPos, attackBits, pos)) {
+                attackers[++attackers[0]] = pos;
             }
         }
     }
 
-    public boolean isAttackedBySliding(final int targetIndex, final int attackBits, final int pieceIndex) {
-        final int attackArrayIndex = targetIndex - pieceIndex + 120;
+    public boolean isAttackedBySliding(final int targetPos, final int attackBits, final int piecePos) {
+        final int attackArrayIndex = targetPos - piecePos + 120;
         final int attackValue = ATTACK_ARRAY[attackArrayIndex];
         if ((attackValue & attackBits) > 0) {
             final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
-            int testIndex = pieceIndex + delta;
-            while (testIndex != targetIndex && (testIndex & 0x88) == 0 && board[testIndex] == EMPTY) {
-                testIndex += delta;
+            int testPos = piecePos + delta;
+            while (testPos != targetPos && (testPos & 0x88) == 0 && board[testPos] == EMPTY) {
+                testPos += delta;
             }
-            if (testIndex == targetIndex) return true;
+            if (testPos == targetPos) return true;
         }
         return false;
     }
 
-    public boolean isAttackedByNonSliding(final int targetIndex, final int attackBits, final int pieceIndex) {
-        assert Math.abs(board[pieceIndex]) == KNIGHT || Math.abs(board[pieceIndex]) == KING;
-        final int attackArrayIndex = targetIndex - pieceIndex + 120;
+    public boolean isAttackedByNonSliding(final int targetPos, final int attackBits, final int piecePos) {
+        assert Math.abs(board[piecePos]) == KNIGHT || Math.abs(board[piecePos]) == KING;
+        final int attackArrayIndex = targetPos - piecePos + 120;
         final int attackValue = ATTACK_ARRAY[attackArrayIndex];
         return (attackValue & attackBits) > 0;
     }
@@ -583,37 +583,37 @@ public final class Board {
     }
 
     public boolean attacksKing(final int side) {
-        final int kingIndex = pieces[KING][1 - side][1];
-        return isAttacked(kingIndex, side);
+        final int kingPos = pieces[KING][1 - side][1];
+        return isAttacked(kingPos, side);
     }
 
     public boolean isCheckingMove(final int move) {
         final int toMove = state & WHITE_TO_MOVE;
-        final int fromIndex = getMoveFromIndex(move);
+        final int fromPos = getFromPosition(move);
         final int signum = (toMove << 1) - 1;
-        final int piece = board[fromIndex];
+        final int piece = board[fromPos];
         final int absPiece = signum * piece;
         assert absPiece != EMPTY: StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
-        final int kingIndex = pieces[KING][1 - toMove][1];
-        final int toIndex = getMoveToIndex(move);
-        final int attacked = board[toIndex];
+        final int kingPos = pieces[KING][1 - toMove][1];
+        final int toPos = getToPosition(move);
+        final int attacked = board[toPos];
         // if it we are moving on the line to the opponent king and it's not castling or capturing
         // then it's not a checking move (assuming that we start from a legal position)
         if (attacked == EMPTY && !Utils.isCastling(move) &&
-                (ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_Q & ATTACK_ARRAY[kingIndex - fromIndex + 120]) > 0) {
+                (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_Q & ATTACK_ARRAY[kingPos - fromPos + 120]) > 0) {
             return false;
         }
 
-        if (isDiscoveredCheck(kingIndex, fromIndex, signum)) {
+        if (isDiscoveredCheck(kingPos, fromPos, signum)) {
             return true;
         }
         switch (absPiece) {
             case PAWN:
-                final int toRank = getRank(toIndex);
+                final int toRank = getRank(toPos);
                 if (toRank > 0 && toRank < 7) {
                     final int[] deltas = DELTA_PAWN_ATTACK[toMove];
                     for (int delta: deltas) {
-                        if (toIndex + delta == kingIndex) {
+                        if (toPos + delta == kingPos) {
                             return true;
                         }
                     }
@@ -623,24 +623,24 @@ public final class Board {
                     assert promotedTo == KNIGHT || promotedTo == BISHOP || promotedTo == ROOK || promotedTo == QUEEN:
                         StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
                     if (promotedTo == KNIGHT) {
-                        return ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_N) == ATTACK_N);
+                        return ((ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_N) == ATTACK_N);
                     } else {
-                        return isAttackedBySliding(kingIndex, ATTACK_BITS[promotedTo], toIndex);
+                        return isAttackedBySliding(kingPos, ATTACK_BITS[promotedTo], toPos);
                     }
                 }
                 return false;
             case KNIGHT:
-                return ((ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_N) == ATTACK_N);
+                return ((ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_N) == ATTACK_N);
             case BISHOP:
             case ROOK:
             case QUEEN:
-                return isAttackedBySliding(kingIndex, ATTACK_BITS[absPiece], toIndex);
+                return isAttackedBySliding(kingPos, ATTACK_BITS[absPiece], toPos);
             case KING:
                 if (Utils.isCastling(move)) {
                     if ((move & MT_CASTLING_QUEENSIDE) > 0) {
-                        return isAttackedBySliding(kingIndex, ATTACK_R, toIndex + 1);
+                        return isAttackedBySliding(kingPos, ATTACK_R, toPos + 1);
                     } else {
-                        return isAttackedBySliding(kingIndex, ATTACK_R, toIndex - 1);
+                        return isAttackedBySliding(kingPos, ATTACK_R, toPos - 1);
                     }
                 }
                 return false;
@@ -648,19 +648,19 @@ public final class Board {
         return false;
     }
 
-    public boolean isDiscoveredCheck(final int kingIndex, final int fromIndex, final int signum) {
-        if (isAttackedBySliding(kingIndex, ATTACK_Q, fromIndex)) {
+    public boolean isDiscoveredCheck(final int kingPos, final int fromPos, final int signum) {
+        if (isAttackedBySliding(kingPos, ATTACK_Q, fromPos)) {
             // search for discovered check
-            final int attackValue = ATTACK_ARRAY[fromIndex - kingIndex + 120];
+            final int attackValue = ATTACK_ARRAY[fromPos - kingPos + 120];
             final int attackBits = attackValue & ATTACK_Q;
             assert attackBits != 0;
             final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
-            int testIndex = fromIndex + delta;
-            while ((testIndex & 0x88) == 0 && board[testIndex] == EMPTY) {
-                testIndex += delta;
+            int testPos = fromPos + delta;
+            while ((testPos & 0x88) == 0 && board[testPos] == EMPTY) {
+                testPos += delta;
             }
-            if ((testIndex & 0x88) == 0) {
-                final int absAttacker = board[testIndex] * signum;
+            if ((testPos & 0x88) == 0) {
+                final int absAttacker = board[testPos] * signum;
                 if (absAttacker > 0) {
                     return SLIDING[absAttacker] && (ATTACK_BITS[absAttacker] & attackBits) > 0;
                 }
@@ -671,8 +671,8 @@ public final class Board {
 
     public boolean isMate() {
         final int toMove = state & WHITE_TO_MOVE;
-        final int kingIndex = pieces[KING][toMove][1];
-        if (isAttacked(kingIndex, 1 - toMove)) {
+        final int kingPos = pieces[KING][toMove][1];
+        if (isAttacked(kingPos, 1 - toMove)) {
             final MoveGenerator moveGenerator = new MoveGenerator();
             moveGenerator.pushFrame();
             moveGenerator.generatePseudoLegalMoves(this);
@@ -692,8 +692,8 @@ public final class Board {
         for (int i = moves[0]; i > 0 && !found; i--) {
             final long undo = move(moves[i]);
             final int toMove = state & WHITE_TO_MOVE;
-            final int kingIndex = pieces[KING][(1 - toMove)][1];
-            found = !isAttacked(kingIndex, toMove);
+            final int kingPos = pieces[KING][(1 - toMove)][1];
+            found = !isAttacked(kingPos, toMove);
             takeBack(undo);
         }
         return found;

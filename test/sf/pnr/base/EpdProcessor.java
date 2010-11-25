@@ -42,7 +42,7 @@ public class EpdProcessor {
                         continue;
                     }
                     final Board board = StringUtils.fromFen(fen);
-                    final Set<String> problems = StringUtils.checkBoard(board);
+                    final Set<String> problems = Utils.checkBoard(board);
                     if (!problems.isEmpty()) {
                         System.out.printf("Skipping FEN '%s' because of the following problem(s):\r\n", fen);
                         for (String problem: problems) {

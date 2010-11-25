@@ -1,9 +1,7 @@
 package sf.pnr.base;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static sf.pnr.base.Utils.*;
 
@@ -267,7 +265,7 @@ public class StringUtils {
         final char fromRank = moveStr.charAt(1);
         final char toFile = moveStr.charAt(2);
         final char toRank = moveStr.charAt(3);
-        int move = (getIndex(toFile - 'a', toRank - '1') << SHIFT_TO) + getIndex(fromFile - 'a', fromRank - '1');
+        int move = (getPosition(toFile - 'a', toRank - '1') << SHIFT_TO) + getPosition(fromFile - 'a', fromRank - '1');
         if (moveStr.length() > 4) {
             final String suffix = moveStr.substring(4).trim();
             if ("e.p.".equals(suffix)) {
@@ -299,13 +297,13 @@ public class StringUtils {
     }
 
     public static String toSimple(final int move) {
-        final int fromIndex = move & FROM;
-        final int toIndex = (move & TO) >> SHIFT_TO;
+        final int fromPos = move & FROM;
+        final int toPos = (move & TO) >> SHIFT_TO;
         final StringBuilder builder = new StringBuilder();
-        builder.append((char) ('a' + getFile(fromIndex)));
-        builder.append((char) ('1' + getRank(fromIndex)));
-        builder.append((char) ('a' + getFile(toIndex)));
-        builder.append((char) ('1' + getRank(toIndex)));
+        builder.append((char) ('a' + getFile(fromPos)));
+        builder.append((char) ('1' + getRank(fromPos)));
+        builder.append((char) ('a' + getFile(toPos)));
+        builder.append((char) ('1' + getRank(toPos)));
         final int moveType = move & MOVE_TYPE;
         switch (moveType) {
             case MT_EN_PASSANT:
@@ -331,9 +329,9 @@ public class StringUtils {
         final char fromRank = moveStr.charAt(1);
         final char toFile = moveStr.charAt(2);
         final char toRank = moveStr.charAt(3);
-        final int fromIndex = getIndex(fromFile - 'a', fromRank - '1');
-        final int toIndex = getIndex(toFile - 'a', toRank - '1');
-        int move = (toIndex << SHIFT_TO) + fromIndex;
+        final int fromPos = getPosition(fromFile - 'a', fromRank - '1');
+        final int toPos = getPosition(toFile - 'a', toRank - '1');
+        int move = (toPos << SHIFT_TO) + fromPos;
         if (moveStr.length() > 4) {
             final String suffix = moveStr.substring(4).trim();
             if ("n".equals(suffix)) {
@@ -349,8 +347,8 @@ public class StringUtils {
             }
         } else {
             final int[] boardArray = board.getBoard();
-            final int absPiece = Math.abs(boardArray[fromIndex]);
-            if (absPiece == PAWN && boardArray[toIndex] == EMPTY && ((fromIndex - toIndex) & 0x0F) > 0) {
+            final int absPiece = Math.abs(boardArray[fromPos]);
+            if (absPiece == PAWN && boardArray[toPos] == EMPTY && ((fromPos - toPos) & 0x0F) > 0) {
                 move |= MT_EN_PASSANT;
             } else if (absPiece == KING && (fromFile - toFile == 2)) {
                 move |= MT_CASTLING_QUEENSIDE;
@@ -373,13 +371,13 @@ public class StringUtils {
     }
 
     public static String toLong(final int move) {
-        final int fromIndex = move & FROM;
-        final int toIndex = (move & TO) >> SHIFT_TO;
+        final int fromPos = move & FROM;
+        final int toPos = (move & TO) >> SHIFT_TO;
         final StringBuilder builder = new StringBuilder();
-        builder.append((char) ('a' + getFile(fromIndex)));
-        builder.append((char) ('1' + getRank(fromIndex)));
-        builder.append((char) ('a' + getFile(toIndex)));
-        builder.append((char) ('1' + getRank(toIndex)));
+        builder.append((char) ('a' + getFile(fromPos)));
+        builder.append((char) ('1' + getRank(fromPos)));
+        builder.append((char) ('a' + getFile(toPos)));
+        builder.append((char) ('1' + getRank(toPos)));
         final int moveType = move & MOVE_TYPE;
         switch (moveType) {
             case MT_PROMOTION_KNIGHT:
@@ -407,40 +405,40 @@ public class StringUtils {
         } else if (moveType == MT_CASTLING_QUEENSIDE) {
             builder.append("O-O-O");
         } else {
-            final int fromIndex = getMoveFromIndex(move);
-            final int toIndex = getMoveToIndex(move);
+            final int fromPos = getFromPosition(move);
+            final int toPos = getToPosition(move);
             final int[] squares = board.getBoard();
-            final int piece = squares[fromIndex];
+            final int piece = squares[fromPos];
             assert piece != EMPTY: StringUtils.toFen(board) + "/" + StringUtils.toSimple(move);
             final int absPiece = Integer.signum(piece) * piece;
             if (absPiece != PAWN) {
                 builder.append(FEN_CHARS[absPiece * 2 - 2]);
-                final int fromFile = getFile(fromIndex);
-                final int fromRank = getRank(fromIndex);
+                final int fromFile = getFile(fromPos);
+                final int fromRank = getRank(fromPos);
                 boolean needsExtraInfo = false;
                 boolean needsFromFile = false;
                 boolean needsFromRank = false;
                 final int[] pieces = board.getPieces(toMove, absPiece);
                 if (absPiece == KNIGHT) {
                     for (int i = pieces[0]; i > 0; i--) {
-                        final int index = pieces[i];
-                        if (index != fromIndex) {
-                            if ((ATTACK_ARRAY[toIndex - index + 120] & ATTACK_N) == ATTACK_N) {
+                        final int pos = pieces[i];
+                        if (pos != fromPos) {
+                            if ((ATTACK_ARRAY[toPos - pos + 120] & ATTACK_N) == ATTACK_N) {
                                 needsExtraInfo = true;
-                                needsFromRank |= getFile(index) == fromFile;
-                                needsFromFile |= getRank(index) == fromRank;
+                                needsFromRank |= getFile(pos) == fromFile;
+                                needsFromFile |= getRank(pos) == fromRank;
                             }
                         }
                     }
                 } else if (absPiece != KING) {
                     final int attackBits = ATTACK_BITS[absPiece];
                     for (int i = pieces[0]; i > 0; i--) {
-                        final int index = pieces[i];
-                        if (index != fromIndex) {
-                            if (board.isAttackedBySliding(toIndex, attackBits, index)) {
+                        final int pos = pieces[i];
+                        if (pos != fromPos) {
+                            if (board.isAttackedBySliding(toPos, attackBits, pos)) {
                                 needsExtraInfo = true;
-                                needsFromRank |= getFile(index) == fromFile;
-                                needsFromFile |= getRank(index) == fromRank;
+                                needsFromRank |= getFile(pos) == fromFile;
+                                needsFromFile |= getRank(pos) == fromRank;
                             }
                         }
                     }
@@ -453,16 +451,16 @@ public class StringUtils {
                 }
             }
 
-            assert fromIndex != toIndex;
-            final boolean capture = (moveType == MT_EN_PASSANT) || (squares[toIndex] != EMPTY);
+            assert fromPos != toPos;
+            final boolean capture = (moveType == MT_EN_PASSANT) || (squares[toPos] != EMPTY);
             if (capture) {
                 if (absPiece == PAWN) {
-                    builder.append((char) ('a' + getFile(fromIndex)));
+                    builder.append((char) ('a' + getFile(fromPos)));
                 }
                 builder.append('x');
             }
-            builder.append((char) ('a' + getFile(toIndex)));
-            builder.append((char) ('1' + getRank(toIndex)));
+            builder.append((char) ('a' + getFile(toPos)));
+            builder.append((char) ('1' + getRank(toPos)));
             switch (moveType) {
                 case MT_PROMOTION_KNIGHT:
                     builder.append("=N");
@@ -481,8 +479,8 @@ public class StringUtils {
 
         // check if it is a check or mate
         final long undo = board.move(move);
-        final int kingIndex = board.getKing(1 - toMove);
-        if (board.isAttacked(kingIndex, toMove)) {
+        final int kingPos = board.getKing(1 - toMove);
+        if (board.isAttacked(kingPos, toMove)) {
             final MoveGenerator moveGenerator = new MoveGenerator();
             moveGenerator.pushFrame();
             moveGenerator.generatePseudoLegalMoves(board);
@@ -556,7 +554,7 @@ public class StringUtils {
         assert toFile != -1;
         assert toRank != -1;
 
-        final int toIndex = getIndex(toFile, toRank);
+        final int toPos = getPosition(toFile, toRank);
         final int[] pieces = board.getPieces(whiteToMove, pieceType);
         if (pieceType == PAWN) {
             final int signum = (whiteToMove << 1) - 1;
@@ -573,13 +571,13 @@ public class StringUtils {
                 }
                 final int delta = signum * UP;
                 final int squareInFront = piecePos + delta;
-                if (toIndex == squareInFront ||
-                    (squares[squareInFront] == EMPTY && toIndex == squareInFront + delta && (pieceRank == 1 || pieceRank == 6))) {
+                if (toPos == squareInFront ||
+                    (squares[squareInFront] == EMPTY && toPos == squareInFront + delta && (pieceRank == 1 || pieceRank == 6))) {
                     fromFile = pieceFile;
                     fromRank = pieceRank;
                     break;
-                } else if (toIndex == squareInFront - 1 || toIndex == squareInFront + 1) {
-                    if (squares[toIndex] != EMPTY) {
+                } else if (toPos == squareInFront - 1 || toPos == squareInFront + 1) {
+                    if (squares[toPos] != EMPTY) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         break;
@@ -604,13 +602,13 @@ public class StringUtils {
                     continue;
                 }
                 if (board.isSliding(pieceType)) {
-                    if (board.isAttackedBySliding(toIndex, ATTACK_BITS[pieceType], piecePos)) {
+                    if (board.isAttackedBySliding(toPos, ATTACK_BITS[pieceType], piecePos)) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         break;
                     }
                 } else {
-                    if (board.isAttackedByNonSliding(toIndex, ATTACK_BITS[pieceType], piecePos)) {
+                    if (board.isAttackedByNonSliding(toPos, ATTACK_BITS[pieceType], piecePos)) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         break;
@@ -618,7 +616,7 @@ public class StringUtils {
                 }
             }
         }
-        return toIndex << SHIFT_TO | getIndex(fromFile, fromRank) | moveType;
+        return toPos << SHIFT_TO | getPosition(fromFile, fromRank) | moveType;
     }
 
     public static String toString0x88(final int pos) {
@@ -631,7 +629,7 @@ public class StringUtils {
     public static int fromString0x88(final String posStr) {
         final char file = posStr.charAt(0);
         final char rank = posStr.charAt(1);
-        return getIndex(file - 'a', rank - '1');
+        return getPosition(file - 'a', rank - '1');
     }
 
     public static boolean containsString(final String[] strings, final String str) {
@@ -733,74 +731,4 @@ public class StringUtils {
         }
         return moves;
     }
-
-    public static Set<String> checkBoard(final Board board) {
-        final Set<String> problems = new HashSet<String>();
-        final int state = board.getState();
-        final int[] squares = board.getBoard();
-        if ((state & CASTLING_WHITE_KINGSIDE) > 0) {
-            if (squares[H[0]] != ROOK) {
-                problems.add("King-side castling for white is allowed, but no white rook on h1");
-            }
-            if (squares[E[0]] != KING) {
-                problems.add("King-side castling for white is allowed, but white king is not on e1");
-            }
-        }
-        if ((state & CASTLING_WHITE_QUEENSIDE) > 0) {
-            if (squares[A[0]] != ROOK) {
-                problems.add("Queen-side castling for white is allowed, but no white rook on a1");
-            }
-            if (squares[E[0]] != KING) {
-                problems.add("King-side castling for white is allowed, but white king is not on e1");
-            }
-        }
-        if ((state & CASTLING_BLACK_KINGSIDE) > 0) {
-            if (squares[H[7]] != -ROOK) {
-                problems.add("King-side castling for white is allowed, but no black rook on h8");
-            }
-            if (squares[E[7]] != -KING) {
-                problems.add("King-side castling for white is allowed, but black king is not on e8");
-            }
-        }
-        if ((state & CASTLING_BLACK_QUEENSIDE) > 0) {
-            if (squares[A[7]] != -ROOK) {
-                problems.add("Queen-side castling for white is allowed, but no black rook on a8");
-            }
-            if (squares[E[7]] != -KING) {
-                problems.add("King-side castling for white is allowed, but black king is not on e8");
-            }
-        }
-        if ((state & EN_PASSANT) > 0) {
-            final int file = ((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1;
-            if ((state & WHITE_TO_MOVE) > 0) {
-                if (squares[getIndex(file, 6)] != EMPTY) {
-                    problems.add(String.format(
-                        "En passant file '%1$s' is defined, but '%1$s7' is not empty", FILE[file]));
-                }
-                if (squares[getIndex(file, 5)] != EMPTY) {
-                    problems.add(String.format(
-                        "En passant file '%1$s' is defined, but '%1$s6' is not empty", FILE[file]));
-                }
-                if (squares[getIndex(file, 4)] != -PAWN) {
-                    problems.add(String.format(
-                        "En passant file '%1$s' is defined, but no black pawn is on '%1$s6'", FILE[file]));
-                }
-            } else {
-                if (squares[getIndex(file, 1)] != EMPTY) {
-                    problems.add(String.format(
-                        "En passant file '%1$s' is defined, but '%1$s2' is not empty", FILE[file]));
-                }
-                if (squares[getIndex(file, 2)] != EMPTY) {
-                    problems.add(String.format(
-                        "En passant file '%1$s' is defined, but '%1$s3' is not empty", FILE[file]));
-                }
-                if (squares[getIndex(file, 3)] != PAWN) {
-                    problems.add(String.format(
-                        "En passant file '%1$s' is defined, but no black pawn is on '%1$s4'", FILE[file]));
-                }
-            }
-        }
-        return problems;
-    }
-
 }

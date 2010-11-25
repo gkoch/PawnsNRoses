@@ -41,8 +41,8 @@ public class SelfPlayTest {
 
     private static boolean isMate(final Board board) {
         final int toMove = board.getState() & Utils.WHITE_TO_MOVE;
-        final int kingIndex = board.getKing(toMove);
-        return board.isAttacked(kingIndex, 1 - toMove) &&
+        final int kingPos = board.getKing(toMove);
+        return board.isAttacked(kingPos, 1 - toMove) &&
             PerftTest.perft(board, 1, new MoveGenerator(), false, false) == 0;
     }
 }

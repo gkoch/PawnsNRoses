@@ -297,34 +297,34 @@ public class Polyglot {
         return (a < b) ^ (a < 0) ^ ( b < 0);
     }
 
-    private int convertFromPolyglotMove(final Board boardObj, final int polyglotMove) {
+    private int convertFromPolyglotMove(final Board board, final int polyglotMove) {
         final int toFile = polyglotMove & 0x0007;
         final int toRank = (polyglotMove >> 3) & 0x0007;
         final int fromFile = (polyglotMove >> 6) & 0x0007;
         final int fromRank = (polyglotMove >> 9) & 0x0007;
-        final int fromIndex = getIndex(fromFile, fromRank);
-        final int state = boardObj.getState();
+        final int fromPos = getPosition(fromFile, fromRank);
+        final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
         final int signum = (toMove << 1) - 1;
-        final int[] board = boardObj.getBoard();
-        int move = fromIndex;
-        int toIndex = getIndex(toFile, toRank);
-        final int absPiece = signum * board[fromIndex];
+        final int[] squares = board.getBoard();
+        int move = fromPos;
+        int toPos = getPosition(toFile, toRank);
+        final int absPiece = signum * squares[fromPos];
         if (absPiece == KING) {
             if (fromFile == toFile - 3) {
-                toIndex = getIndex(fromFile + 2, toRank);
+                toPos = getPosition(fromFile + 2, toRank);
                 move |= MT_CASTLING_KINGSIDE;
             } else if (fromFile == toFile + 4) {
-                toIndex = getIndex(fromFile - 2, toRank);
+                toPos = getPosition(fromFile - 2, toRank);
                 move |= MT_CASTLING_QUEENSIDE;
             }
-        } else if (absPiece == PAWN && fromFile != toFile && board[toIndex] == EMPTY) {
+        } else if (absPiece == PAWN && fromFile != toFile && squares[toPos] == EMPTY) {
             move |= MT_EN_PASSANT;
         } else {
             final int promotion = (polyglotMove >> 12) & 0x0007;
             move |= PROMOTION_MAP[promotion];
         }
-        move |= toIndex << SHIFT_TO;
+        move |= toPos << SHIFT_TO;
         return move;
     }
 

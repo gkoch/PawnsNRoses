@@ -187,9 +187,9 @@ public class MoveGeneratorTest extends TestCase {
         final Board board = fromFen("8/7p/p5p1/4k3/P1pPn3/8/P5PP/2b3K1 w - - 0 30");
         final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
-        final int kingIndex = board.getKing(toMove);
+        final int kingPos = board.getKing(toMove);
         final MoveGenerator.Frame frame = new MoveGenerator.Frame();
-        MoveGenerator.generatePseudoLegalMovesNonSliding(board, DELTA_KING, kingIndex, frame);
+        MoveGenerator.generatePseudoLegalMovesNonSliding(board, DELTA_KING, kingPos, frame);
         final int[] moves = frame.getMoves();
         assertTrue(containsMove(moves, fromSimple("g1f2")));
     }

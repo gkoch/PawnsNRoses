@@ -305,13 +305,13 @@ public final class Evaluation {
         return (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
     }
 
-    public static int computePositionalGain(final int absPiece, final int toMove, final int fromIndex, final int toIndex,
+    public static int computePositionalGain(final int absPiece, final int toMove, final int fromPos, final int toPos,
                                             final int stage) {
         final int shift = toMove << 3;
         final int[] typeBonusOpening = VAL_POSITION_BONUS_OPENING[absPiece];
         final int[] typeBonusEndGame = VAL_POSITION_BONUS_ENDGAME[absPiece];
-        return ((typeBonusOpening[toIndex + shift] - typeBonusOpening[fromIndex + shift]) * (STAGE_MAX - stage) +
-            (typeBonusEndGame[toIndex + shift] - typeBonusEndGame[fromIndex + shift]) * stage) / STAGE_MAX;
+        return ((typeBonusOpening[toPos + shift] - typeBonusOpening[fromPos + shift]) * (STAGE_MAX - stage) +
+            (typeBonusEndGame[toPos + shift] - typeBonusEndGame[fromPos + shift]) * stage) / STAGE_MAX;
     }
 
     public int computeMobilityBonus(final Board board) {
@@ -328,32 +328,32 @@ public final class Evaluation {
         return score + distance[0] * board.getStage() / STAGE_MAX;
     }
 
-    private int computeMobilityBonusPawn(final Board boardObj, final int side) {
-        final int[] board = boardObj.getBoard();
+    private int computeMobilityBonusPawn(final Board board, final int side) {
+        final int[] squares = board.getBoard();
         int score = 0;
         final int signum = (side << 1) - 1;
         final int move = signum * UP;
-        final int[] pieces = boardObj.getPieces(side, PAWN);
+        final int[] pieces = board.getPieces(side, PAWN);
         for (int i = pieces[0]; i > 0; i--) {
             int pawn = pieces[i];
             for (int delta: DELTA_PAWN_ATTACK[side]) {
                 int pos = pawn + delta;
-                if ((pos & 0x88) == 0 && board[pos] != EMPTY) {
-                    if (side == side(board[pos])) {
+                if ((pos & 0x88) == 0 && squares[pos] != EMPTY) {
+                    if (side == side(squares[pos])) {
                         score += BONUS_DEFENSE;
-                    } else if (board[pos] * (-signum) > PAWN) {
+                    } else if (squares[pos] * (-signum) > PAWN) {
                         score += BONUS_ATTACK + BONUS_HUNG_PIECE;
                     }
                 }
             }
-            final int toIndex = pawn + move;
-            if ((toIndex & 0x88) == 0) {
-                final int attacked = board[toIndex];
+            final int toPos = pawn + move;
+            if ((toPos & 0x88) == 0) {
+                final int attacked = squares[toPos];
                 if (attacked == EMPTY) {
                     score += BONUS_MOBILITY;
                     final int rank = getRank(pawn);
                     if (rank == 1 && move == UP || rank == 6 && move == DN) {
-                        if (board[(toIndex + move)] == EMPTY) {
+                        if (squares[(toPos + move)] == EMPTY) {
                             score += BONUS_MOBILITY;
                         }
                     }
@@ -392,19 +392,19 @@ public final class Evaluation {
         return (ATTACK_ARRAY[from0x88 - to0x88 + 120] & distanceMask) >> distanceShift;
     }
 
-    private int computeMobilityBonusSliding(final Board boardObj, final int side, final int type,
+    private int computeMobilityBonusSliding(final Board board, final int side, final int type,
                                             final int[] distanceBonus, final int[] distance) {
-        final int opponentKing = boardObj.getKing(1 - side);
-        final int[] board = boardObj.getBoard();
+        final int opponentKing = board.getKing(1 - side);
+        final int[] squares = board.getBoard();
         int score = 0;
-        final int[] pieces = boardObj.getPieces(side, type);
+        final int[] pieces = board.getPieces(side, type);
         for (int i = pieces[0]; i > 0; i--) {
             final int piecePos = pieces[i];
             for (int delta: DELTA[type]) {
                 for (int pos = piecePos + delta; (pos & 0x88) == 0; pos += delta) {
-                    if (board[pos] == EMPTY) {
+                    if (squares[pos] == EMPTY) {
                         score += BONUS_MOBILITY;
-                    } else if (side == side(board[pos])) {
+                    } else if (side == side(squares[pos])) {
                         score += BONUS_DEFENSE;
                     } else {
                         score += BONUS_ATTACK;
@@ -417,16 +417,16 @@ public final class Evaluation {
         return score;
     }
 
-    private int computeMobilityBonusKing(final Board boardObj, final int side) {
-        final int[] board = boardObj.getBoard();
+    private int computeMobilityBonusKing(final Board board, final int side) {
+        final int[] squares = board.getBoard();
         int score = 0;
-        final int kingIndex = boardObj.getKing(side);
+        final int kingPos = board.getKing(side);
         for (int delta: DELTA_KING) {
-            int pos = kingIndex + delta;
+            int pos = kingPos + delta;
             if ((pos & 0x88) == 0) {
-                if (board[pos] == EMPTY) {
+                if (squares[pos] == EMPTY) {
                     score += BONUS_MOBILITY;
-                } else if (side == side(board[pos])) {
+                } else if (side == side(squares[pos])) {
                     score += BONUS_DEFENSE;
                 } else {
                     score += BONUS_ATTACK;
@@ -460,14 +460,14 @@ public final class Evaluation {
         boolean bishopOnWhite = false;
         boolean bishopOnBlack = false;
         for (int i = 1; i <= whiteBishopCount; i++) {
-            final int index = whiteBishops[i];
-            final int color = (getRank(index) + getFile(index)) & 0x01;
+            final int pos = whiteBishops[i];
+            final int color = (getRank(pos) + getFile(pos)) & 0x01;
             bishopOnWhite |= color == 1;
             bishopOnBlack |= color == 0;
         }
         for (int i = 1; i <= blackBishopCount; i++) {
-            final int index = blackBishops[i];
-            final int color = (getRank(index) + getFile(index)) & 0x01;
+            final int pos = blackBishops[i];
+            final int color = (getRank(pos) + getFile(pos)) & 0x01;
             bishopOnWhite |= color == 1;
             bishopOnBlack |= color == 0;
         }

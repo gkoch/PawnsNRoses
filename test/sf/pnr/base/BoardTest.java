@@ -30,8 +30,8 @@ public class BoardTest extends TestCase {
     public void testEnPassantWithCheck() {
         Board board = fromFen("8/2p5/3p4/KP5r/1R2Pp1k/8/6P1/8 b - e3 0 1");
         play(board, fromSimple("f4e3 e.p."));
-        final int kingIndex = board.getKing(BLACK_TO_MOVE);
-        assertTrue(board.isAttacked(kingIndex, WHITE_TO_MOVE));
+        final int kingPos = board.getKing(BLACK_TO_MOVE);
+        assertTrue(board.isAttacked(kingPos, WHITE_TO_MOVE));
         board = fromFen("8/2p5/3p4/KP5r/1R2Pp1k/8/6P1/8 b - e3 0 1 ");
         playAndUndo(board, fromSimple("f4e3 e.p."));
     }
@@ -107,8 +107,8 @@ public class BoardTest extends TestCase {
         board.move(MT_PROMOTION_QUEEN | (B[7] << SHIFT_TO) | B[6]);
         final int[] queens = board.getPieces(WHITE_TO_MOVE, QUEEN);
         assertEquals(2, queens[0]);
-        assertTrue(containsPieceIndex(D[0], queens));
-        assertTrue(containsPieceIndex(B[7], queens));
+        assertTrue(containsPosition(D[0], queens));
+        assertTrue(containsPosition(B[7], queens));
     }
 
     public void testIsAttackedSimple() {
@@ -404,9 +404,9 @@ public class BoardTest extends TestCase {
 		}
 	}
 
-    private boolean containsPieceIndex(final int index, final int[] pieces) {
+    private boolean containsPosition(final int pos, final int[] pieces) {
         for (int i = pieces[0]; i > 0; i--) {
-            if (pieces[i] == index) {
+            if (pieces[i] == pos) {
                 return true;
             }
         }

@@ -1,6 +1,8 @@
 package sf.pnr.base;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Utils {
 	public static final int FULL_INT = 0xFFFFFFFF;
@@ -284,23 +286,23 @@ public class Utils {
 		// hide
 	}
 
-    public static int getMoveFromIndex(final int move) {
+    public static int getFromPosition(final int move) {
 		return move & FROM;
 	}
 
-	public static int getMoveToIndex(final int move) {
+	public static int getToPosition(final int move) {
 		return (move & TO) >> SHIFT_TO;
 	}
 	
-	public static int getFile(final int index) {
-		return index & 0x0F;
+	public static int getFile(final int position) {
+		return position & 0x0F;
 	}
 
-	public static int getRank(final int index) {
-		return index >> SHIFT_RANK;
+	public static int getRank(final int position) {
+		return position >> SHIFT_RANK;
 	}
 
-    public static int getIndex(final int file, final int rank) {
+    public static int getPosition(final int file, final int rank) {
         return (rank << 4) + file;
     }
 
@@ -352,5 +354,74 @@ public class Utils {
     public static boolean isCastling(final int move) {
         final int moveType = move & MOVE_TYPE;
         return moveType == MT_CASTLING_KINGSIDE || moveType == MT_CASTLING_QUEENSIDE;
+    }
+
+    public static Set<String> checkBoard(final Board board) {
+        final Set<String> problems = new HashSet<String>();
+        final int state = board.getState();
+        final int[] squares = board.getBoard();
+        if ((state & CASTLING_WHITE_KINGSIDE) > 0) {
+            if (squares[H[0]] != ROOK) {
+                problems.add("King-side castling for white is allowed, but no white rook on h1");
+            }
+            if (squares[E[0]] != KING) {
+                problems.add("King-side castling for white is allowed, but white king is not on e1");
+            }
+        }
+        if ((state & CASTLING_WHITE_QUEENSIDE) > 0) {
+            if (squares[A[0]] != ROOK) {
+                problems.add("Queen-side castling for white is allowed, but no white rook on a1");
+            }
+            if (squares[E[0]] != KING) {
+                problems.add("King-side castling for white is allowed, but white king is not on e1");
+            }
+        }
+        if ((state & CASTLING_BLACK_KINGSIDE) > 0) {
+            if (squares[H[7]] != -ROOK) {
+                problems.add("King-side castling for white is allowed, but no black rook on h8");
+            }
+            if (squares[E[7]] != -KING) {
+                problems.add("King-side castling for white is allowed, but black king is not on e8");
+            }
+        }
+        if ((state & CASTLING_BLACK_QUEENSIDE) > 0) {
+            if (squares[A[7]] != -ROOK) {
+                problems.add("Queen-side castling for white is allowed, but no black rook on a8");
+            }
+            if (squares[E[7]] != -KING) {
+                problems.add("King-side castling for white is allowed, but black king is not on e8");
+            }
+        }
+        if ((state & EN_PASSANT) > 0) {
+            final int file = ((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1;
+            if ((state & WHITE_TO_MOVE) > 0) {
+                if (squares[getPosition(file, 6)] != EMPTY) {
+                    problems.add(String.format(
+                        "En passant file '%1$s' is defined, but '%1$s7' is not empty", StringUtils.FILE[file]));
+                }
+                if (squares[getPosition(file, 5)] != EMPTY) {
+                    problems.add(String.format(
+                        "En passant file '%1$s' is defined, but '%1$s6' is not empty", StringUtils.FILE[file]));
+                }
+                if (squares[getPosition(file, 4)] != -PAWN) {
+                    problems.add(String.format(
+                        "En passant file '%1$s' is defined, but no black pawn is on '%1$s6'", StringUtils.FILE[file]));
+                }
+            } else {
+                if (squares[getPosition(file, 1)] != EMPTY) {
+                    problems.add(String.format(
+                        "En passant file '%1$s' is defined, but '%1$s2' is not empty", StringUtils.FILE[file]));
+                }
+                if (squares[getPosition(file, 2)] != EMPTY) {
+                    problems.add(String.format(
+                        "En passant file '%1$s' is defined, but '%1$s3' is not empty", StringUtils.FILE[file]));
+                }
+                if (squares[getPosition(file, 3)] != PAWN) {
+                    problems.add(String.format(
+                        "En passant file '%1$s' is defined, but no black pawn is on '%1$s4'", StringUtils.FILE[file]));
+                }
+            }
+        }
+        return problems;
     }
 }

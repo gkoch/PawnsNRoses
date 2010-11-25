@@ -91,7 +91,7 @@ public class EvaluationTest extends TestCase {
         final int positionalBonusWhite = VAL_POSITION_BONUS_PAWN[A[2] + SHIFT_POSITION_BONUS[WHITE]];
         int positionalBonusBlack = 0;
         for (int i = 0; i < 8; i++) {
-            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getIndex(i, 6)];
+            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getPosition(i, 6)];
         }
         assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
@@ -102,7 +102,7 @@ public class EvaluationTest extends TestCase {
         final int positionalBonusWhite = VAL_POSITION_BONUS_PAWN[B[2] + SHIFT_POSITION_BONUS[WHITE]];
         int positionalBonusBlack = 0;
         for (int i = 0; i < 8; i++) {
-            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getIndex(i, 6)];
+            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getPosition(i, 6)];
         }
         assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
@@ -113,7 +113,7 @@ public class EvaluationTest extends TestCase {
         final int positionalBonusWhite = VAL_POSITION_BONUS_PAWN[H[2] + SHIFT_POSITION_BONUS[WHITE]];
         int positionalBonusBlack = 0;
         for (int i = 0; i < 8; i++) {
-            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getIndex(i, 6)];
+            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getPosition(i, 6)];
         }
         assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));

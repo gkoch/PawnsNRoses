@@ -216,9 +216,9 @@ public final class Engine {
                 if (opponentInCheck) {
                     depthExt += DEPTH_EXT_CHECK;
                 }
-                final int toIndex = getMoveToIndex(move);
-                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
-                    final int piece = board.getBoard()[toIndex];
+                final int toPos = getToPosition(move);
+                if (getRank(toPos) == 1 || getRank(toPos) == 6) {
+                    final int piece = board.getBoard()[toPos];
                     final int signum = (toMove << 1) - 1;
                     final int absPiece = signum * piece;
                     if (absPiece == PAWN) {
@@ -271,7 +271,7 @@ public final class Engine {
                     if (a >= beta) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
+                        assert board.getBoard()[getFromPosition(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
@@ -291,7 +291,7 @@ public final class Engine {
                     if (a >= beta) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
+                        assert board.getBoard()[getFromPosition(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
@@ -418,14 +418,14 @@ public final class Engine {
         }
 
         int ttMove = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-        assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
-        assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+        assert (Utils.getFromPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+        assert (Utils.getToPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
         if (depth > 3 * PLY && ttMove == 0) {
             // internal iterative deepening
             final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, searchedPly);
             ttMove = getMoveFromSearchResult(searchResult);
-            assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
-            assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+            assert (Utils.getFromPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+            assert (Utils.getToPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
         }
 
         // futility pruning
@@ -495,9 +495,9 @@ public final class Engine {
                 if (opponentInCheck) {
                     depthExt += DEPTH_EXT_CHECK;
                 }
-                final int toIndex = getMoveToIndex(move);
-                if (getRank(toIndex) == 1 || getRank(toIndex) == 6) {
-                    final int piece = board.getBoard()[toIndex];
+                final int toPos = getToPosition(move);
+                if (getRank(toPos) == 1 || getRank(toPos) == 6) {
+                    final int piece = board.getBoard()[toPos];
                     final int signum = (toMove << 1) - 1;
                     final int absPiece = signum * piece;
                     if (absPiece == PAWN) {
@@ -549,7 +549,7 @@ public final class Engine {
                     if (a >= beta) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
+                        assert board.getBoard()[getFromPosition(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
@@ -568,7 +568,7 @@ public final class Engine {
                     if (a >= beta) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
+                        assert board.getBoard()[getFromPosition(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
@@ -617,10 +617,10 @@ public final class Engine {
         if (bestMove != 0) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
         }
-        assert (Utils.getMoveFromIndex(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
-        assert (Utils.getMoveToIndex(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
-        assert (Utils.getMoveFromIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
-        assert (Utils.getMoveToIndex(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+        assert (Utils.getFromPosition(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
+        assert (Utils.getToPosition(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
+        assert (Utils.getFromPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
+        assert (Utils.getToPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
         return alpha;
     }
 
@@ -738,7 +738,7 @@ public final class Engine {
                 if (a >= beta) {
                     board.takeBack(undo);
                     moveGenerator.popFrame();
-                    assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
+                    assert board.getBoard()[getFromPosition(move)] != EMPTY;
                     transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, move);
                     return a;
@@ -754,7 +754,7 @@ public final class Engine {
                     if (a >= beta) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        assert board.getBoard()[getMoveFromIndex(move)] != EMPTY;
+                        assert board.getBoard()[getFromPosition(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN, age);
                         addMoveToHistoryTable(board, move);
                         return a;
@@ -792,14 +792,14 @@ public final class Engine {
     }
 
     private void addMoveToHistoryTable(final Board board, final int move) {
-        final int fromIndex = getMoveFromIndex(move);
-        final int toIndex = getMoveToIndex(move);
-        final int pieceHistoryIdx = board.getBoard()[fromIndex] + 7;
-        final int fromIndex64 = convert0x88To64(fromIndex);
-        final int toIndex64 = convert0x88To64(toIndex);
-        history[pieceHistoryIdx][fromIndex64][toIndex64]++;
-        if (history[pieceHistoryIdx][fromIndex64][toIndex64] > historyMax) {
-            historyMax = history[pieceHistoryIdx][fromIndex64][toIndex64];
+        final int fromPos = getFromPosition(move);
+        final int toPos = getToPosition(move);
+        final int pieceHistoryIdx = board.getBoard()[fromPos] + 7;
+        final int fromPos64 = convert0x88To64(fromPos);
+        final int toPos64 = convert0x88To64(toPos);
+        history[pieceHistoryIdx][fromPos64][toPos64]++;
+        if (history[pieceHistoryIdx][fromPos64][toPos64] > historyMax) {
+            historyMax = history[pieceHistoryIdx][fromPos64][toPos64];
         }
     }
 
@@ -807,8 +807,8 @@ public final class Engine {
         if (searchStage == SearchStage.NORMAL && (move & MOVE_TYPE) == MT_NORMAL) {
             final int fromTo = move & FROM_TO;
             if (killerMoves[searchedPly][0] != fromTo) {
-                assert (Utils.getMoveFromIndex(fromTo) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
-                assert (Utils.getMoveToIndex(fromTo) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
+                assert (Utils.getFromPosition(fromTo) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
+                assert (Utils.getToPosition(fromTo) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
                 killerMoves[searchedPly][1] = killerMoves[searchedPly][0];
                 killerMoves[searchedPly][0] = fromTo;
             }
@@ -865,7 +865,7 @@ public final class Engine {
                 moves = new int[3];
                 int killerCount = 0;
                 for (int move: killerMoves[searchedPly]) {
-                    if (isValidKillerMove(board, getMoveFromIndex(move), getMoveToIndex(move))) {
+                    if (isValidKillerMove(board, getFromPosition(move), getToPosition(move))) {
                         if (board.isCheckingMove(move)) {
                             moves[++killerCount] = move | CHECKING;
                         } else {
@@ -900,20 +900,20 @@ public final class Engine {
             shift = 24 - leadingZeros;
         }
         final int toMove = board.getState() & WHITE_TO_MOVE;
-        final int kingIndex = board.getKing(1 - toMove);
+        final int kingPos = board.getKing(1 - toMove);
         final int signum = (toMove << 1) - 1;
         final int stage = board.getStage();
         for (int i = moves[0]; i > 0; i--) {
             final int move = moves[i];
             if ((move & BASE_INFO) != ttMove && !isKiller(killers, move)) {
-                final int fromIndex = getMoveFromIndex(move);
-                final int toIndex = getMoveToIndex(move);
-                final int fromIndex64 = convert0x88To64(fromIndex);
-                final int toIndex64 = convert0x88To64(toIndex);
-                final int piece = board.getBoard()[fromIndex];
-                final int historyValue = history[piece + 7][fromIndex64][toIndex64] >>> shift;
+                final int fromPos = getFromPosition(move);
+                final int toPos = getToPosition(move);
+                final int fromPos64 = convert0x88To64(fromPos);
+                final int toPos64 = convert0x88To64(toPos);
+                final int piece = board.getBoard()[fromPos];
+                final int historyValue = history[piece + 7][fromPos64][toPos64] >>> shift;
                 final int absPiece = piece * signum;
-                final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromIndex, toIndex, stage);
+                final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromPos, toPos, stage);
                 final int valPositional = ((positionalGain + 100) >> 2);
                 final int checkBonus;
                 final int checkingBit;
@@ -922,13 +922,13 @@ public final class Engine {
                     checkingBit = CHECKING;
                 } else {
                     checkingBit = 0;
-                    if (SLIDING[absPiece] && (ATTACK_ARRAY[kingIndex - toIndex + 120] & ATTACK_BITS[absPiece]) > 0) {
+                    if (SLIDING[absPiece] && (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_BITS[absPiece]) > 0) {
                         checkBonus = MOVE_ORDER_BLOCKED_CHECK_BONUS;
                     } else {
                         checkBonus = 0;
                     }
                 }
-                final int toRank = getRank(toIndex);
+                final int toRank = getRank(toPos);
                 final int pawnBonus;
                 if (absPiece == PAWN && (toRank == 1 || toRank == 6)) {
                     pawnBonus = MOVE_ORDER_7TH_RANK_PAWN;
@@ -1054,40 +1054,40 @@ public final class Engine {
 
     public static int getMoveFromSearchResult(final long result) {
         final int move = (int) (result >> 32);
-        assert (Utils.getMoveFromIndex(move) & 0x88) == 0: Long.toHexString(result) + "/" + StringUtils.toSimple(move);
-        assert (Utils.getMoveToIndex(move) & 0x88) == 0: Long.toHexString(result) + "/" + StringUtils.toSimple(move);
+        assert (Utils.getFromPosition(move) & 0x88) == 0: Long.toHexString(result) + "/" + StringUtils.toSimple(move);
+        assert (Utils.getToPosition(move) & 0x88) == 0: Long.toHexString(result) + "/" + StringUtils.toSimple(move);
         return move;
     }
 
     public static long getSearchResult(final int move, final int value) {
-        assert (Utils.getMoveFromIndex(move) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
-        assert (Utils.getMoveToIndex(move) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
+        assert (Utils.getFromPosition(move) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
+        assert (Utils.getToPosition(move) & 0x88) == 0: Integer.toHexString(move) + "/" + StringUtils.toSimple(move);
         return (((long) (move & BASE_INFO)) << 32) | (((long) value) & 0xFFFFFFFFL);
     }
 
-    public boolean isValidKillerMove(final Board boardObj, final int fromIndex, final int toIndex) {
-        final int[] board = boardObj.getBoard();
-        final int piece = board[fromIndex];
-        if (piece == EMPTY || board[toIndex] != EMPTY) {
+    public boolean isValidKillerMove(final Board board, final int fromPos, final int toPos) {
+        final int[] squares = board.getBoard();
+        final int piece = squares[fromPos];
+        if (piece == EMPTY || squares[toPos] != EMPTY) {
             return false;
         }
-        final int toMove = boardObj.getState() & WHITE_TO_MOVE;
+        final int toMove = board.getState() & WHITE_TO_MOVE;
         final int signum = Integer.signum(piece);
         if (((toMove << 1) - 1) != signum) {
-            // fromIndex is occupied by the opponent's piece
+            // fromPos is occupied by the opponent's piece
             return false;
         }
         final int absPiece = signum * piece;
-        if (boardObj.isSliding(absPiece)) {
-            return boardObj.isAttackedBySliding(toIndex, ATTACK_BITS[absPiece], fromIndex);
+        if (board.isSliding(absPiece)) {
+            return board.isAttackedBySliding(toPos, ATTACK_BITS[absPiece], fromPos);
         } else if (absPiece == PAWN) {
-            final int squareInFront = fromIndex + signum * UP;
-            final int fromRank = getRank(fromIndex);
-            final int toRank = getRank(toIndex);
-            return toRank != 0 && toRank != 7 && (toIndex == squareInFront ||
-                (board[squareInFront] == EMPTY && toIndex == squareInFront + signum * UP && (fromRank == 1 || fromRank == 6)));
+            final int squareInFront = fromPos + signum * UP;
+            final int fromRank = getRank(fromPos);
+            final int toRank = getRank(toPos);
+            return toRank != 0 && toRank != 7 && (toPos == squareInFront ||
+                (squares[squareInFront] == EMPTY && toPos == squareInFront + signum * UP && (fromRank == 1 || fromRank == 6)));
         } else {
-            return boardObj.isAttackedByNonSliding(toIndex, ATTACK_BITS[absPiece], fromIndex);
+            return board.isAttackedByNonSliding(toPos, ATTACK_BITS[absPiece], fromPos);
         }
     }
 }

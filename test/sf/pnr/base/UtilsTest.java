@@ -56,7 +56,7 @@ public class UtilsTest extends TestCase {
             assertEquals(2, (ATTACK_ARRAY[A[0] - B[i] + 120] & ATTACK_DISTANCE_ROOK) >> SHIFT_ATTACK_DISTANCE_ROOK);
             assertEquals(2, (ATTACK_ARRAY[B[i] - A[0] + 120] & ATTACK_DISTANCE_ROOK) >> SHIFT_ATTACK_DISTANCE_ROOK);
 
-            final int diag = getIndex(i, i);
+            final int diag = getPosition(i, i);
             assertEquals(1, (ATTACK_ARRAY[A[0] - diag + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
             assertEquals(1, (ATTACK_ARRAY[diag - A[0] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
             assertEquals(7, (ATTACK_ARRAY[A[0] - (diag - 1) + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);

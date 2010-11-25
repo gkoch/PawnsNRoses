@@ -45,6 +45,8 @@ public final class Engine {
     private static int DEPTH_EXT_MATE_THREAT = 20;
     @Configurable(Configurable.Key.ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT)
     private static double ITERATIVE_DEEPENING_TIME_LIMIT = 0.9;
+    @Configurable(Configurable.Key.ENGINE_SEARCH_ROOT_MIN_MOVE)
+    private static int SEARCH_ROOT_MIN_MOVE = 5;
 
     private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
     private static final SearchStage[] searchStages = SearchStage.values();
@@ -234,7 +236,7 @@ public final class Engine {
                         if (cancelled) {
                             moveGenerator.popFrame();
                             board.takeBack(undo);
-                            return bestMove > 0 && (depth <= PLY || legalMoveCount > 5)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                            return bestMove > 0 && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                         }
                         if (qscore < b) {
                             board.takeBack(undo);
@@ -251,7 +253,7 @@ public final class Engine {
                         if (cancelled) {
                             board.takeBack(undo);
                             moveGenerator.popFrame();
-                            return bestMove > 0 && (depth <= PLY || legalMoveCount > 5)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                            return bestMove > 0 && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                         }
                     }
                 }
@@ -262,7 +264,7 @@ public final class Engine {
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return bestMove > 0 && (depth <= PLY || legalMoveCount > 5)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                        return bestMove > 0 && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                     }
 
                     // the other player has a better option, beta cut off
@@ -284,7 +286,7 @@ public final class Engine {
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return bestMove > 0 && (depth <= PLY || legalMoveCount > 5)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                        return bestMove > 0 && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                     }
                     if (a >= beta) {
                         board.takeBack(undo);

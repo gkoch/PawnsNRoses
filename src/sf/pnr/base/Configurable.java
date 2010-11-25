@@ -26,7 +26,8 @@ public @interface Configurable {
         ENGINE_FUTILITY_THRESHOLD("engine.futility.threshold"), ENGINE_DEEP_FUTILITY_THRESHOLD("engine.deepFutility.threshold"),
         ENGINE_RAZORING_THRESHOLD("engine.razoring.threshold"),
         ENGINE_LMR_MIN_DEPTH("engine.lmr.minDepth"), ENGINE_LMR_MIN_MOVE("engine.lmr.minMove"),
-        ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT("engine.iterative.deepening.time.limit");
+        ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT("engine.iterative.deepening.time.limit"),
+        ENGINE_SEARCH_ROOT_MIN_MOVE("engine.searchRoot.minMove");
 
         private final String key;
         Key(final String key) {

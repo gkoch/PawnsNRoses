@@ -11,6 +11,7 @@ public class StringUtils {
     // helpers
     public static final char[] FILE = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
     public static final char[] FEN_CHARS = new char[6 * 2];
+    public static final String[] PIECES = new String[7];
     public static final int[] CODE_TO_TYPE = new int[20];
     public static final int[] CODE_TO_PROMOTION_TYPE = new int[20];
 
@@ -27,6 +28,13 @@ public class StringUtils {
 		FEN_CHARS[(KNIGHT * 2) - 1] = 'n';
 		FEN_CHARS[(PAWN * 2) - 2] = 'P';
 		FEN_CHARS[(PAWN * 2) - 1] = 'p';
+
+        PIECES[KING] = "king";
+        PIECES[QUEEN] = "queen";
+        PIECES[ROOK] = "rook";
+        PIECES[BISHOP] = "bishop";
+        PIECES[KNIGHT] = "knight";
+        PIECES[PAWN] = "pawn";
 
         CODE_TO_TYPE['B' - 'A'] = BISHOP;
         CODE_TO_TYPE['K' - 'A'] = KING;
@@ -619,10 +627,10 @@ public class StringUtils {
         return toPos << SHIFT_TO | getPosition(fromFile, fromRank) | moveType;
     }
 
-    public static String toString0x88(final int pos) {
+    public static String toString0x88(final int position) {
         final StringBuilder builder = new StringBuilder();
-        builder.append((char) ('a' + getFile(pos)));
-        builder.append((char) ('1' + getRank(pos)));
+        builder.append((char) ('a' + getFile(position)));
+        builder.append((char) ('1' + getRank(position)));
         return builder.toString();
     }
 

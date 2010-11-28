@@ -424,4 +424,36 @@ public class Utils {
         }
         return problems;
     }
+
+    public static Set<String> checkMove(final Board board, final int move) {
+        final Set<String> problems = new HashSet<String>();
+        final int[] squares = board.getBoard();
+        final int fromPos = getFromPosition(move);
+        final int piece = squares[fromPos];
+        if (piece == EMPTY) {
+            problems.add(String.format("From position %s is empty", StringUtils.toString0x88(fromPos)));
+        }
+        final int state = board.getState();
+        final int toMove = state & WHITE_TO_MOVE;
+        if (toMove == WHITE && piece < 0) {
+            problems.add(String.format("It's white to move, but %s has a black %s on it",
+                StringUtils.toString0x88(fromPos), StringUtils.PIECES[-piece]));
+        }
+        if (toMove == BLACK && piece > 0) {
+            problems.add(String.format("It's black to move, but %s has a white %s on it",
+                StringUtils.toString0x88(fromPos), StringUtils.PIECES[piece]));
+        }
+        final int absPiece = Math.abs(piece);
+        final int fromRank = getRank(fromPos);
+        if (absPiece == PAWN && (fromRank == 0 || fromRank == 7)) {
+            problems.add(String.format("Pawn moving from 1st/8th rank (%s)", StringUtils.toString0x88(fromPos)));
+        }
+        final int toPos = getToPosition(move);
+        final int capturedPiece = squares[toPos];
+        if (piece * capturedPiece > 0) {
+            problems.add(String.format("The %s on %s is trying to capture a piece with the same color on %s",
+                StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos), StringUtils.toString0x88(toPos)));
+        }
+        return problems;
+    }
 }

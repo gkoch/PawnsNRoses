@@ -92,6 +92,16 @@ public class GameManager {
                 if (move == 0) {
                     throw new IOException("Zero move. Best line: " + player.getBestMoveLine());
                 }
+                final Set<String> problems = Utils.checkMove(board, move);
+                if (!problems.isEmpty()) {
+                    final String message = String.format("Illegal move ('%s') from '%s' at FEN %s",
+                        StringUtils.toSimple(move), player.getName(), StringUtils.toFen(board));
+                    System.out.println(message);
+                    for (String problem: problems) {
+                        System.out.println(problem);
+                    }
+                    throw new IOException(message);
+                }
                 final String whiteMove;
                 final String blackMove;
                 if (currentPlayer == 0) {

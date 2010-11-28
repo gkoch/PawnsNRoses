@@ -5,6 +5,7 @@ import sf.pnr.base.Board;
 import sf.pnr.base.Configurable;
 import sf.pnr.base.Configuration;
 import sf.pnr.base.StringUtils;
+import sf.pnr.base.Utils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -16,6 +17,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -146,7 +148,14 @@ public class UCI implements UciProcess {
                     if (type.equals("startpos")) {
                         chess.restartBoard();
                     } else if (type.startsWith("fen")) {
-                        chess.setBoard(type.substring(4));
+                        final String fen = type.substring(4);
+                        chess.setBoard(fen);
+                        final Set<String> problems = Utils.checkBoard(chess.getBoard());
+                        if (!problems.isEmpty()) {
+                            for (String problem: problems) {
+                                out.printf("info string Problem with FEN '%s': %s\r\n", fen, problem);
+                            }
+                        }
                     }
                     if (matcher.groupCount() > 2) {
                         final String groupStr = matcher.group(2);
@@ -154,8 +163,16 @@ public class UCI implements UciProcess {
                             final String movesStr = groupStr.substring(6).trim();
                             final String moves[] = movesStr.split(" ");
                             final Board board = chess.getBoard();
-                            for (String move: moves) {
-                                board.move(StringUtils.fromLong(board, move.trim()));
+                            for (String moveStr: moves) {
+                                final int move = StringUtils.fromLong(board, moveStr.trim());
+                                final Set<String> problems = Utils.checkMove(board, move);
+                                if (!problems.isEmpty()) {
+                                    for (String problem: problems) {
+                                        out.printf("info string Problem with move '%s': %s\r\n", moveStr, problem);
+                                    }
+                                    break;
+                                }
+                                board.move(move);
                             }
                         }
                     }

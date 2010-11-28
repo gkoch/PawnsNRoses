@@ -324,6 +324,14 @@ public final class Board {
         return materialValue[WHITE_TO_MOVE] - materialValue[BLACK_TO_MOVE];
     }
 
+    public int getMaterialValueWhite() {
+        return materialValue[WHITE_TO_MOVE];
+    }
+
+    public int getMaterialValueBlack() {
+        return materialValue[BLACK_TO_MOVE];
+    }
+
     public int getStage() {
         final int fullMoves = (state & FULL_MOVES) >> SHIFT_FULL_MOVES;
         final int moveCount;

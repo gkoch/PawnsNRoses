@@ -242,8 +242,8 @@ public final class Evaluation {
         score += computeMobilityBonus(board);
         final long pawnHashValue = pawnEval(board);
         score += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
-        if (board.getMaterialValueAsWhite() == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] -
-                VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]]) {
+        if ((board.getMaterialValueWhite() == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]]) &&
+                (board.getMaterialValueBlack() == VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]])) {
             final int unstoppablePawnDistWhite = PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, toMove);
             final int unstoppablePawnDistBlack = PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, toMove);
             if (unstoppablePawnDistWhite < unstoppablePawnDistBlack) {
@@ -289,7 +289,7 @@ public final class Evaluation {
         int typeBonusEndGame = 0;
         for (int type: TYPES_NOPAWN) {
             final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[type];
-            final int[] positionalBonusEndGame = VAL_POSITION_BONUS_OPENING[type];
+            final int[] positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[type];
             final int[] whites = board.getPieces(WHITE, type);
             for (int i = whites[0]; i > 0; i--) {
                 typeBonusOpening += positionalBonusOpening[whites[i] + SHIFT_POSITION_BONUS[WHITE]];

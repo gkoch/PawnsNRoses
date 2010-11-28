@@ -206,4 +206,20 @@ public class EvaluationTest extends TestCase {
         assertEquals(1, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(1, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
     }
+
+    public void testPositionalBonus() {
+        final Board board = StringUtils.fromFen("8/5p2/3p1kp1/PR2b2p/r7/8/1P6/1K5B w - - 2 45");
+        final int stage = board.getStage();
+        final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
+        final int openingScore =
+            Evaluation.VAL_POSITION_BONUS_ROOK[B[4] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_ROOK[A[3]] +
+            Evaluation.VAL_POSITION_BONUS_BISHOP[H[0] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_BISHOP[E[4]] +
+            Evaluation.VAL_POSITION_BONUS_KING[B[0] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_KING[F[5]];
+        final int endGameScore =
+            Evaluation.VAL_POSITION_BONUS_ROOK[B[4] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_ROOK[A[3]] +
+            Evaluation.VAL_POSITION_BONUS_BISHOP[H[0] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_BISHOP[E[4]] +
+            Evaluation.VAL_POSITION_BONUS_KING_ENDGAME[B[0] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_KING_ENDGAME[F[5]];
+        final int bonus = (openingScore * (STAGE_MAX - stage) + endGameScore * stage) / STAGE_MAX;
+        assertEquals(bonus, eval.computePositionalBonusNoPawnAsWhite(board));
+    }
 }

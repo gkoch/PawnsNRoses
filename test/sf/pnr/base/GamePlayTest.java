@@ -32,7 +32,7 @@ public class GamePlayTest {
         final int initialTime = Integer.parseInt(System.getProperty("searchTask.initialTime", "120000"));
         final int increment = Integer.parseInt(System.getProperty("searchTask.incrementTime", "6000"));
         final int rounds = Integer.parseInt(System.getProperty("searchTask.rounds", "20"));
-        final GameManager manager = new GameManager(initialTime, increment, rounds);
+        final GameManager manager = new GameManager(getEngineDir().getName(), initialTime, increment, rounds);
         manager.play(players);
         if (debugOs != null) {
             debugOs.close();
@@ -43,10 +43,10 @@ public class GamePlayTest {
     }
 
     private static UciRunner[] getPlayers() throws IOException {
-        final String engineDir = System.getProperty("searchTask.engineDir");
+        final File engineDir = getEngineDir();
         final String patternStr = System.getProperty("searchTask.enginePattern", ".*");
         final Pattern executablePattern = Pattern.compile(patternStr);
-        final File[] executables = new File(engineDir).listFiles(new FileFilter() {
+        final File[] executables = engineDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(final File file) {
                 return file.isFile() && executablePattern.matcher(file.getName()).matches();
@@ -69,6 +69,10 @@ public class GamePlayTest {
         return players;
     }
 
+    private static File getEngineDir() {
+        return new File(System.getProperty("searchTask.engineDir"));
+    }
+
     private static String getPlayerName(final File executable) {
         final String fileName = executable.getName();
         final int pos = fileName.lastIndexOf('.');
@@ -82,19 +86,19 @@ public class GamePlayTest {
     }
 
     private static UciRunner[] getTestPlayers() throws IOException {
-        final String engineDir = System.getProperty("searchTest.engineDir");
+        final File engineDir = getEngineDir();
         final Map<String, String> options = new HashMap<String, String>();
         options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE), "128");
         options.put(UCI.toUciOption(Configurable.Key.EVAL_TABLE_SIZE), "8");
         final UciRunner pnrLatest = new UciRunner("Pawns N' Roses Latest", options, new PipedUciProcess());
         final UciRunner pnrV0054 = new UciRunner("Pawns N' Roses v0.054",
-            new ExternalUciProcess(engineDir + "/PawnsNRoses/v0.05x/PawnsNRoses v0.054.bat"));
+            new ExternalUciProcess(new File(engineDir, "PawnsNRoses/v0.05x/PawnsNRoses v0.054.bat").getAbsolutePath()));
         final UciRunner pnrV0055 = new UciRunner("Pawns N' Roses v0.055",
-            new ExternalUciProcess(engineDir + "/PawnsNRoses/v0.05x/PawnsNRoses v0.055.bat"));
+            new ExternalUciProcess(new File(engineDir, "/PawnsNRoses/v0.05x/PawnsNRoses v0.055.bat").getAbsolutePath()));
         final UciRunner rybka22 = new UciRunner("Rybka 2.2 - 2 cores",
-            new ExternalUciProcess(engineDir + "/Rybka/Rybka v2.2n2.mp.w32.exe"));
+            new ExternalUciProcess(new File(engineDir, "/Rybka/Rybka v2.2n2.mp.w32.exe").getAbsolutePath()));
         final UciRunner mediocre = new UciRunner("Mediocre 0.34",
-            new ExternalUciProcess(engineDir + "/mediocre-0.34/Mediocre.bat"));
+            new ExternalUciProcess(new File(engineDir, "/mediocre-0.34/Mediocre.bat").getAbsolutePath()));
         return new UciRunner[]{pnrLatest, pnrV0054, pnrV0055, rybka22, mediocre};
     }
 }

@@ -313,7 +313,7 @@ public class UCI implements UciProcess {
             if (result != null) {
                 out.printf("info string Result: %s\r\n", result);
             } else {
-                out.println("Done.");
+                out.println("info string Done.");
             }
         } catch (Exception e) {
             out.printf("info string Failed to execute command '%s': %s\r\n", fullCommand, e.getMessage());

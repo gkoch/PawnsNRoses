@@ -1,6 +1,8 @@
 package sf.pnr.base;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,11 +25,13 @@ public class GameManager {
         PERIOD_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+    private final String event;
     private final int initialTimes;
     private final int increments;
     private final int rounds;
 
-    public GameManager(final int initialTime, final int increment, final int rounds) {
+    public GameManager(final String event, final int initialTime, final int increment, final int rounds) {
+        this.event = event;
         this.initialTimes = initialTime;
         this.increments = increment;
         this.rounds = rounds;
@@ -148,7 +152,8 @@ public class GameManager {
             movesArr[j] = moves.get(j);
         }
 
-        final GameDetails details = new GameDetails(white, black, round, index, startTime, result, movesArr, times, ex);
+        final GameDetails details =
+            new GameDetails(event, round, white, black, index, startTime, result, movesArr, times, ex);
         tournamentResult.registerResult(white, black, details);
         System.out.printf("[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL] %s\r\n",
             System.currentTimeMillis(), tournamentResult.toString(white, black));
@@ -187,6 +192,16 @@ public class GameManager {
     }
 
     public static class GameDetails {
+        private static String HOST_NAME;
+        static {
+            try {
+                HOST_NAME = Inet4Address.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                HOST_NAME = "??";
+            }
+
+        }
+        private final String event;
         private final UciRunner white;
         private final UciRunner black;
         private final int round;
@@ -197,9 +212,10 @@ public class GameManager {
         private final int[] remainedTimes;
         private final Exception ex;
 
-        public GameDetails(final UciRunner white, final UciRunner black, final int round, final int gameIndex,
-                           final long startTime, final GameResult result, final int[] moves, final int[] remainedTimes,
-                           final Exception ex) {
+        public GameDetails(final String event, final int round, final UciRunner white, final UciRunner black,
+                           final int gameIndex, final long startTime, final GameResult result, final int[] moves,
+                           final int[] remainedTimes, final Exception ex) {
+            this.event = event;
             this.white = white;
             this.black = black;
             this.round = round;
@@ -239,11 +255,13 @@ public class GameManager {
         public String toPgn() {
             final StringBuilder builder = new StringBuilder();
             final Date startDateTime = new Date(startTime);
+            builder.append(StringUtils.createPgnEntry("Event", event));
+            builder.append(StringUtils.createPgnEntry("Site", getHostName()));
             builder.append(StringUtils.createPgnEntry("Date", DATE_FORMAT.format(startDateTime)));
             builder.append(StringUtils.createPgnEntry("Round", Integer.toString(round)));
-            builder.append(StringUtils.createPgnEntry("Game", Integer.toString(gameIndex)));
             builder.append(StringUtils.createPgnEntry("White", white.getName()));
             builder.append(StringUtils.createPgnEntry("Black", black.getName()));
+            builder.append(StringUtils.createPgnEntry("Game", Integer.toString(gameIndex)));
             builder.append(StringUtils.createPgnEntry("Result", getScoreStr(white) + "-" + getScoreStr(black)));
             builder.append(StringUtils.createPgnEntry("Time", TIME_FORMAT.format(startDateTime)));
             builder.append(StringUtils.createPgnEntry("PlyCount", Integer.toString(moves.length)));
@@ -267,6 +285,10 @@ public class GameManager {
                 board.move(move);
             }
             return builder.toString();
+        }
+
+        private String getHostName() {
+            return HOST_NAME;
         }
     }
 

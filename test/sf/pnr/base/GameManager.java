@@ -94,7 +94,8 @@ public class GameManager {
                 final String bestMove = player.getBestMove();
                 final int move = StringUtils.fromLong(board, bestMove);
                 if (move == 0) {
-                    throw new IOException("Zero move. Best line: " + player.getBestMoveLine());
+                    throw new IllegalMoveException(String.format("Zero move at FEN '%s'. Best line: %s",
+                        StringUtils.toFen(board), player.getBestMoveLine()));
                 }
                 final Set<String> problems = Utils.checkMove(board, move);
                 if (!problems.isEmpty()) {
@@ -104,7 +105,7 @@ public class GameManager {
                     for (String problem: problems) {
                         System.out.println(problem);
                     }
-                    throw new IOException(message);
+                    throw new IllegalMoveException(message);
                 }
                 final String whiteMove;
                 final String blackMove;
@@ -145,6 +146,10 @@ public class GameManager {
             e.printStackTrace();
             System.out.println(StringUtils.toFen(board));
             ex=e;
+        } catch (IllegalMoveException e) {
+            result = GameResult.ILLEGAL_MOVE;
+            System.out.println(e.getMessage());
+            ex=e;
         }
 
         final int[] movesArr = new int[moves.size()];
@@ -164,7 +169,7 @@ public class GameManager {
 
     private static enum GameResult {
         TIME_OUT(0, 'T', 't'), MATE(1, '1', '0'), THREEFOLD_REPETITION(0.5, 'R', 'r'),
-        INSUFFICIENT_MATERIAL(0.5, 'I', 'i'), ERROR(1, 'e', 'E');
+        INSUFFICIENT_MATERIAL(0.5, 'I', 'i'), ERROR(1, 'e', 'E'), ILLEGAL_MOVE(1, 'm', 'M');
 
         private final double whiteScore;
         private final double blackScore;
@@ -243,7 +248,9 @@ public class GameManager {
         public String getTerminationStr() {
             final String termination;
             if (result == GameResult.ERROR) {
-                termination = "error";
+                termination = "death";
+            } else if (result == GameResult.ILLEGAL_MOVE) {
+                termination = "rules infraction";
             } else if (result == GameResult.TIME_OUT) {
                 termination = "time forfeit";
             } else {
@@ -477,6 +484,12 @@ public class GameManager {
                     builder.append(' ');
                 }
             }
+        }
+    }
+
+    private static class IllegalMoveException extends Exception {
+        public IllegalMoveException(final String message) {
+            super(message);
         }
     }
 

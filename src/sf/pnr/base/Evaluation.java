@@ -41,7 +41,7 @@ public final class Evaluation {
     private static final int[][] VAL_POSITION_BONUS_OPENING = new int[7][128];
     private static final int[][] VAL_POSITION_BONUS_ENDGAME = new int[7][128];
 
-    public static final int[] SHIFT_POSITION_BONUS = new int[]{0, 8};
+    public static final int[] SHIFT_POSITION_BONUS = new int[]{8, 0};
 
     @Configurable(Configurable.Key.EVAL_PENALTY_DOUBLE_PAWN)
     public static int PENALTY_DOUBLE_PAWN = -10;
@@ -127,12 +127,12 @@ public final class Evaluation {
         VAL_POSITION_BONUS_PAWN_ENDGAME = new int[]
             {
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0,
-                 20, 20, 20, 20, 20, 20, 20, 20,      0,  0,  0,-20,-20,  0,  0,  0,
-                 16, 16, 17, 18, 18, 17, 16, 16,      4,  4,  4,  0,  0,  4,  4,  4,
-                 12, 12, 14, 16, 16, 14,  0, 12,      8,  8, 11, 12, 12, 11,  8,  8,
-                  8,  8, 11, 12, 12, 11,  8,  8,     12, 12, 14, 16, 16, 14,  0, 12,
-                  4,  4,  4,  0,  0,  4,  4,  4,     16, 16, 17, 18, 18, 17, 16, 16,
                   0,  0,  0,-20,-20,  0,  0,  0,     20, 20, 20, 20, 20, 20, 20, 20,
+                  4,  4,  4,  0,  0,  4,  4,  4,     16, 16, 17, 18, 18, 17, 16, 16,
+                  8,  8, 11, 12, 12, 11,  8,  8,     12, 12, 14, 16, 16, 14,  0, 12,
+                 12, 12, 14, 16, 16, 14,  0, 12,      8,  8, 11, 12, 12, 11,  8,  8,
+                 16, 16, 17, 18, 18, 17, 16, 16,      4,  4,  4,  0,  0,  4,  4,  4,
+                 20, 20, 20, 20, 20, 20, 20, 20,      0,  0,  0,-20,-20,  0,  0,  0,
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0
             };
         VAL_POSITION_BONUS_KNIGHT = new int[]

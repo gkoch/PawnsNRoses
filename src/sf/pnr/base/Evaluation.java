@@ -48,14 +48,14 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_PENALTY_TRIPLE_PAWN)
     public static int PENALTY_TRIPLE_PAWN = -35;
     @Configurable(Configurable.Key.EVAL_PENALTY_ISOLATED_PAWN)
-    public static int PENALTY_ISOLATED_PAWN = -15;
+    public static int PENALTY_ISOLATED_PAWN = -20;
     @Configurable(Configurable.Key.EVAL_PENALTY_WEAK_PAWN)
     public static int PENALTY_WEAK_PAWN = -10;
 
     @Configurable(Configurable.Key.EVAL_BONUS_PAWN_SHIELD)
-    public static int BONUS_PAWN_SHIELD = 30;
+    public static int BONUS_PAWN_SHIELD = 35;
     @Configurable(Configurable.Key.EVAL_BONUS_PAWN_STORM_MAX)
-    public static int BONUS_PAWN_STORM_MAX = 25;
+    public static int BONUS_PAWN_STORM_MAX = 40;
     public static final int BONUS_PAWN_STORM_DEDUCTION_MAIN_FILE = 5;
     public static final int BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE = 4;
     public static final int BONUS_PASSED_PAWN_PER_SQUARE = 5;
@@ -66,7 +66,7 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_HUNG_PIECE)
     public static int BONUS_HUNG_PIECE = 3;
     @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY)
-    public static int BONUS_MOBILITY = 2;
+    public static int BONUS_MOBILITY = 1;
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_KNIGHT)
     public static int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 5, 3, 2, 2, 1, 1, 0};
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_BISHOP)

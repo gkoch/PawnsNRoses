@@ -20,6 +20,7 @@ public class PrefixOutputStream extends OutputStream {
     public void write(final int b) throws IOException {
         if (b == trigger) {
             pending = true;
+            flush();
         } else if (pending) {
             os.write(prefix);
             pending = false;

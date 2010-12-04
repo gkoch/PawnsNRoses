@@ -352,9 +352,9 @@ public final class Engine {
             // three-fold repetition
             return VAL_DRAW;
         }
-        if (depth < PLY || searchedPly > Utils.MAX_SEARCH_DEPTH - 5) {
+        if (depth < PLY || searchedPly > Utils.MAX_SEARCH_DEPTH - 15) {
             final int eval;
-            if (!quiescence || searchedPly > Utils.MAX_SEARCH_DEPTH - 5) {
+            if (!quiescence || searchedPly > Utils.MAX_SEARCH_DEPTH - 15) {
                 eval = evaluation.evaluate(board);
             } else {
                 eval = quiescence(board, alpha, beta);

@@ -430,6 +430,7 @@ public class Utils {
         final int[] squares = board.getBoard();
         final int fromPos = getFromPosition(move);
         final int piece = squares[fromPos];
+        final int absPiece = Math.abs(piece);
         if (piece == EMPTY) {
             problems.add(String.format("From position %s is empty", StringUtils.toString0x88(fromPos)));
         }
@@ -437,19 +438,38 @@ public class Utils {
         final int toMove = state & WHITE_TO_MOVE;
         if (toMove == WHITE && piece < 0) {
             problems.add(String.format("It's white to move, but %s has a black %s on it",
-                StringUtils.toString0x88(fromPos), StringUtils.PIECES[-piece]));
+                StringUtils.toString0x88(fromPos), StringUtils.PIECES[absPiece]));
         }
+        final int signum = (toMove << 1) - 1;
         if (toMove == BLACK && piece > 0) {
             problems.add(String.format("It's black to move, but %s has a white %s on it",
-                StringUtils.toString0x88(fromPos), StringUtils.PIECES[piece]));
+                StringUtils.toString0x88(fromPos), StringUtils.PIECES[absPiece]));
         }
-        final int absPiece = Math.abs(piece);
         final int fromRank = getRank(fromPos);
-        if (absPiece == PAWN && (fromRank == 0 || fromRank == 7)) {
-            problems.add(String.format("Pawn moving from 1st/8th rank (%s)", StringUtils.toString0x88(fromPos)));
-        }
         final int toPos = getToPosition(move);
-        final int capturedPiece = squares[toPos];
+        final int moveType = move & MOVE_TYPE;
+        if (absPiece == PAWN) {
+            if (fromRank == 0 || fromRank == 7) {
+                problems.add(String.format("Pawn moving from 1st/8th rank (%s)", StringUtils.toString0x88(fromPos)));
+            }
+
+            final int fromFile = getFile(fromPos);
+            final int toFile = getFile(toPos);
+            if (fromFile == toFile && squares[toPos] != EMPTY) {
+                problems.add(String.format("Pawn moving to non-empty square (%s).", StringUtils.toString0x88(toPos)));
+            }
+        }
+        final int capturePos;
+        if (moveType == MT_EN_PASSANT) {
+            capturePos = toPos - signum * UP;
+            if (absPiece != PAWN) {
+                problems.add(String.format("%s on %s is trying to make an en-passant move",
+                    StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos)));
+            }
+        } else {
+            capturePos = toPos;
+        }
+        final int capturedPiece = squares[capturePos];
         if (piece * capturedPiece > 0) {
             problems.add(String.format("The %s on %s is trying to capture a piece with the same color on %s",
                 StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos), StringUtils.toString0x88(toPos)));

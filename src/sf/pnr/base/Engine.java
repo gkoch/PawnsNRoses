@@ -15,9 +15,16 @@ public final class Engine {
     public static final int ASPIRATION_WINDOW = 50;
 
     private static final int[] NO_MOVE_ARRAY = new int[] {0};
-    private static final int MOVE_ORDER_CHECK_BONUS = 500;
-    private static final int MOVE_ORDER_BLOCKED_CHECK_BONUS = 100;
-    private static final int MOVE_ORDER_7TH_RANK_PAWN = 300;
+    @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_CHECK_BONUS)
+    private static int MOVE_ORDER_CHECK_BONUS = 500;
+    @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_BLOCKED_CHECK_BONUS)
+    private static int MOVE_ORDER_BLOCKED_CHECK_BONUS = 100;
+    @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_7TH_RANK_PAWN_BONUS)
+    private static int MOVE_ORDER_7TH_RANK_PAWN_BONUS = 300;
+    @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_POSITIONAL_GAIN_SHIFT)
+    private static int MOVE_ORDER_POSITIONAL_GAIN_SHIFT = 2;
+    @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_HISTORY_MAX_BITS)
+    private static int MOVE_ORDER_HISTORY_MAX_BITS = 8;
     @Configurable(Configurable.Key.ENGINE_NULL_MOVE_MIN_DEPTH)
     private static int NULL_MOVE_MIN_DEPTH = 3 * PLY;
     @Configurable(Configurable.Key.ENGINE_NULL_MOVE_DEPTH_CHANGE_THRESHOLD)
@@ -895,9 +902,9 @@ public final class Engine {
     private void addMoveValuesAndRemoveTTMove(final int[] moves, final Board board, final int ttMove, final int[] killers) {
         int shift = 0;
         final int leadingZeros = Integer.numberOfLeadingZeros(historyMax);
-        if (leadingZeros < 24) {
+        if (leadingZeros < 32 - MOVE_ORDER_HISTORY_MAX_BITS) {
             // normalise history counts
-            shift = 24 - leadingZeros;
+            shift = 32 - MOVE_ORDER_HISTORY_MAX_BITS - leadingZeros;
         }
         final int toMove = board.getState() & WHITE_TO_MOVE;
         final int kingPos = board.getKing(1 - toMove);
@@ -914,7 +921,7 @@ public final class Engine {
                 final int historyValue = history[piece + 7][fromPos64][toPos64] >>> shift;
                 final int absPiece = piece * signum;
                 final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromPos, toPos, stage);
-                final int valPositional = ((positionalGain + 100) >> 2);
+                final int valPositional = ((positionalGain + 100) >> MOVE_ORDER_POSITIONAL_GAIN_SHIFT);
                 final int checkBonus;
                 final int checkingBit;
                 if (board.isCheckingMove(move)) {
@@ -931,7 +938,7 @@ public final class Engine {
                 final int toRank = getRank(toPos);
                 final int pawnBonus;
                 if (absPiece == PAWN && (toRank == 1 || toRank == 6)) {
-                    pawnBonus = MOVE_ORDER_7TH_RANK_PAWN;
+                    pawnBonus = MOVE_ORDER_7TH_RANK_PAWN_BONUS;
                 } else {
                     pawnBonus = 0;
                 }

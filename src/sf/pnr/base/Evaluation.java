@@ -239,7 +239,7 @@ public final class Evaluation {
         }
         int score = board.getMaterialValueAsWhite();
         score += computePositionalBonusNoPawnAsWhite(board);
-        score += computeMobilityBonus(board);
+        score += computeMobilityBonusAsWhite(board);
         final long pawnHashValue = pawnEval(board);
         score += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
         if ((board.getMaterialValueWhite() == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]]) &&
@@ -314,7 +314,7 @@ public final class Evaluation {
             (typeBonusEndGame[toPos + shift] - typeBonusEndGame[fromPos + shift]) * stage) / STAGE_MAX;
     }
 
-    public int computeMobilityBonus(final Board board) {
+    public int computeMobilityBonusAsWhite(final Board board) {
         int score = computeMobilityBonusPawn(board, WHITE) - computeMobilityBonusPawn(board, BLACK);
         final int[] distance = new int[1];
         score += computeMobilityBonusKnight(board, WHITE, distance) - computeMobilityBonusKnight(board, BLACK, distance);
@@ -325,7 +325,10 @@ public final class Evaluation {
         score += computeMobilityBonusSliding(board, WHITE, QUEEN, BONUS_DISTANCE_QUEEN, distance) -
             computeMobilityBonusSliding(board, BLACK, QUEEN, BONUS_DISTANCE_QUEEN, distance);
         score += computeMobilityBonusKing(board, WHITE) - computeMobilityBonusKing(board, BLACK);
-        return score + distance[0] * board.getStage() / STAGE_MAX;
+        final int state = board.getState();
+        final int toMove = state & WHITE;
+        final int signum = (toMove << 1) - 1;
+        return score + signum * distance[0] * board.getStage() / STAGE_MAX;
     }
 
     private int computeMobilityBonusPawn(final Board board, final int side) {

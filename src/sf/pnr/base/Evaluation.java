@@ -556,12 +556,12 @@ public final class Evaluation {
                     final int pawnFile = getFile(pawn);
                     int pawnStormBonusDeduction = BONUS_PAWN_STORM_MAX;
                     if (pawnFile == whiteKingFile) {
-                        pawnStormBonusDeduction = BONUS_PAWN_STORM_DEDUCTION_MAIN_FILE * (pawnRank - whiteKingFile);
+                        pawnStormBonusDeduction = BONUS_PAWN_STORM_DEDUCTION_MAIN_FILE * (pawnRank - whiteKingRank);
                     } else if (pawnFile == whiteKingFile + 1 || pawnFile == whiteKingFile - 1) {
-                        pawnStormBonusDeduction = BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE * (pawnRank - whiteKingFile);
+                        pawnStormBonusDeduction = BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE * (pawnRank - whiteKingRank);
                     }
                     if (pawnStormBonusDeduction < BONUS_PAWN_STORM_MAX) {
-                        pawnStormBonus += BONUS_PAWN_STORM_MAX - pawnStormBonusDeduction;
+                        pawnStormBonus -= BONUS_PAWN_STORM_MAX - pawnStormBonusDeduction;
                     }
                 }
             }

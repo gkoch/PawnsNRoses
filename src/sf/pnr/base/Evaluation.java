@@ -511,7 +511,7 @@ public final class Evaluation {
         int typeBonusOpening = 0;
         int typeBonusEndGame = 0;
         final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[PAWN];
-        final int[] positionalBonusEndGame = VAL_POSITION_BONUS_OPENING[PAWN];
+        final int[] positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[PAWN];
 
         final int[] pawnsWhite = board.getPieces(WHITE, PAWN);
         final int shiftPositionBonusWhite = SHIFT_POSITION_BONUS[WHITE];

@@ -58,14 +58,15 @@ public class EvaluationTest extends TestCase {
 
     public void testPawnEvalDoublePawns() {
         final Board board = StringUtils.fromFen("8/p7/K7/p3p2p/k3p2P/4N3/PP4P1/8 w - - 0 1");
+        final int stage = board.getStage();
         final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
         final int shiftBlack = SHIFT_POSITION_BONUS[BLACK];
-        final int positionalBonusWhite = VAL_POSITION_BONUS_PAWN[A[1] + shiftWhite] +
-            VAL_POSITION_BONUS_PAWN[B[1] + shiftWhite] + VAL_POSITION_BONUS_PAWN[G[1] + shiftWhite] +
-            VAL_POSITION_BONUS_PAWN[H[3] + shiftWhite];
-        final int positionalBonusBlack = VAL_POSITION_BONUS_PAWN[A[4] + shiftBlack] +
-            VAL_POSITION_BONUS_PAWN[A[6] + shiftBlack] + VAL_POSITION_BONUS_PAWN[E[3] + shiftBlack] +
-            VAL_POSITION_BONUS_PAWN[E[4] + shiftBlack] + VAL_POSITION_BONUS_PAWN[H[4] + shiftBlack] +
+        final int positionalBonusWhite = getPositionalBonusPawn(A[1], shiftWhite, stage) +
+            getPositionalBonusPawn(B[1], shiftWhite, stage) + getPositionalBonusPawn(G[1], shiftWhite, stage) +
+            getPositionalBonusPawn(H[3], shiftWhite, stage);
+        final int positionalBonusBlack = getPositionalBonusPawn(A[4], shiftBlack, stage) +
+            getPositionalBonusPawn(A[6], shiftBlack, stage) + getPositionalBonusPawn(E[3], shiftBlack, stage) +
+            getPositionalBonusPawn(E[4], shiftBlack, stage) + getPositionalBonusPawn(H[4], shiftBlack, stage) +
             BONUS_PASSED_PAWN_PER_SQUARE * 3;
         assertEquals(positionalBonusWhite - positionalBonusBlack - 2 * PENALTY_DOUBLE_PAWN - 3 * PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
@@ -90,10 +91,11 @@ public class EvaluationTest extends TestCase {
 
     public void testIsolatedPawnOnFileA() {
         final Board board = StringUtils.fromFen("4k3/pppppppp/8/8/8/P7/8/4K3 w - - 0 1");
-        final int positionalBonusWhite = VAL_POSITION_BONUS_PAWN[A[2] + SHIFT_POSITION_BONUS[WHITE]];
+        final int stage = board.getStage();
+        final int positionalBonusWhite = getPositionalBonusPawn(A[2], SHIFT_POSITION_BONUS[WHITE], stage);
         int positionalBonusBlack = 0;
         for (int i = 0; i < 8; i++) {
-            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getPosition(i, 6) + SHIFT_POSITION_BONUS[BLACK]];
+            positionalBonusBlack += getPositionalBonusPawn(getPosition(i, 6), SHIFT_POSITION_BONUS[BLACK], stage);
         }
         assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
@@ -101,10 +103,11 @@ public class EvaluationTest extends TestCase {
 
     public void testIsolatedPawnOnFileB() {
         final Board board = StringUtils.fromFen("4k3/pppppppp/8/8/8/1P6/8/4K3 w - - 0 1");
-        final int positionalBonusWhite = VAL_POSITION_BONUS_PAWN[B[2] + SHIFT_POSITION_BONUS[WHITE]];
+        final int stage = board.getStage();
+        final int positionalBonusWhite = getPositionalBonusPawn(B[2], SHIFT_POSITION_BONUS[WHITE], stage);
         int positionalBonusBlack = 0;
         for (int i = 0; i < 8; i++) {
-            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getPosition(i, 6) + SHIFT_POSITION_BONUS[BLACK]];
+            positionalBonusBlack += getPositionalBonusPawn(getPosition(i, 6), SHIFT_POSITION_BONUS[BLACK], stage);
         }
         assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
@@ -112,10 +115,11 @@ public class EvaluationTest extends TestCase {
 
     public void testIsolatedPawnOnFileH() {
         final Board board = StringUtils.fromFen("4k3/pppppppp/8/8/8/7P/8/4K3 w - - 0 1");
-        final int positionalBonusWhite = VAL_POSITION_BONUS_PAWN[H[2] + SHIFT_POSITION_BONUS[WHITE]];
+        final int stage = board.getStage();
+        final int positionalBonusWhite = getPositionalBonusPawn(H[2], SHIFT_POSITION_BONUS[WHITE], stage);
         int positionalBonusBlack = 0;
         for (int i = 0; i < 8; i++) {
-            positionalBonusBlack += VAL_POSITION_BONUS_PAWN[getPosition(i, 6) + SHIFT_POSITION_BONUS[BLACK]];
+            positionalBonusBlack += getPositionalBonusPawn(getPosition(i, 6), SHIFT_POSITION_BONUS[BLACK], stage);
         }
         assertEquals(positionalBonusWhite - positionalBonusBlack + PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
@@ -123,28 +127,32 @@ public class EvaluationTest extends TestCase {
 
     public void testPassedPawnOnFileA() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/P7/8/4K3 w - - 0 1");
-        assertEquals(VAL_POSITION_BONUS_PAWN[A[2] + SHIFT_POSITION_BONUS[WHITE]] + BONUS_PASSED_PAWN_PER_SQUARE +
+        final int stage = board.getStage();
+        assertEquals(getPositionalBonusPawn(A[2], SHIFT_POSITION_BONUS[WHITE], stage) + BONUS_PASSED_PAWN_PER_SQUARE +
             PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
     }
 
     public void testPassedPawnOnFileB() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/1P6/8/4K3 w - - 0 1");
-        assertEquals(VAL_POSITION_BONUS_PAWN[B[2] + SHIFT_POSITION_BONUS[WHITE]] + BONUS_PASSED_PAWN_PER_SQUARE +
+        final int stage = board.getStage();
+        assertEquals(getPositionalBonusPawn(B[2], SHIFT_POSITION_BONUS[WHITE], stage) + BONUS_PASSED_PAWN_PER_SQUARE +
             PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
     }
 
     public void testPassedPawnOnB4() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/1P6/8/8/4K3 w - - 0 1");
-        assertEquals(VAL_POSITION_BONUS_PAWN[B[3] + SHIFT_POSITION_BONUS[WHITE]] + BONUS_PASSED_PAWN_PER_SQUARE * 2 +
+        final int stage = board.getStage();
+        assertEquals(getPositionalBonusPawn(B[3], SHIFT_POSITION_BONUS[WHITE], stage) + BONUS_PASSED_PAWN_PER_SQUARE * 2 +
             PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
     }
 
     public void testPassedPawnOnFileH() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/7P/8/4K3 w - - 0 1");
-        assertEquals(VAL_POSITION_BONUS_PAWN[H[2] + SHIFT_POSITION_BONUS[WHITE]] + BONUS_PASSED_PAWN_PER_SQUARE +
+        final int stage = board.getStage();
+        assertEquals(getPositionalBonusPawn(H[2], SHIFT_POSITION_BONUS[WHITE], stage) + BONUS_PASSED_PAWN_PER_SQUARE +
             PENALTY_ISOLATED_PAWN,
             PawnHashTable.getValueFromPawnHashValue(eval.pawnEval(board)));
     }
@@ -231,5 +239,41 @@ public class EvaluationTest extends TestCase {
         final int[] pawnEndGame = Evaluation.VAL_POSITION_BONUS_PAWN_ENDGAME;
         assertTrue(pawnEndGame[A[6] + shiftWhite] >= pawnEndGame[A[1] + shiftWhite]);
         assertTrue(pawnEndGame[A[6] + shiftBlack] <= pawnEndGame[A[1] + shiftBlack]);
+    }
+
+    public void testPawnMirrorEvalPawnStorm() {
+        final Board boardWhite = StringUtils.fromFen("1k6/8/1P6/P1P5/8/8/8/6K1 w - - 0 1");
+        final long pawnHashValueWhite = eval.pawnEval(boardWhite);
+        final int pawnValueWhite = PawnHashTable.getValueFromPawnHashValue(pawnHashValueWhite);
+        final int valueWhite = eval.evaluate(boardWhite);
+
+        final Board boardBlack = StringUtils.fromFen("1k6/8/8/8/5p1p/6p1/8/6K1 b - - 0 1");
+        final long pawnHashValueBlack = eval.pawnEval(boardBlack);
+        final int pawnValueBlack = PawnHashTable.getValueFromPawnHashValue(pawnHashValueBlack);
+        final int valueBlack = eval.evaluate(boardBlack);
+
+        assertEquals(pawnValueWhite, -pawnValueBlack);
+        assertEquals(valueWhite, valueBlack);
+    }
+
+    public void testPawnMirrorEvalHalfInitial() {
+        final Board boardWhite = StringUtils.fromFen("5k2/8/8/8/8/8/PPPPPPPP/RNBKQBNR w KQ - 0 1");
+        final long pawnHashValueWhite = eval.pawnEval(boardWhite);
+        final int pawnValueWhite = PawnHashTable.getValueFromPawnHashValue(pawnHashValueWhite);
+        final int valueWhite = eval.evaluate(boardWhite);
+
+        final Board boardBlack = StringUtils.fromFen("rnbqkbnr/pppppppp/8/8/8/8/8/2K5 b kq - 0 1 ");
+        final long pawnHashValueBlack = eval.pawnEval(boardBlack);
+        final int pawnValueBlack = PawnHashTable.getValueFromPawnHashValue(pawnHashValueBlack);
+        final int valueBlack = eval.evaluate(boardBlack);
+
+        assertEquals(pawnValueWhite, -pawnValueBlack);
+        assertEquals(valueWhite, valueBlack);
+    }
+
+    private static int getPositionalBonusPawn(final int position, final int shift, final int stage) {
+        final int openingBonus = VAL_POSITION_BONUS_PAWN[position + shift] * (STAGE_MAX - stage);
+        final int endgameBonus = VAL_POSITION_BONUS_PAWN_ENDGAME[position + shift] * stage;
+        return (openingBonus + endgameBonus) / STAGE_MAX;
     }
 }

@@ -474,6 +474,19 @@ public class Utils {
             problems.add(String.format("The %s on %s is trying to capture a piece with the same color on %s",
                 StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos), StringUtils.toString0x88(toPos)));
         }
+        if (moveType == MT_NORMAL) {
+            if (board.isSliding(absPiece)) {
+                if (!board.isAttackedBySliding(toPos, ATTACK_BITS[absPiece], fromPos)) {
+                    problems.add(String.format("The %s on %s is trying to move to %s which is not possible",
+                        StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos), StringUtils.toString0x88(toPos)));
+                }
+            } else if (absPiece != PAWN) {
+                if (!board.isAttackedByNonSliding(toPos, ATTACK_BITS[absPiece], fromPos)) {
+                    problems.add(String.format("The %s on %s is trying to move to %s which is not possible",
+                        StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos), StringUtils.toString0x88(toPos)));
+                }
+            }
+        }
         return problems;
     }
 }

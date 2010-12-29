@@ -50,6 +50,8 @@ public final class Engine {
     private static int DEPTH_EXT_7TH_RANK_PAWN = 8;
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_MATE_THREAT)
     private static int DEPTH_EXT_MATE_THREAT = 20;
+    @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_MAX)
+    private static int DEPTH_EXT_MAX = 16;
     @Configurable(Configurable.Key.ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT)
     private static double ITERATIVE_DEEPENING_TIME_LIMIT = 0.9;
     @Configurable(Configurable.Key.ENGINE_SEARCH_ROOT_MIN_MOVE)
@@ -231,6 +233,10 @@ public final class Engine {
                     if (absPiece == PAWN) {
                         depthExt += DEPTH_EXT_7TH_RANK_PAWN;
                     }
+                }
+
+                if (depthExt > DEPTH_EXT_MAX) {
+                    depthExt = DEPTH_EXT_MAX;
                 }
 
                 // razoring
@@ -510,6 +516,10 @@ public final class Engine {
                     if (absPiece == PAWN) {
                         depthExt += DEPTH_EXT_7TH_RANK_PAWN;
                     }
+                }
+
+                if (depthExt > DEPTH_EXT_MAX) {
+                    depthExt = DEPTH_EXT_MAX;
                 }
 
                 // razoring

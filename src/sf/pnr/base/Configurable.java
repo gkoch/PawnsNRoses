@@ -22,7 +22,7 @@ public @interface Configurable {
         EVAL_BONUS_DISTANCE_ROOK("evaluation.bonus.distanceRook"),
         EVAL_BONUS_DISTANCE_QUEEN("evaluation.bonus.distanceQueen"),
         ENGINE_DEPTH_EXT_CHECK("engine.depthExt.check"), ENGINE_DEPTH_EXT_7TH_RANK_PAWN("engine.depthExt.7thRankPawn"),
-        ENGINE_DEPTH_EXT_MATE_THREAT("engine.depthExt.mateThreat"),
+        ENGINE_DEPTH_EXT_MATE_THREAT("engine.depthExt.mateThreat"), ENGINE_DEPTH_EXT_MAX("engine.depthExt.max"),
         ENGINE_NULL_MOVE_MIN_DEPTH("engine.nullMove.minDepth"), ENGINE_NULL_MOVE_DEPTH_CHANGE_THRESHOLD("engine.nullMove.depthChangeThreshold"),
         ENGINE_NULL_MOVE_DEPTH_HIGH("engine.nullMove.depthHigh"), ENGINE_NULL_MOVE_DEPTH_LOW("engine.nullMove.depthLow"),
         ENGINE_FUTILITY_THRESHOLD("engine.futility.threshold"), ENGINE_DEEP_FUTILITY_THRESHOLD("engine.deepFutility.threshold"),

@@ -81,6 +81,10 @@ public final class Evaluation {
     public static final int BONUS_KING_IN_SIGHT_SLIDING = 3;
     @Configurable(Configurable.Key.EVAL_BONUS_UNSTOPPABLE_PAWN)
     public static int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN - 125;
+    @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_KINGSIDE)
+    public static int PENALTY_CASTLING_KINGSIDE = -15;
+    @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_QUEENSIDE)
+    public static int PENALTY_CASTLING_QUEENSIDE = -15;
 
     public static final int INITIAL_MATERIAL_VALUE;
 
@@ -330,7 +334,21 @@ public final class Evaluation {
         final int state = board.getState();
         final int toMove = state & WHITE;
         final int signum = (toMove << 1) - 1;
-        return score + signum * distance[0] * board.getStage() / STAGE_MAX;
+        int castlingPenalty = 0;
+        if ((state & CASTLING_WHITE_KINGSIDE) == CASTLING_WHITE_KINGSIDE) {
+            castlingPenalty += PENALTY_CASTLING_KINGSIDE;
+        }
+        if ((state & CASTLING_WHITE_QUEENSIDE) == CASTLING_WHITE_QUEENSIDE) {
+            castlingPenalty += PENALTY_CASTLING_QUEENSIDE;
+        }
+        if ((state & CASTLING_BLACK_KINGSIDE) == CASTLING_BLACK_KINGSIDE) {
+            castlingPenalty -= PENALTY_CASTLING_KINGSIDE;
+        }
+        if ((state & CASTLING_BLACK_QUEENSIDE) == CASTLING_BLACK_QUEENSIDE) {
+            castlingPenalty -= PENALTY_CASTLING_QUEENSIDE;
+        }
+        return score + signum * distance[0] * board.getStage() / STAGE_MAX +
+            castlingPenalty * (STAGE_MAX - board.getStage()) / STAGE_MAX;
     }
 
     private int computeMobilityBonusPawn(final Board board, final int side) {

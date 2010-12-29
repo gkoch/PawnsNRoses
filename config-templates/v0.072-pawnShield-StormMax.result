@@ -1,0 +1,40 @@
+Statistics after 22344 tests (elapsed time: 221651.3s):
+                                                             Engine name             %    ply      nodes          msec  nodes/sec       eliminated
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@30-pawnStormMax@25.ini         45.23   6.39      92114         898.8     102488       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@35-pawnStormMax@15.ini         45.22   6.38      91885         898.6     102255       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@35-pawnStormMax@35.ini         45.12   6.38      90849         899.0     101059       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@25-pawnStormMax@30.ini         45.11   6.38      91511         898.5     101845       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@15-pawnStormMax@15.ini         45.10   6.39      92447         898.5     102885       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@35-pawnStormMax@30.ini         45.10   6.37      89825         898.8      99938       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@35-pawnStormMax@20.ini         45.04   6.36      88439         899.0      98377       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@10-pawnStormMax@30.ini         44.94   6.39      91841         898.8     102183       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@10-pawnStormMax@20.ini         44.94   6.38      90694         898.5     100936       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@20-pawnStormMax@20.ini         44.76   6.31      82904         899.4      92178       alive
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@10-pawnStormMax@40.ini         45.17   6.14      91000         821.7     110746       @1800
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@30-pawnStormMax@15.ini         45.17   6.15      92472         821.6     112545       @1800
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@20-pawnStormMax@35.ini         44.25   6.22      96854         824.4     117488       @1600
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@20-pawnStormMax@30.ini         44.25   6.23      97277         823.6     118115       @1600
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@10-pawnStormMax@35.ini         44.19   6.21      96578         823.4     117296       @1600
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@10-pawnStormMax@15.ini         44.14   6.16      94499         823.4     114763       @1400
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@35-pawnStormMax@25.ini         44.07   6.15      93071         824.5     112883       @1400
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@20-pawnStormMax@15.ini         43.93   6.15      93134         824.7     112928       @1400
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@25-pawnStormMax@15.ini         45.33   6.14      92282         815.5     113166       @1200
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@15-pawnStormMax@40.ini         45.25   6.15      91677         813.6     112674       @1200
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@10-pawnStormMax@25.ini         45.25   6.13      91771         814.3     112694       @1200
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@15-pawnStormMax@25.ini         45.70   6.27      99364         816.0     121768       @1000
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@30-pawnStormMax@40.ini         45.60   6.27      96210         815.5     117973       @1000
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@15-pawnStormMax@35.ini         45.50   6.29     101894         815.7     124917       @1000
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@25-pawnStormMax@20.ini         43.38   6.40     108578         833.2     130309       @800
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@20-pawnStormMax@40.ini         43.25   6.36      99917         831.4     120177       @800
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@15-pawnStormMax@30.ini         43.25   6.36     101408         833.3     121698       @800
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@25-pawnStormMax@25.ini         42.00   6.35     103106         827.8     124553       @600
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@25-pawnStormMax@35.ini         41.83   6.33     101056         829.2     121875       @600
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@30-pawnStormMax@20.ini         41.67   6.34     102866         827.7     124275       @600
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@35-pawnStormMax@40.ini         41.25   6.36     103647         825.2     125604       @400
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@15-pawnStormMax@20.ini         40.75   6.35     104707         825.0     126922       @400
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@20-pawnStormMax@25.ini         40.50   6.33     102653         826.3     124238       @400
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@30-pawnStormMax@35.ini         39.50   7.00     129535         828.9     156281       @200
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@25-pawnStormMax@40.ini         39.50   7.00     130453         829.9     157198       @200
+  Pawns N' Roses - pawnShield-StormMax-pawnShield@30-pawnStormMax@30.ini         38.50   6.94     121128         830.7     145813       @200
+Processed all files in 221651.3s
+ 

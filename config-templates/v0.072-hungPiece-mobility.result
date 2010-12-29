@@ -1,0 +1,16 @@
+Statistics after 22344 tests (elapsed time: 203431.4s):
+                                                     Engine name             %    ply      nodes      msec      nodes/sec       eliminated
+  Pawns N' Roses - hungPiece-mobility-hungPiece@2-mobility@2.ini         44.82   6.28      83023     899.0          92347       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@1-mobility@2.ini         44.81   6.29      84205     898.9          93679       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@2-mobility@1.ini         44.70   6.26      79693     899.0          88644       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@4-mobility@1.ini         44.67   6.28      82609     898.9          91901       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@4-mobility@2.ini         44.64   6.26      80662     899.1          89709       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@1-mobility@3.ini         44.53   6.27      82560     898.9          91850       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@4-mobility@3.ini         44.53   6.28      82916     899.1          92220       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@2-mobility@3.ini         44.52   6.28      82455     898.9          91725       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@3-mobility@3.ini         44.47   6.29      83348     898.7          92748       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@3-mobility@1.ini         44.45   6.29      83876     899.3          93270       alive
+  Pawns N' Roses - hungPiece-mobility-hungPiece@3-mobility@2.ini         44.15   6.10      84624     824.9         102583       @2000
+  Pawns N' Roses - hungPiece-mobility-hungPiece@1-mobility@1.ini         45.20   6.31     104422     814.3         128234       @1000
+Processed all files in 203431.4s
+ 

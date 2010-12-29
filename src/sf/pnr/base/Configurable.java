@@ -12,6 +12,8 @@ public @interface Configurable {
         EVAL_PENALTY_DOUBLE_PAWN("evaluation.penalty.doublePawn"), EVAL_PENALTY_TRIPLE_PAWN("evaluation.penalty.triplePawn"),
         EVAL_PENALTY_ISOLATED_PAWN("evaluation.penalty.isolatedPawn"), EVAL_PENALTY_WEAK_PAWN("evaluation.penalty.weakPawn"),
         EVAL_BONUS_PAWN_SHIELD("evaluation.bonus.pawnShield"), EVAL_BONUS_PAWN_STORM_MAX("evaluation.bonus.pawnStormMax"),
+        EVAL_PENALTY_PAWN_STORM_MAX_MAIN("evaluation.penalty.pawnStormMax.main"),
+        EVAL_PENALTY_PAWN_STORM_MAX_SIDE("evaluation.penalty.pawnStormMax.side"),
         EVAL_BONUS_DEFENSE("evaluation.bonus.defense"), EVAL_BONUS_ATTACK("evaluation.bonus.attack"),
         EVAL_BONUS_HUNG_PIECE("evaluation.bonus.hungPiece"), EVAL_BONUS_MOBILITY("evaluation.bonus.mobility"),
         EVAL_BONUS_UNSTOPPABLE_PAWN("evaluation.bonus.unstoppablePawn"),

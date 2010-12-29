@@ -347,7 +347,7 @@ public final class Board {
             return STAGE_MAX;
         }
         return moveCount * STAGE_WEIGHT_MOVE / STAGE_MOVE_RANGE +
-            capturedMax * STAGE_WEIGHT_CAPTURED / STAGE_CAPTURED_MAX; 
+            capturedMax * STAGE_WEIGHT_CAPTURED / STAGE_CAPTURED_MAX;
     }
 
     public void takeBack(final long undo) {

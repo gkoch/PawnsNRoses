@@ -75,7 +75,7 @@ public final class TranspositionTable {
                     final int age) {
         assert (Utils.getFromPosition(move) & 0x88) == 0;
         assert (Utils.getToPosition(move) & 0x88) == 0;
-        assert move != 0;
+        assert move != 0 || type != TT_TYPE_EXACT;
         final int hashed = hash(zobrist);
         final int startIndex = hashed << 1;
         final long[] array = getArraySegment(zobrist);

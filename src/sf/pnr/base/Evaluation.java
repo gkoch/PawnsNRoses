@@ -57,9 +57,9 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_PAWN_STORM_MAX)
     public static int BONUS_PAWN_STORM_MAX = 25;
     @Configurable(Configurable.Key.EVAL_PENALTY_PAWN_STORM_MAX_MAIN)
-    public static final int BONUS_PAWN_STORM_DEDUCTION_MAIN_FILE = 5;
+    public static int BONUS_PAWN_STORM_DEDUCTION_MAIN_FILE = 5;
     @Configurable(Configurable.Key.EVAL_PENALTY_PAWN_STORM_MAX_SIDE)
-    public static final int BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE = 4;
+    public static int BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE = 4;
     public static final int BONUS_PASSED_PAWN_PER_SQUARE = 5;
     @Configurable(Configurable.Key.EVAL_BONUS_DEFENSE)
     public static int BONUS_DEFENSE = 2;

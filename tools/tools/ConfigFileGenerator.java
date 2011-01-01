@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class ConfigFileGenerator {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
         final File templateFile = new File(args[0]);
         final String templateFileName = templateFile.getName();
         final String templateName = templateFileName.substring(0, templateFileName.lastIndexOf('.'));

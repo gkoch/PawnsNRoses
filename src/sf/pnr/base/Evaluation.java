@@ -44,9 +44,9 @@ public final class Evaluation {
     public static final int[] SHIFT_POSITION_BONUS = new int[]{8, 0};
 
     @Configurable(Configurable.Key.EVAL_PENALTY_DOUBLE_PAWN)
-    public static int PENALTY_DOUBLE_PAWN = -10;
+    public static int PENALTY_DOUBLE_PAWN = -30;
     @Configurable(Configurable.Key.EVAL_PENALTY_TRIPLE_PAWN)
-    public static int PENALTY_TRIPLE_PAWN = -35;
+    public static int PENALTY_TRIPLE_PAWN = -20;
     @Configurable(Configurable.Key.EVAL_PENALTY_ISOLATED_PAWN)
     public static int PENALTY_ISOLATED_PAWN = -20;
     @Configurable(Configurable.Key.EVAL_PENALTY_WEAK_PAWN)

@@ -1,0 +1,53 @@
+Statistics after 22344 tests (elapsed time: 222991.8s):
+                                             Engine name             %    ply      nodes          msec  nodes/sec       eliminated
+  Pawns N' Roses - defense-attack-defense@2-attack@1.ini         45.35   6.55     117102         897.4     130493       alive
+  Pawns N' Roses - defense-attack-defense@1-attack@3.ini         45.31   6.52     114201         897.3     127270       alive
+  Pawns N' Roses - defense-attack-defense@4-attack@4.ini         45.22   6.55     117155         897.4     130552       alive
+  Pawns N' Roses - defense-attack-defense@4-attack@5.ini         45.17   6.55     116416         897.7     129676       alive
+  Pawns N' Roses - defense-attack-defense@3-attack@1.ini         45.14   6.54     115023         897.3     128185       alive
+  Pawns N' Roses - defense-attack-defense@4-attack@3.ini         45.10   6.55     117366         897.5     130765       alive
+  Pawns N' Roses - defense-attack-defense@6-attack@6.ini         45.02   6.56     118285         897.5     131791       alive
+  Pawns N' Roses - defense-attack-defense@3-attack@5.ini         44.98   6.50     110014         897.5     122573       alive
+  Pawns N' Roses - defense-attack-defense@5-attack@7.ini         44.88   6.51     111987         897.6     124765       alive
+  Pawns N' Roses - defense-attack-defense@7-attack@1.ini         44.69   6.57     119569         897.1     133286       alive
+  Pawns N' Roses - defense-attack-defense@5-attack@5.ini         45.38   6.34     122575         817.3     149972       @1300
+  Pawns N' Roses - defense-attack-defense@6-attack@5.ini         45.31   6.35     123586         817.7     151139       @1300
+  Pawns N' Roses - defense-attack-defense@2-attack@6.ini         45.15   6.32     119738         818.3     146321       @1300
+  Pawns N' Roses - defense-attack-defense@3-attack@3.ini         46.08   6.30     117741         813.6     144718       @1200
+  Pawns N' Roses - defense-attack-defense@6-attack@2.ini         46.00   6.28     117540         812.3     144692       @1200
+  Pawns N' Roses - defense-attack-defense@6-attack@4.ini         46.00   6.30     119392         811.7     147097       @1200
+  Pawns N' Roses - defense-attack-defense@4-attack@6.ini         46.18   6.33     122526         807.7     151691       @1100
+  Pawns N' Roses - defense-attack-defense@6-attack@7.ini         46.09   6.32     119868         807.0     148536       @1100
+  Pawns N' Roses - defense-attack-defense@3-attack@6.ini         46.09   6.32     123975         806.0     153816       @1100
+  Pawns N' Roses - defense-attack-defense@1-attack@5.ini         46.20   6.41     124543         813.5     153090       @1000
+  Pawns N' Roses - defense-attack-defense@5-attack@2.ini         46.20   6.42     128287         813.2     157764       @1000
+  Pawns N' Roses - defense-attack-defense@5-attack@3.ini         46.00   6.41     124903         813.7     153494       @1000
+  Pawns N' Roses - defense-attack-defense@7-attack@5.ini         45.89   6.43     127781         814.8     156831       @900
+  Pawns N' Roses - defense-attack-defense@3-attack@7.ini         45.78   6.42     128229         815.9     157167       @900
+  Pawns N' Roses - defense-attack-defense@4-attack@7.ini         45.67   6.42     124806         816.7     152824       @900
+  Pawns N' Roses - defense-attack-defense@7-attack@6.ini         44.13   6.54     133366         830.1     160659       @800
+  Pawns N' Roses - defense-attack-defense@1-attack@7.ini         44.13   6.52     134117         829.3     161727       @800
+  Pawns N' Roses - defense-attack-defense@5-attack@4.ini         43.75   6.52     129755         829.1     156503       @800
+  Pawns N' Roses - defense-attack-defense@2-attack@5.ini         42.14   6.46     126780         832.4     152304       @700
+  Pawns N' Roses - defense-attack-defense@5-attack@6.ini         42.00   6.46     122918         833.0     147560       @700
+  Pawns N' Roses - defense-attack-defense@4-attack@2.ini         41.86   6.45     123034         832.3     147827       @700
+  Pawns N' Roses - defense-attack-defense@1-attack@6.ini         42.67   6.49     136380         824.6     165389       @600
+  Pawns N' Roses - defense-attack-defense@2-attack@2.ini         42.50   6.47     127264         824.3     154398       @600
+  Pawns N' Roses - defense-attack-defense@1-attack@2.ini         42.33   6.46     121988         826.5     147596       @600
+  Pawns N' Roses - defense-attack-defense@7-attack@3.ini         43.20   6.46     125711         819.9     153319       @500
+  Pawns N' Roses - defense-attack-defense@6-attack@3.ini         43.20   6.48     128758         819.5     157115       @500
+  Pawns N' Roses - defense-attack-defense@2-attack@7.ini         42.60   6.47     125166         821.5     152362       @500
+  Pawns N' Roses - defense-attack-defense@2-attack@4.ini         42.00   6.44     120209         825.0     145704       @400
+  Pawns N' Roses - defense-attack-defense@3-attack@2.ini         41.75   6.45     121029         822.9     147071       @400
+  Pawns N' Roses - defense-attack-defense@6-attack@1.ini         41.50   6.47     127293         824.2     154449       @400
+  Pawns N' Roses - defense-attack-defense@4-attack@1.ini         42.33   6.68     132377         813.0     162828       @300
+  Pawns N' Roses - defense-attack-defense@5-attack@1.ini         42.00   6.71     139880         813.5     171958       @300
+  Pawns N' Roses - defense-attack-defense@7-attack@4.ini         42.00   6.74     140161         812.9     172420       @300
+  Pawns N' Roses - defense-attack-defense@1-attack@4.ini         39.50   7.06     146530         826.5     177287       @200
+  Pawns N' Roses - defense-attack-defense@7-attack@7.ini         39.00   7.07     141264         830.5     170100       @200
+  Pawns N' Roses - defense-attack-defense@7-attack@2.ini         38.00   7.06     151605         829.3     182820       @200
+  Pawns N' Roses - defense-attack-defense@3-attack@4.ini         39.00   6.72     123388         835.8     147627       @100
+  Pawns N' Roses - defense-attack-defense@1-attack@1.ini         38.00   6.66     106614         839.1     127056       @100
+  Pawns N' Roses - defense-attack-defense@2-attack@3.ini         38.00   6.72     124737         838.1     148840       @100
+Processed all files in 222991.9s
+ 

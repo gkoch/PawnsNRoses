@@ -38,16 +38,20 @@ public class Utils {
 	public static final int SHIFT_EN_PASSANT = 5;
 	public static final int SHIFT_HALF_MOVES = 9;
 	public static final int SHIFT_FULL_MOVES = 20;
-	public static final int CLEAR_CASTLING_WHITE_KINGSIDE = FULL_INT ^ CASTLING_WHITE_KINGSIDE;
-	public static final int CLEAR_CASTLING_WHITE_QUEENSIDE = FULL_INT ^ CASTLING_WHITE_QUEENSIDE;
-	public static final int CLEAR_CASTLING_BLACK_KINGSIDE = FULL_INT ^ CASTLING_BLACK_KINGSIDE;
-	public static final int CLEAR_CASTLING_BLACK_QUEENSIDE = FULL_INT ^ CASTLING_BLACK_QUEENSIDE;
+	public static final int CLEAR_CASTLING_WHITE_KINGSIDE = ~CASTLING_WHITE_KINGSIDE;
+	public static final int CLEAR_CASTLING_WHITE_QUEENSIDE = ~CASTLING_WHITE_QUEENSIDE;
+	public static final int CLEAR_CASTLING_BLACK_KINGSIDE = ~CASTLING_BLACK_KINGSIDE;
+	public static final int CLEAR_CASTLING_BLACK_QUEENSIDE = ~CASTLING_BLACK_QUEENSIDE;
 	public static final int[] CLEAR_CASTLING = new int[128];
-	public static final int CLEAR_EN_PASSANT = FULL_INT ^ EN_PASSANT;
-	public static final int CLEAR_HALF_MOVES = FULL_INT ^ HALF_MOVES;
-	public static final int CLEAR_FULL_MOVES = FULL_INT ^ FULL_MOVES;
+	public static final int CLEAR_EN_PASSANT = ~EN_PASSANT;
+	public static final int CLEAR_HALF_MOVES = ~HALF_MOVES;
+	public static final int CLEAR_FULL_MOVES = ~FULL_MOVES;
 	public static final int UNIT_HALF_MOVES = 0x00000200;
 	public static final int UNIT_FULL_MOVES = 0x00100000;
+
+    // state2
+    public static final int CASTLED_BLACK = 0x00000001;
+    public static final int CASTLED_WHITE = 0x00000002;
 
 	public static final int FILE = 0x07;
 	public static final int RANK = 0x70;

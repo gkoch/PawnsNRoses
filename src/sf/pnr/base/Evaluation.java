@@ -81,10 +81,10 @@ public final class Evaluation {
     public static final int BONUS_KING_IN_SIGHT_SLIDING = 3;
     @Configurable(Configurable.Key.EVAL_BONUS_UNSTOPPABLE_PAWN)
     public static int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN - 125;
-    @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_KINGSIDE)
-    public static int PENALTY_CASTLING_KINGSIDE = -15;
-    @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_QUEENSIDE)
-    public static int PENALTY_CASTLING_QUEENSIDE = -15;
+    @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_MISSED)
+    public static int PENALTY_CASTLING_MISSED = -20;
+    @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_PENDING)
+    public static int PENALTY_CASTLING_PENDING = -15;
 
     public static final int INITIAL_MATERIAL_VALUE;
 
@@ -332,20 +332,25 @@ public final class Evaluation {
             computeMobilityBonusSliding(board, BLACK, QUEEN, BONUS_DISTANCE_QUEEN, distance);
         score += computeMobilityBonusKing(board, WHITE) - computeMobilityBonusKing(board, BLACK);
         final int state = board.getState();
+        final int state2 = board.getState2();
         final int toMove = state & WHITE;
         final int signum = (toMove << 1) - 1;
         int castlingPenalty = 0;
-        if ((state & CASTLING_WHITE_KINGSIDE) == CASTLING_WHITE_KINGSIDE) {
-            castlingPenalty += PENALTY_CASTLING_KINGSIDE;
+        final int castlingWhite = state & CASTLING_WHITE;
+        if (castlingWhite == CASTLING_WHITE_KINGSIDE || castlingWhite == CASTLING_WHITE_QUEENSIDE) {
+            castlingPenalty += PENALTY_CASTLING_MISSED;
+        } else if (castlingWhite == CASTLING_WHITE) {
+            castlingPenalty += PENALTY_CASTLING_PENDING;
+        } else if (castlingWhite == 0 && (state2 & CASTLED_WHITE) == 0) {
+            castlingPenalty += PENALTY_CASTLING_MISSED;
         }
-        if ((state & CASTLING_WHITE_QUEENSIDE) == CASTLING_WHITE_QUEENSIDE) {
-            castlingPenalty += PENALTY_CASTLING_QUEENSIDE;
-        }
-        if ((state & CASTLING_BLACK_KINGSIDE) == CASTLING_BLACK_KINGSIDE) {
-            castlingPenalty -= PENALTY_CASTLING_KINGSIDE;
-        }
-        if ((state & CASTLING_BLACK_QUEENSIDE) == CASTLING_BLACK_QUEENSIDE) {
-            castlingPenalty -= PENALTY_CASTLING_QUEENSIDE;
+        final int castlingBlack = state & CASTLING_BLACK;
+        if (castlingBlack == CASTLING_BLACK_KINGSIDE || castlingBlack == CASTLING_BLACK_QUEENSIDE) {
+            castlingPenalty -= PENALTY_CASTLING_MISSED;
+        } else if (castlingBlack == CASTLING_BLACK) {
+            castlingPenalty -= PENALTY_CASTLING_PENDING;
+        } else if (castlingBlack == 0 && (state2 & CASTLED_BLACK) == 0) {
+            castlingPenalty -= PENALTY_CASTLING_MISSED;
         }
         return score + signum * distance[0] * board.getStage() / STAGE_MAX +
             castlingPenalty * (STAGE_MAX - board.getStage()) / STAGE_MAX;

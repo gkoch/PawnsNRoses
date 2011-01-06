@@ -18,6 +18,7 @@ public final class Board {
 
     private final int[] board = new int[128];
 	private int state;
+	private int state2;
 	private final int[][][] pieces = new int[7][2][11];
     private final int[] pieceArrayPos = new int[128];
     private final long[] bitboardAllPieces = new long[2];
@@ -32,6 +33,7 @@ public final class Board {
 		System.arraycopy(INITIAL_BOARD, 0, board, 0, board.length);
 		System.arraycopy(INITIAL_PIECE_ARRAY_POS, 0, pieceArrayPos, 0, pieceArrayPos.length);
 		state = INITIAL_STATE;
+        state2 = 0;
 
 		pieces[PAWN][0][0] = 8;
 		pieces[PAWN][0][1] = A[6]; pieces[PAWN][0][2] = B[6]; pieces[PAWN][0][3] = C[6]; pieces[PAWN][0][4] = D[6];
@@ -72,6 +74,7 @@ public final class Board {
 		Arrays.fill(board, 0);
 		Arrays.fill(pieceArrayPos, 0);
 		state = 0;
+        state2 = 0;
 		Arrays.fill(pieces[PAWN][0], 0); Arrays.fill(pieces[PAWN][1], 0);
 		Arrays.fill(pieces[ROOK][0], 0); Arrays.fill(pieces[ROOK][1], 0);
 		Arrays.fill(pieces[KNIGHT][0], 0); Arrays.fill(pieces[KNIGHT][1], 0);
@@ -99,6 +102,10 @@ public final class Board {
 		return state;
 	}
 
+	public int getState2() {
+		return state2;
+	}
+
     public int getFullMoveCount() {
         return (state & FULL_MOVES) >> SHIFT_FULL_MOVES;
     }
@@ -114,6 +121,7 @@ public final class Board {
 	
 	public void setState(final int state) {
 		this.state = state;
+        state2 = 0;
 	}
 
     public void recompute() {
@@ -213,6 +221,7 @@ public final class Board {
                 movePiece(ROOK, currentPlayer, rookFromPos, rookToPos);
                 state &= (fromPos < 8)? (CLEAR_CASTLING_WHITE_KINGSIDE & CLEAR_CASTLING_WHITE_QUEENSIDE):
                     (CLEAR_CASTLING_BLACK_KINGSIDE & CLEAR_CASTLING_BLACK_QUEENSIDE);
+                state2 |= (currentPlayer + 1);
             }
             break;
         case MT_EN_PASSANT:
@@ -392,9 +401,11 @@ public final class Board {
                     break;
                 case MT_CASTLING_QUEENSIDE:
                     movePiece(ROOK, currentPlayer, fromPos - 1, toPos - 2);
+                    state2 &= ~(currentPlayer + 1);
                     break;
                 case MT_CASTLING_KINGSIDE:
                     movePiece(ROOK, currentPlayer, fromPos + 1, toPos + 1);
+                    state2 &= ~(currentPlayer + 1);
                     break;
                 default:
                     final int absCaptured = (move & CAPTURED) >> SHIFT_CAPTURED;

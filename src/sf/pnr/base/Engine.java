@@ -49,7 +49,7 @@ public final class Engine {
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_7TH_RANK_PAWN)
     private static int DEPTH_EXT_7TH_RANK_PAWN = 8;
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_MATE_THREAT)
-    private static int DEPTH_EXT_MATE_THREAT = 20;
+    private static int DEPTH_EXT_MATE_THREAT = 8;
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_MAX)
     private static int DEPTH_EXT_MAX = 16;
     @Configurable(Configurable.Key.ENGINE_ITERATIVE_DEEPENING_TIME_LIMIT)

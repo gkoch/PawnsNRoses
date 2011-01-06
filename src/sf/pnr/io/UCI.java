@@ -269,16 +269,29 @@ public class UCI implements UciProcess {
                         return moveStr;
                     }
                 } catch (Exception e) {
-                    out.println("info string " + e.getMessage());
-                    e.printStackTrace();
+                    printStackTrace(e);
                     throw e;
                 } catch (Error e) {
-                    out.println("info string " + e.getMessage());
-                    e.printStackTrace();
+                    printStackTrace(e);
                     throw e;
                 }
             }
         });
+    }
+
+    private void printStackTrace(final Throwable t) {
+        out.println("info string " + t.toString());
+        for(StackTraceElement element: t.getStackTrace()) {
+            out.println("info string   at " + element.toString());
+        }
+        Throwable cause = t.getCause();
+        while (cause != null) {
+            out.println("info string Caused by " + cause.toString());
+            for(StackTraceElement element: t.getStackTrace()) {
+                out.println("info string   at " + element.toString());
+            }
+            cause = cause.getCause();
+        }
     }
 
     private TimeControl getTimeControl(final int timeLeft, final int increment, final int movesToGo) {

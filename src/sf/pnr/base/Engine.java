@@ -16,13 +16,13 @@ public final class Engine {
 
     private static final int[] NO_MOVE_ARRAY = new int[] {0};
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_CHECK_BONUS)
-    private static int MOVE_ORDER_CHECK_BONUS = 500;
+    private static int MOVE_ORDER_CHECK_BONUS = 600;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_BLOCKED_CHECK_BONUS)
     private static int MOVE_ORDER_BLOCKED_CHECK_BONUS = 100;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_7TH_RANK_PAWN_BONUS)
-    private static int MOVE_ORDER_7TH_RANK_PAWN_BONUS = 300;
+    private static int MOVE_ORDER_7TH_RANK_PAWN_BONUS = 200;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_POSITIONAL_GAIN_SHIFT)
-    private static int MOVE_ORDER_POSITIONAL_GAIN_SHIFT = 2;
+    private static int MOVE_ORDER_POSITIONAL_GAIN_SHIFT = 1;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_HISTORY_MAX_BITS)
     private static int MOVE_ORDER_HISTORY_MAX_BITS = 8;
     @Configurable(Configurable.Key.ENGINE_NULL_MOVE_MIN_DEPTH)

@@ -1,0 +1,38 @@
+Statistics after 22344 tests (elapsed time: 210248.0s):
+                                                  Engine name        %    ply      nodes          msec  nodes/sec       eliminated
+  Pawns N' Roses - futility-futility@450-deepFutility@450.ini    47.20   6.19     110215         897.5     122800       alive
+  Pawns N' Roses - futility-futility@300-deepFutility@500.ini    47.16   6.24     107763         897.4     120082       alive
+  Pawns N' Roses - futility-futility@300-deepFutility@700.ini    47.15   6.22     106897         897.4     119125       alive
+  Pawns N' Roses - futility-futility@350-deepFutility@600.ini    47.12   6.17     104306         897.4     116227       alive
+  Pawns N' Roses - futility-futility@450-deepFutility@650.ini    47.05   6.18     110510         897.6     123123       alive
+  Pawns N' Roses - futility-futility@400-deepFutility@500.ini    46.95   6.19     108680         897.7     121070       alive
+  Pawns N' Roses - futility-futility@450-deepFutility@700.ini    46.91   6.18     111265         897.5     123971       alive
+  Pawns N' Roses - futility-futility@450-deepFutility@500.ini    46.89   6.17     106297         897.5     118431       alive
+  Pawns N' Roses - futility-futility@400-deepFutility@650.ini    46.75   6.18     106825         897.4     119033       alive
+  Pawns N' Roses - futility-futility@500-deepFutility@450.ini    46.72   6.18     110451         897.6     123055       alive
+  Pawns N' Roses - futility-futility@350-deepFutility@550.ini    47.89   6.25     114431         811.2     141063       @900
+  Pawns N' Roses - futility-futility@300-deepFutility@550.ini    46.13   6.36     118340         824.5     143522       @800
+  Pawns N' Roses - futility-futility@400-deepFutility@550.ini    46.13   6.34     119230         826.0     144346       @800
+  Pawns N' Roses - futility-futility@400-deepFutility@400.ini    45.88   6.33     112964         824.7     136972       @800
+  Pawns N' Roses - futility-futility@350-deepFutility@650.ini    44.14   6.26     112571         826.9     136130       @700
+  Pawns N' Roses - futility-futility@500-deepFutility@700.ini    44.00   6.24     116534         826.5     141001       @700
+  Pawns N' Roses - futility-futility@350-deepFutility@450.ini    43.86   6.26     110416         828.0     133355       @700
+  Pawns N' Roses - futility-futility@500-deepFutility@600.ini    44.17   6.23     117353         825.2     142212       @600
+  Pawns N' Roses - futility-futility@300-deepFutility@450.ini    44.00   6.27     109880         823.9     133361       @600
+  Pawns N' Roses - futility-futility@450-deepFutility@550.ini    43.83   6.22     113878         822.2     138500       @600
+  Pawns N' Roses - futility-futility@300-deepFutility@400.ini    44.20   6.28     109177         817.4     133571       @500
+  Pawns N' Roses - futility-futility@350-deepFutility@400.ini    44.20   6.25     109289         817.8     133643       @500
+  Pawns N' Roses - futility-futility@300-deepFutility@650.ini    44.20   6.26     111420         818.2     136182       @500
+  Pawns N' Roses - futility-futility@400-deepFutility@700.ini    43.00   6.30     118095         821.4     143778       @400
+  Pawns N' Roses - futility-futility@450-deepFutility@600.ini    43.00   6.28     118318         822.4     143872       @400
+  Pawns N' Roses - futility-futility@400-deepFutility@600.ini    43.00   6.30     120640         821.7     146816       @400
+  Pawns N' Roses - futility-futility@500-deepFutility@400.ini    44.67   6.53     132391         808.9     163663       @300
+  Pawns N' Roses - futility-futility@400-deepFutility@450.ini    44.33   6.52     127510         811.5     157126       @300
+  Pawns N' Roses - futility-futility@300-deepFutility@600.ini    44.00   6.55     129426         810.4     159703       @300
+  Pawns N' Roses - futility-futility@450-deepFutility@400.ini    42.50   6.91     140423         823.3     170554       @200
+  Pawns N' Roses - futility-futility@500-deepFutility@650.ini    42.50   6.85     143137         823.7     173778       @200
+  Pawns N' Roses - futility-futility@350-deepFutility@500.ini    42.00   6.90     139003         824.9     168507       @200
+  Pawns N' Roses - futility-futility@350-deepFutility@700.ini    41.00   6.53     119904         829.0     144644       @100
+  Pawns N' Roses - futility-futility@500-deepFutility@500.ini    41.00   6.48     120069         831.1     144473       @100
+  Pawns N' Roses - futility-futility@500-deepFutility@550.ini    41.00   6.49     125592         829.4     151429       @100
+Processed all files in 210248.0s

@@ -82,9 +82,9 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_UNSTOPPABLE_PAWN)
     public static int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN - 125;
     @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_MISSED)
-    public static int PENALTY_CASTLING_MISSED = -20;
+    public static int PENALTY_CASTLING_MISSED = -15;
     @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_PENDING)
-    public static int PENALTY_CASTLING_PENDING = -15;
+    public static int PENALTY_CASTLING_PENDING = -16;
 
     public static final int INITIAL_MATERIAL_VALUE;
 
@@ -290,7 +290,7 @@ public final class Evaluation {
         return score;
     }
 
-    public int computePositionalBonusNoPawnAsWhite(final Board board) {
+    public static int computePositionalBonusNoPawnAsWhite(final Board board) {
         int typeBonusOpening = 0;
         int typeBonusEndGame = 0;
         for (int type: TYPES_NOPAWN) {
@@ -320,7 +320,7 @@ public final class Evaluation {
             (typeBonusEndGame[toPos + shift] - typeBonusEndGame[fromPos + shift]) * stage) / STAGE_MAX;
     }
 
-    public int computeMobilityBonusAsWhite(final Board board) {
+    public static int computeMobilityBonusAsWhite(final Board board) {
         int score = computeMobilityBonusPawn(board, WHITE) - computeMobilityBonusPawn(board, BLACK);
         final int[] distance = new int[1];
         score += computeMobilityBonusKnight(board, WHITE, distance) - computeMobilityBonusKnight(board, BLACK, distance);
@@ -356,7 +356,7 @@ public final class Evaluation {
             castlingPenalty * (STAGE_MAX - board.getStage()) / STAGE_MAX;
     }
 
-    private int computeMobilityBonusPawn(final Board board, final int side) {
+    private static int computeMobilityBonusPawn(final Board board, final int side) {
         final int[] squares = board.getBoard();
         int score = 0;
         final int signum = (side << 1) - 1;
@@ -392,7 +392,7 @@ public final class Evaluation {
         return score;
     }
 
-    private int computeMobilityBonusKnight(final Board board, final int side, final int[] distance) {
+    private static int computeMobilityBonusKnight(final Board board, final int side, final int[] distance) {
         final long piecesMask = board.getBitboard(side);
         final long opponentPiecesMask = board.getBitboard(1 - side);
         final int opponentKing = board.getKing(1 - side);
@@ -420,8 +420,8 @@ public final class Evaluation {
         return (ATTACK_ARRAY[from0x88 - to0x88 + 120] & distanceMask) >> distanceShift;
     }
 
-    private int computeMobilityBonusSliding(final Board board, final int side, final int type,
-                                            final int[] distanceBonus, final int[] distance) {
+    private static int computeMobilityBonusSliding(final Board board, final int side, final int type,
+                                                   final int[] distanceBonus, final int[] distance) {
         final int opponentKing = board.getKing(1 - side);
         final int[] squares = board.getBoard();
         int score = 0;
@@ -445,7 +445,7 @@ public final class Evaluation {
         return score;
     }
 
-    private int computeMobilityBonusKing(final Board board, final int side) {
+    private static int computeMobilityBonusKing(final Board board, final int side) {
         final int[] squares = board.getBoard();
         int score = 0;
         final int kingPos = board.getKing(side);
@@ -513,7 +513,7 @@ public final class Evaluation {
         return pawnHashValue;
     }
 
-    public long pawnEval(final Board board, final int stage) {
+    public static long pawnEval(final Board board, final int stage) {
 
         int score = 0;
 

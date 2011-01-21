@@ -1,0 +1,327 @@
+Statistics after 400 tests (elapsed time: 45916.5s):
+                                                                                                                       Engine name           %    ply      nodes
+          msec  nodes/sec       eliminated
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       45.50   6.28     110894
+         820.7     135118       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       45.00   6.26     106253
+         822.4     129200       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       44.75   6.25     106244
+         822.9     129114       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       44.75   6.27     106807
+         826.7     129189       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       44.75   6.27     107705
+         823.1     130857       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       44.75   6.28     108954
+         823.2     132363       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       44.75   6.30     110441
+         823.0     134186       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       44.75   6.28     110973
+         821.7     135049       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       44.50   6.24     104351
+         824.4     126572       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       44.50   6.24     106050
+         823.9     128713       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       44.50   6.28     107714
+         825.4     130496       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       44.50   6.30     107718
+         823.4     130820       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       44.50   6.27     108190
+         821.5     131695       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       44.50   6.27     108489
+         825.7     131386       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       44.50   6.27     109489
+         820.7     133413       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       44.50   6.32     109715
+         824.7     133030       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       44.50   6.27     109881
+         822.1     133654       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       44.50   6.29     110030
+         821.6     133928       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       44.50   6.29     110526
+         821.0     134624       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       44.25   6.26     102921
+         822.6     125112       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       44.25   6.24     105406
+         823.0     128072       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       44.25   6.30     105620
+         826.6     127775       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       44.25   6.25     106682
+         821.2     129905       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       44.25   6.29     107164
+         823.4     130155       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       44.25   6.28     108800
+         822.9     132213       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       44.25   6.29     109687
+         822.3     133393       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       44.25   6.28     110328
+         821.2     134354       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       44.25   6.28     110593
+         824.5     134135       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       44.00   6.22     100880
+         824.0     122424       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       44.00   6.25     104250
+         821.6     126888       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       44.00   6.25     105312
+         822.8     127986       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       44.00   6.27     106015
+         822.5     128889       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       44.00   6.25     106097
+         823.0     128915       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       44.00   6.27     106851
+         821.1     130125       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       44.00   6.25     107477
+         823.7     130482       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       44.00   6.29     107742
+         821.8     131104       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       44.00   6.27     107748
+         821.9     131099       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       44.00   6.27     108696
+         822.9     132083       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       44.00   6.29     110083
+         821.4     134015       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       43.75   6.25     103528
+         821.5     126017       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       43.75   6.29     106185
+         824.6     128767       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       43.75   6.27     106729
+         821.1     129983       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       43.75   6.28     107067
+         823.9     129947       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       43.75   6.25     107232
+         822.2     130428       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       43.75   6.28     107816
+         821.0     131322       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       43.75   6.26     108252
+         820.8     131892       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       43.75   6.30     108407
+         826.6     131146       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       43.75   6.27     108508
+         823.4     131777       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       43.75   6.29     109161
+         822.1     132788       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       43.75   6.29     110268
+         822.3     134100       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       43.75   6.30     111050
+         826.9     134298       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       43.50   6.26     101858
+         825.5     123394       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       43.50   6.26     104229
+         825.6     126244       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       43.50   6.24     105258
+         822.6     127959       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       43.50   6.25     105960
+         823.7     128647       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       43.50   6.25     106001
+         823.4     128740       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       43.50   6.26     106246
+         824.1     128926       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       43.50   6.25     106326
+         823.4     129130       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       43.50   6.27     106493
+         822.2     129524       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       43.50   6.27     107603
+         820.9     131077       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       43.50   6.29     108454
+         821.5     132022       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       43.50   6.29     108699
+         821.8     132277       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       43.50   6.30     109836
+         822.0     133621       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       43.50   6.29     109934
+         820.7     133944       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       43.50   6.28     110451
+         823.2     134176       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       43.25   6.23     102991
+         822.8     125174       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       43.25   6.26     105178
+         820.5     128190       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       43.25   6.27     105364
+         822.5     128099       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       43.25   6.26     105703
+         822.6     128497       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       43.25   6.27     105745
+         821.7     128696       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       43.25   6.26     106230
+         821.1     129373       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       43.25   6.27     106321
+         820.3     129614       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       43.25   6.26     107126
+         823.3     130116       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       43.25   6.26     107220
+         824.1     130111       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       43.25   6.25     107397
+         825.3     130137       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       43.25   6.27     108323
+         822.6     131681       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       43.25   6.28     109221
+         822.8     132737       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       43.25   6.29     109905
+         823.7     133433       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       43.25   6.27     110612
+         822.0     134565       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       43.25   6.34     112581
+         827.1     136119       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       43.00   6.28     102349
+         827.2     123729       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       43.00   6.26     103893
+         824.1     126066       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       43.00   6.27     104849
+         822.0     127550       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       43.00   6.27     106183
+         822.6     129078       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       43.00   6.26     106493
+         819.0     130025       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       43.00   6.27     106723
+         823.1     129668       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       43.00   6.27     106817
+         822.8     129818       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       43.00   6.26     106824
+         823.3     129752       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       43.00   6.25     107378
+         821.6     130688       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       43.00   6.27     107602
+         822.3     130857       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       43.00   6.28     107692
+         822.4     130941       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       43.00   6.28     108148
+         825.8     130963       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       43.00   6.28     108926
+         820.2     132796       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       43.00   6.28     109635
+         821.2     133511       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       43.00   6.26     109786
+         821.6     133626       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       42.75   6.23     102700
+         821.9     124955       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       42.75   6.25     103518
+         822.3     125892       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       42.75   6.22     103808
+         821.6     126346       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       42.75   6.27     105014
+         822.8     127628       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       42.75   6.26     105620
+         824.4     128112       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       42.75   6.27     106215
+         823.4     128991       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       42.75   6.26     106255
+         823.4     129044       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       42.75   6.28     107498
+         822.3     130736       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       42.75   6.28     108454
+         821.4     132042       alive
+    Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       42.75   6.28     109781
+         823.2     133359       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       42.75   6.29     111323
+         820.5     135677       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       42.50   6.28     106571
+         822.4     129589       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       42.50   6.27     107218
+         823.5     130198       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       42.50   6.25     107248
+         823.6     130212       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       42.50   6.25     108057
+         820.8     131655       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       42.50   6.27     108423
+         822.6     131803       alive
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       42.50   6.26     108554
+         822.9     131910       alive
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       42.50   6.27     108831
+         821.6     132457       @400
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       42.50   6.29     108966
+         822.1     132554       @400
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       42.50   6.28     108981
+         822.2     132541       @400
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       42.50   6.28     109383
+         822.9     132927       @400
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       42.25   6.27     102866
+         822.3     125096       @400
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       43.06   6.34     108520
+         820.5     132260       @360
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       43.06   6.34     109727
+         822.3     133446       @360
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@8.ini       43.06   6.36     111559
+         820.6     135952       @360
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       43.06   6.35     112943
+         821.9     137420       @360
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       42.78   6.34     109233
+         821.9     132901       @360
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       44.69   6.46     118516
+         813.6     145668       @320
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@8.ini       44.69   6.48     120199
+         809.9     148420       @320
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@8.ini       44.69   6.45     120661
+         812.0     148594       @320
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       44.38   6.45     116379
+         810.6     143566       @320
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       43.75   6.48     116597
+         811.7     143649       @320
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       43.57   6.62     125413
+         817.6     153383       @280
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       43.57   6.61     125498
+         819.4     153160       @280
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       43.57   6.63     129762
+         814.2     159377       @280
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@10.ini       43.57   6.64     131188
+         815.6     160858       @280
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       43.21   6.63     130484
+         816.5     159805       @280
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       42.50   6.77     127309
+         830.2     153350       @240
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       42.50   6.76     129702
+         825.6     157095       @240
+   Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@10.ini       42.50   6.78     129933
+         830.5     156460       @240
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       42.50   6.75     130488
+         827.5     157697       @240
+    Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       42.08   6.78     132701
+         823.9     161072       @240
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       42.50   6.91     139768
+         824.3     169553       @200
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       42.00   6.85     125229
+         828.6     151141       @200
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@10.ini       42.00   6.90     131955
+         825.3     159885       @200
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@8.ini       42.00   6.90     136890
+         821.1     166722       @200
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       41.00   6.88     133708
+         824.9     162090       @200
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       38.75   6.81     133293
+         825.2     161528       @160
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       38.75   6.84     136877
+         825.9     165738       @160
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       38.13   6.80     130472
+         828.2     157543       @160
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       38.13   6.81     131585
+         824.4     159605       @160
+  Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       38.13   6.84     137549
+         828.6     166010       @160
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       40.00   6.54     119744
+         808.1     148173       @120
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@300-historyMaxBits@10.ini       40.00   6.55     122261
+         810.8     150798       @120
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@10.ini       39.17   6.48     110352
+         809.6     136298       @120
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       39.17   6.50     120477
+         809.6     148805       @120
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@150-7thRankPawnBonus@200-historyMaxBits@10.ini       38.33   6.49     111916
+         811.2     137969       @120
+   Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@8.ini       40.00   6.45     111844
+         822.3     136012       @80
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@600-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       40.00   6.44     111933
+         819.2     136638       @80
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@200-historyMaxBits@8.ini       40.00   6.46     114418
+         821.3     139311       @80
+  Pawns N' Roses - moveOrder-positionalGainShift@2-checkBonus@500-blockedCheckBonus@100-7thRankPawnBonus@200-historyMaxBits@10.ini       38.75   6.43     100764
+         824.0     122282       @80
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@300-historyMaxBits@10.ini       38.75   6.48     104760
+         820.9     127616       @80
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       40.00   7.05     134529
+         806.1     166894       @40
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@400-historyMaxBits@8.ini       40.00   7.05     135221
+         805.8     167805       @40
+  Pawns N' Roses - moveOrder-positionalGainShift@1-checkBonus@400-blockedCheckBonus@150-7thRankPawnBonus@300-historyMaxBits@10.ini       40.00   7.10     138458
+         807.3     171518       @40
+    Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@500-blockedCheckBonus@50-7thRankPawnBonus@400-historyMaxBits@8.ini       40.00   7.03     139315
+         809.2     172159       @40
+   Pawns N' Roses - moveOrder-positionalGainShift@3-checkBonus@400-blockedCheckBonus@100-7thRankPawnBonus@400-historyMaxBits@8.ini       40.00   7.13     152139
+         806.2     188722       @40

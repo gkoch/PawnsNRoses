@@ -1,0 +1,27 @@
+Statistics after 19400 tests (elapsed time: 176339.4s):
+                                           Engine name       %    ply      nodes          msec  nodes/sec       eliminated
+  Pawns N' Roses - castling-pending@-16-missed@-15.ini   46.53   6.12      96674         889.7     108659       alive
+  Pawns N' Roses - castling-pending@-12-missed@-15.ini   46.43   6.13      97335         889.7     109408       alive
+  Pawns N' Roses - castling-pending@-16-missed@-10.ini   46.42   6.15      99747         889.6     112130       alive
+  Pawns N' Roses - castling-pending@-12-missed@-30.ini   46.41   6.16     100732         889.3     113265       alive
+  Pawns N' Roses - castling-pending@-12-missed@-20.ini   46.38   6.14      99305         889.5     111646       alive
+  Pawns N' Roses - castling-pending@-20-missed@-20.ini   46.31   6.14      99445         889.5     111796       alive
+   Pawns N' Roses - castling-pending@-8-missed@-25.ini   46.31   6.15      99467         889.2     111857       alive
+  Pawns N' Roses - castling-pending@-20-missed@-10.ini   46.23   6.13      97568         890.0     109624       alive
+   Pawns N' Roses - castling-pending@-4-missed@-25.ini   46.22   6.14      98211         889.6     110403       alive
+   Pawns N' Roses - castling-pending@-4-missed@-15.ini   46.05   6.11      95338         889.8     107149       alive
+  Pawns N' Roses - castling-pending@-16-missed@-30.ini   45.20   6.29     117014         818.1     143037       @500
+   Pawns N' Roses - castling-pending@-4-missed@-10.ini   44.80   6.27     109404         817.1     133886       @500
+   Pawns N' Roses - castling-pending@-8-missed@-30.ini   44.40   6.29     113510         818.1     138748       @500
+  Pawns N' Roses - castling-pending@-20-missed@-25.ini   44.00   6.33     118481         821.3     144264       @400
+  Pawns N' Roses - castling-pending@-12-missed@-25.ini   43.75   6.31     114400         821.5     139255       @400
+   Pawns N' Roses - castling-pending@-8-missed@-10.ini   43.75   6.34     118414         819.6     144478       @400
+  Pawns N' Roses - castling-pending@-16-missed@-20.ini   45.67   6.54     127776         808.7     158001       @300
+  Pawns N' Roses - castling-pending@-16-missed@-25.ini   45.67   6.56     131282         810.6     161966       @300
+   Pawns N' Roses - castling-pending@-8-missed@-20.ini   45.67   6.58     134043         811.6     165156       @300
+   Pawns N' Roses - castling-pending@-8-missed@-15.ini   44.50   6.94     148299         822.6     180272       @200
+  Pawns N' Roses - castling-pending@-12-missed@-10.ini   43.00   6.94     143169         822.9     173987       @200
+   Pawns N' Roses - castling-pending@-4-missed@-30.ini   43.00   6.93     147834         821.0     180058       @200
+  Pawns N' Roses - castling-pending@-20-missed@-15.ini   41.00   6.62     133506         829.8     160887       @100
+  Pawns N' Roses - castling-pending@-20-missed@-30.ini   41.00   6.65     135094         829.1     162938       @100
+   Pawns N' Roses - castling-pending@-4-missed@-20.ini   41.00   6.63     135666         826.4     164167       @100

@@ -1,0 +1,19 @@
+Statistics after 22344 tests (elapsed time: 204126.4s):
+                                                             Engine name             %    ply      nodes          msec  nodes/sec       eliminated
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-20-isolatedPawn@-20.ini         47.17   6.25     109731         896.7     122375       alive
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-15-isolatedPawn@-20.ini         47.07   6.25     110641         896.7     123381       alive
+   Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-10-isolatedPawn@-5.ini         47.05   6.24     107739         896.9     120124       alive
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-10-isolatedPawn@-15.ini         47.05   6.24     109243         896.5     121856       alive
+   Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-5-isolatedPawn@-20.ini         47.00   6.23     107200         896.9     119528       alive
+   Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-5-isolatedPawn@-10.ini         46.90   6.25     110516         896.7     123251       alive
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-20-isolatedPawn@-15.ini         46.83   6.23     107753         896.8     120157       alive
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-15-isolatedPawn@-10.ini         46.78   6.23     108043         896.7     120485       alive
+   Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-15-isolatedPawn@-5.ini         46.77   6.24     109882         896.7     122546       alive
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-15-isolatedPawn@-15.ini         46.55   6.24     107678         896.8     120063       alive
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-10-isolatedPawn@-10.ini         48.40   6.27     113433         807.8     140429       @1000
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-10-isolatedPawn@-20.ini         48.30   6.27     112589         808.3     139285       @1000
+    Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-5-isolatedPawn@-5.ini         47.90   6.26     111203         808.1     137609       @1000
+   Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-20-isolatedPawn@-5.ini         43.40   6.27     111450         818.2     136208       @500
+  Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-20-isolatedPawn@-10.ini         43.40   6.30     115728         816.7     141706       @500
+   Pawns N' Roses - weak-isolatedPawn-2-weakPawn@-5-isolatedPawn@-15.ini         43.20   6.33     118395         816.6     144980       @500
+Processed all files in 204126.4s

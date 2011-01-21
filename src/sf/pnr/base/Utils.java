@@ -56,6 +56,7 @@ public class Utils {
 	public static final int FILE = 0x07;
 	public static final int RANK = 0x70;
 	public static final int SHIFT_RANK = 4;
+    public static final int[] FILE_RANK_BITS = new int[]{0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 	// move
 	public static final int FROM       = 0x0000007F;

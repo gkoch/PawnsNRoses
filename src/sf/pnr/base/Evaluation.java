@@ -86,6 +86,11 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_PENDING)
     public static int PENALTY_CASTLING_PENDING = -16;
 
+    @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMEFILE)
+    public static int BONUS_ROOKS_ON_SAME_FILE = 15;
+    @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMERANK)
+    public static int BONUS_ROOKS_ON_SAME_RANK = 10;
+
     public static final int INITIAL_MATERIAL_VALUE;
 
     private static final Random RND = new Random(System.currentTimeMillis());
@@ -308,7 +313,8 @@ public final class Evaluation {
             }
         }
         final int stage = board.getStage();
-        return (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
+        return (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX +
+            computeRookBonus(board, WHITE) - computeRookBonus(board, BLACK);
     }
 
     public static int computePositionalGain(final int absPiece, final int toMove, final int fromPos, final int toPos,
@@ -462,6 +468,19 @@ public final class Evaluation {
             }
         }
         return score;
+    }
+
+    public static int computeRookBonus(final Board board, final int side) {
+        final int[] rooks = board.getPieces(side, ROOK);
+        int file = 0;
+        int rank = 0;
+        final int rookCount = rooks[0];
+        for (int i = rookCount; i > 0; i--) {
+            final int rook = rooks[i];
+            file |= FILE_RANK_BITS[getFile(rook)];
+            rank |= FILE_RANK_BITS[getRank(rook)];
+        }
+        return BONUS_ROOKS_ON_SAME_FILE * (rookCount - Integer.bitCount(file)) + BONUS_ROOKS_ON_SAME_RANK * (rookCount - Integer.bitCount(rank));
     }
 
     public static boolean drawByInsufficientMaterial(final Board board) {

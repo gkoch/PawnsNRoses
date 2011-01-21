@@ -23,6 +23,8 @@ public @interface Configurable {
         EVAL_BONUS_DISTANCE_QUEEN("evaluation.bonus.distanceQueen"),
         EVAL_PENALTY_CASTLING_MISSED("evaluation.penalty.castling.missed"),
         EVAL_PENALTY_CASTLING_PENDING("evaluation.penalty.castling.pending"),
+        EVAL_BONUS_ROOK_SAMEFILE("evaluation.bonus.rook.sameFile"),
+        EVAL_BONUS_ROOK_SAMERANK("evaluation.bonus.rook.sameRank"),
         ENGINE_DEPTH_EXT_CHECK("engine.depthExt.check"), ENGINE_DEPTH_EXT_7TH_RANK_PAWN("engine.depthExt.7thRankPawn"),
         ENGINE_DEPTH_EXT_MATE_THREAT("engine.depthExt.mateThreat"), ENGINE_DEPTH_EXT_MAX("engine.depthExt.max"),
         ENGINE_NULL_MOVE_MIN_DEPTH("engine.nullMove.minDepth"), ENGINE_NULL_MOVE_DEPTH_CHANGE_THRESHOLD("engine.nullMove.depthChangeThreshold"),

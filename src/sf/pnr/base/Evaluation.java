@@ -91,6 +91,9 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMERANK)
     public static int BONUS_ROOKS_ON_SAME_RANK = 10;
 
+    @Configurable(Configurable.Key.EVAL_BONUS_BISHOP_OPPOSITECOLORS)
+    public static int BONUS_BISHOP_OPPOSITECOLORS = 15;
+
     public static final int INITIAL_MATERIAL_VALUE;
 
     private static final Random RND = new Random(System.currentTimeMillis());
@@ -314,7 +317,8 @@ public final class Evaluation {
         }
         final int stage = board.getStage();
         return (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX +
-            computeRookBonus(board, WHITE) - computeRookBonus(board, BLACK);
+            computeRookBonus(board, WHITE) - computeRookBonus(board, BLACK) +
+            computeBishopBonus(board, WHITE) - computeBishopBonus(board, BLACK);
     }
 
     public static int computePositionalGain(final int absPiece, final int toMove, final int fromPos, final int toPos,
@@ -481,6 +485,16 @@ public final class Evaluation {
             rank |= FILE_RANK_BITS[getRank(rook)];
         }
         return BONUS_ROOKS_ON_SAME_FILE * (rookCount - Integer.bitCount(file)) + BONUS_ROOKS_ON_SAME_RANK * (rookCount - Integer.bitCount(rank));
+    }
+
+    public static int computeBishopBonus(final Board board, final int side) {
+        final int[] bishops = board.getPieces(side, BISHOP);
+        int state = 0;
+        for (int i = bishops[0]; i > 0; i--) {
+            final int bishop = bishops[i];
+            state |= ((getFile(bishop) + getRank(bishop)) & 1) + 1;
+        }
+        return state == 3? BONUS_BISHOP_OPPOSITECOLORS: 0;
     }
 
     public static boolean drawByInsufficientMaterial(final Board board) {

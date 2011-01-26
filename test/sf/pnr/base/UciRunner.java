@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -205,7 +206,14 @@ public class UciRunner {
     }
 
     public int getScore() {
-        return score;
+        int value = score;
+        if (score < -20000) {
+            value = -20000;
+        }
+        if (score > 20000) {
+            value = 20000;
+        }
+        return value;
     }
 
     public String getBestMove() {
@@ -232,27 +240,21 @@ public class UciRunner {
             }
             if (line.startsWith("info")) {
                 final String[] parts = line.split(" ");
-                boolean resetFields = true;
-                for (int i = 0; i < parts.length; i++) {
-                    if (parts[i].equals("depth")) {
-                        if (resetFields) {
-                            resetFields();
-                            resetFields = false;
-                        }
-                        depth = Integer.parseInt(parts[++i]);
-                    } else if (parts[i].equals("nodes")) {
-                        if (resetFields) {
-                            resetFields();
-                            resetFields = false;
-                        }
-                        nodeCount = Long.parseLong(parts[++i]);
-                    } else if (parts[i].equals("cp")) {
-                        if (resetFields) {
-                            resetFields();
-                            resetFields = false;
-                        }
-                        score = Integer.parseInt(parts[++i]);
+                final Map<String, Number> params = parseInfoLine(parts);
+                final Integer newDepth = (Integer) params.get("depth");
+                if (newDepth != null) {
+                    if (depth != newDepth) {
+                        resetFields();
                     }
+                    depth = newDepth;
+                }
+                final Long newNodeCount = (Long) params.get("nodes");
+                if (newNodeCount != null) {
+                    nodeCount = newNodeCount;
+                }
+                final Integer newScore = (Integer) params.get("cp");
+                if (newScore != null) {
+                    score = newScore;
                 }
             }
         }
@@ -260,6 +262,20 @@ public class UciRunner {
             bestMoveLine = line;
             bestMove = line.substring("bestmove ".length()).split(" ")[0].trim();
         }
+    }
+
+    private Map<String, Number> parseInfoLine(final String[] parts) {
+        final Map<String, Number> params = new HashMap<String, Number>();
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].equals("depth")) {
+                params.put("depth", Integer.parseInt(parts[++i]));
+            } else if (parts[i].equals("nodes")) {
+                params.put("nodes", Long.parseLong(parts[++i]));
+            } else if (parts[i].equals("cp")) {
+                params.put("cp", Integer.parseInt(parts[++i]));
+            }
+        }
+        return params;
     }
 
     private void resetFields() {

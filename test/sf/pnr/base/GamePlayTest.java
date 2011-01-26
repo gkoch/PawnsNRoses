@@ -42,16 +42,21 @@ public class GamePlayTest {
         }
     }
 
-    private static UciRunner[] getPlayers() throws IOException {
+    public static UciRunner[] getPlayers() throws IOException {
         final File engineDir = getEngineDir();
-        final String patternStr = System.getProperty("searchTask.enginePattern", ".*");
-        final Pattern executablePattern = Pattern.compile(patternStr);
-        final File[] executables = engineDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(final File file) {
-                return file.isFile() && executablePattern.matcher(file.getName()).matches();
-            }
-        });
+        final File[] executables;
+        if (engineDir != null) {
+            final String patternStr = System.getProperty("searchTask.enginePattern", ".*");
+            final Pattern executablePattern = Pattern.compile(patternStr);
+            executables = engineDir.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(final File file) {
+                    return file.isFile() && executablePattern.matcher(file.getName()).matches();
+                }
+            });
+        } else {
+            executables = new File[0];
+        }
         final boolean includeLatest = Boolean.parseBoolean(System.getProperty("searchTask.includeLatest", "false"));
         final int shift = includeLatest? 1: 0;
         final UciRunner[] players = new UciRunner[executables.length + shift];
@@ -69,11 +74,18 @@ public class GamePlayTest {
         return players;
     }
 
-    private static File getEngineDir() {
-        return new File(System.getProperty("searchTask.engineDir"));
+    public static File getEngineDir() {
+        final String path = System.getProperty("searchTask.engineDir");
+        final File engineDir;
+        if (path != null) {
+            engineDir = new File(path);
+        } else {
+            engineDir = null;
+        }
+        return engineDir;
     }
 
-    private static String getPlayerName(final File executable) {
+    public static String getPlayerName(final File executable) {
         final String fileName = executable.getName();
         final int pos = fileName.lastIndexOf('.');
         final String name;
@@ -85,7 +97,7 @@ public class GamePlayTest {
         return name;
     }
 
-    private static UciRunner[] getTestPlayers() throws IOException {
+    public static UciRunner[] getTestPlayers() throws IOException {
         final File engineDir = getEngineDir();
         final Map<String, String> options = new HashMap<String, String>();
         options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE), "128");

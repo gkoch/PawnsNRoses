@@ -87,12 +87,12 @@ public final class Evaluation {
     public static int PENALTY_CASTLING_PENDING = -16;
 
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMEFILE)
-    public static int BONUS_ROOKS_ON_SAME_FILE = 15;
+    public static int BONUS_ROOKS_ON_SAME_FILE = 12;
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMERANK)
-    public static int BONUS_ROOKS_ON_SAME_RANK = 10;
+    public static int BONUS_ROOKS_ON_SAME_RANK = 12;
 
     @Configurable(Configurable.Key.EVAL_BONUS_BISHOP_OPPOSITECOLORS)
-    public static int BONUS_BISHOP_OPPOSITECOLORS = 15;
+    public static int BONUS_BISHOP_OPPOSITECOLORS = 12;
 
     public static final int INITIAL_MATERIAL_VALUE;
 

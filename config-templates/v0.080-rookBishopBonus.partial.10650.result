@@ -1,0 +1,29 @@
+Statistics after 15400 tests (elapsed time: 142090.9s):
+                                                                                      Engine name        %        ply      nodes          msec  nodes/seceliminated
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@12-bishop.oppositeColors@12.ini    44.35       5.82      63661         888.9      71619	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@18-bishop.oppositeColors@18.ini    44.19       5.82      63624         888.2      71633	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@15-bishop.oppositeColors@12.ini    44.13       5.81      62158         889.1      69908	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@15-bishop.oppositeColors@18.ini    44.06       5.81      62608         888.4      70469	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@15-bishop.oppositeColors@15.ini    44.06       5.81      62428         888.2      70282	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@12-bishop.oppositeColors@18.ini    44.06       5.81      62993         888.1      70931	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@18-bishop.oppositeColors@12.ini    44.01       5.82      63855         887.4      71954	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@12-bishop.oppositeColors@15.ini    43.99       5.81      62334         888.4      70161	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@18-bishop.oppositeColors@15.ini    43.86       5.83      63575         888.8      71528	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@15-bishop.oppositeColors@12.ini    43.75       5.83      64801         888.3      72945	alive
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@18-bishop.oppositeColors@12.ini    44.17       6.05      83265         826.0     100811	@600
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@12-bishop.oppositeColors@18.ini    43.83       6.01      79905         826.6      96673	@600
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@12-bishop.oppositeColors@15.ini    44.00       6.04      81322         820.5      99117	@500
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@18-bishop.oppositeColors@12.ini    44.00       6.05      81738         821.5      99496	@500
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@18-bishop.oppositeColors@18.ini    44.00       6.04      83264         818.9     101680	@500
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@12-bishop.oppositeColors@12.ini    43.00       6.07      82619         822.5     100445	@400
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@15-bishop.oppositeColors@18.ini    43.00       6.06      82623         823.7     100303	@400
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@18-bishop.oppositeColors@18.ini    43.00       6.06      83251         827.7     100586	@400
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@12-bishop.oppositeColors@15.ini    44.33       6.34      94849         809.8     117127	@300
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@15-bishop.oppositeColors@12.ini    44.33       6.32      96332         813.3     118447	@300
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@18-bishop.oppositeColors@15.ini    44.33       6.34      98358         813.3     120933	@300
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@18-bishop.oppositeColors@15.ini    43.00       6.67     102988         823.7     125029	@200
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@15-rook.sameFile@15-bishop.oppositeColors@15.ini    42.50       6.66     102498         825.5     124166	@200
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@12-bishop.oppositeColors@18.ini    42.00       6.64      99359         825.7     120339	@200
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@15-bishop.oppositeColors@18.ini    42.00       6.29      88985         832.2     106924	@100
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@18-rook.sameFile@12-bishop.oppositeColors@12.ini    42.00       6.37      92107         827.1     111357	@100
+  Pawns N' Roses - rookBishopBonus-rook.sameRank@12-rook.sameFile@15-bishop.oppositeColors@15.ini    40.00       6.35      87540         831.9     105234	@100

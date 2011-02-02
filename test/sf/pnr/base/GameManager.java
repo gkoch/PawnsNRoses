@@ -29,12 +29,17 @@ public class GameManager {
     private final int initialTimes;
     private final int increments;
     private final int rounds;
+    private UciRunner kibitzer;
 
     public GameManager(final String event, final int initialTime, final int increment, final int rounds) {
         this.event = event;
         this.initialTimes = initialTime;
         this.increments = increment;
         this.rounds = rounds;
+    }
+
+    public void setKibitzer(final UciRunner kibitzer) {
+        this.kibitzer = kibitzer;
     }
 
     public TournamentResult play(final UciRunner... players) {
@@ -62,9 +67,9 @@ public class GameManager {
                       final UciRunner white, final UciRunner black) {
         System.out.printf("[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\t%2$s - %3$s\r\n",
             System.currentTimeMillis(), white.getName(), black.getName());
-        System.out.printf(
-            "[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\t%2$s\t%3$6s\t%4$6s\t%5$6s\t%6$7s\t%7$7s\t%8$9s\t%9$5s\t%10$7s\t%11$5s\r\n",
-            System.currentTimeMillis(), "mc", "white", "black", "mt[ms]", "rtw[ms]", "rtb[ms]", "nps", "ply", "nodes", "cp");
+        System.out.printf("%4s\t%6s\t%6s\t%6s\t%7s\t%7s\t%7s\t%7s\t%9s\t%6s\t%3s\t%5s\t%8s\t%6s\t%7s\t%5s\t%6s\t%5s\r\n",
+            "mc", "white", "black", "mt[ms]", "rtw[ms]", "rtb[ms]", "nodes", "a.nodes", "nps", "a.ply", "ply", "cp",
+                "kibitz", "k.mt", "k.nodes", "k.cp", "a.diff", "diff");
         final UciRunner[] players = new UciRunner[] {white, black};
         final int[] times = new int[]{initialTimes, initialTimes};
         GameResult result;
@@ -78,13 +83,26 @@ public class GameManager {
             white.uciNewGame();
             black.restart();
             black.uciNewGame();
+            final UciRunner[] kibitzers = new UciRunner[2];
+            if (kibitzer != null) {
+                kibitzers[0] = kibitzer.duplicate();
+                kibitzers[0].restart();
+                kibitzers[0].uciNewGame();
+                kibitzers[1] = kibitzer.duplicate();
+                kibitzers[1].restart();
+                kibitzers[1].uciNewGame();
+            }
             int currentPlayer = 0;
             final int[] depths = new int[2];
             final long[] nodes = new long[2];
+            final int[] scoreDiffs = new int[2];
             while (true) {
                 final UciRunner player = players[currentPlayer];
                 player.position(moves);
-                player.go(times[0], times[1], increments, increments, times[currentPlayer] + increments);
+                final int timeWhite = times[0];
+                final int timeBlack = times[1];
+                final int timeCurrent = times[currentPlayer];
+                player.go(timeWhite, timeBlack, increments, increments, timeCurrent + increments);
                 final long moveTime = player.getMoveTime();
                 times[currentPlayer] += increments - moveTime;
                 if (times[currentPlayer] < 0) {
@@ -118,13 +136,40 @@ public class GameManager {
                 }
                 depths[currentPlayer] += player.getDepth();
                 nodes[currentPlayer] += player.getNodeCount();
+                final String kMove;
+                final String kNodes;
+                final String kTime;
+                final String kScore;
+                final String kScoreDiff;
+                UciRunner kibitzer = kibitzers[currentPlayer];
+                if (kibitzer != null) {
+                    kibitzer.position(moves);
+                    kibitzer.go(Math.min(Math.max(1, player.getDepth()), 15), 0);
+                    final String kBestMove = kibitzer.getBestMove();
+                    kMove = StringUtils.toShort(board, StringUtils.fromLong(board, kBestMove)) +
+                        (bestMove.equals(kBestMove)? " =": " !");
+                    kTime = Long.toString(kibitzer.getMoveTime());
+                    kNodes = Long.toString(kibitzer.getNodeCount());
+                    kScore = Integer.toString(kibitzer.getScore());
+                    final int scoreDiff = kibitzer.getScore() - player.getScore();
+                    scoreDiffs[currentPlayer] += Math.abs(scoreDiff);
+                    kScoreDiff = Integer.toString(scoreDiff);
+                } else {
+                    kMove = "-";
+                    kTime = "-";
+                    kNodes = "-";
+                    kScore = "-";
+                    kScoreDiff = "-";
+                }
                 final int fullMoveCount = board.getFullMoveCount();
-                System.out.printf(
-                    "[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\t%2$d.\t%3$6s\t%4$6s\t%5$6d\t%6$7d\t%7$7d\t%8$9.0f\t%9$5.2f\t%10$7d\t%11$5d\r\n",
-                    System.currentTimeMillis(), fullMoveCount, whiteMove, blackMove, moveTime, times[0], times[1],
-                    ((double) player.getNodeCount() * 1000) / times[currentPlayer],
-                    ((double) depths[currentPlayer]) / fullMoveCount, nodes[currentPlayer] / fullMoveCount,
-                    player.getScore());
+                System.out.printf("%3d.\t%6s\t%6s\t%6d\t%7d\t%7d\t%7d\t%7d\t%9.1f\t%6.2f\t%3d\t%5d\t%8s\t%6s\t%7s\t%5s\t%6d\t%5s\r\n",
+                    fullMoveCount, whiteMove, blackMove, moveTime, times[0], times[1], player.getNodeCount(),
+                    nodes[currentPlayer] / fullMoveCount, ((double) player.getNodeCount() * 1000) / times[currentPlayer],
+                    ((double) depths[currentPlayer]) / fullMoveCount, player.getDepth(), player.getScore(),
+                    kMove, kTime, kNodes, kScore, scoreDiffs[currentPlayer] / fullMoveCount, kScoreDiff);
+                if (currentPlayer == 1 && fullMoveCount % 5 == 0) {
+                    System.out.println();
+                }
                 board.move(move);
                 moves.add(move);
                 if (board.isMate()) {

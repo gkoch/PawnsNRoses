@@ -407,6 +407,11 @@ public class UCI implements UciProcess {
         }
     }
 
+    @Override
+    public UciProcess duplicate() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
     public static String toUciOption(final Configurable.Key key) {
         final String keyStr = key.getKey();
         final StringBuilder builder = new StringBuilder(keyStr.length());

@@ -15,8 +15,12 @@ public class ExternalUciProcess implements UciProcess {
     private File workDir;
 
     public ExternalUciProcess(final String executable) throws IOException {
-        command = new String[]{"\"" + executable + "\""};
-        workDir = new File(executable).getParentFile();
+        this(new String[]{"\"" + executable + "\""}, new File(executable).getParentFile());
+    }
+
+    public ExternalUciProcess(final String[] command, final File workDir) {
+        this.command = command;
+        this.workDir = workDir;
     }
 
     private void createProcess() throws IOException {
@@ -58,5 +62,10 @@ public class ExternalUciProcess implements UciProcess {
             process.destroy();
             process = null;
         }
+    }
+
+    @Override
+    public UciProcess duplicate() {
+        return new ExternalUciProcess(command, workDir);
     }
 }

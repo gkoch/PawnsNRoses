@@ -13,4 +13,6 @@ public interface UciProcess {
     public void restart() throws IOException;
 
     public void destroy() throws IOException;
+
+    public UciProcess duplicate();
 }

@@ -16,10 +16,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -44,16 +41,16 @@ public class UciRunner {
     private OutputStream debugOs;
     private String prefix;
 
-    public UciRunner(final String name, final UciProcess process) throws IOException {
+    public UciRunner(final String name, final UciProcess process) {
         this(name, null, null, process);
     }
 
-    public UciRunner(final String name, final Map<String, String> uciOptions, final UciProcess process) throws IOException {
+    public UciRunner(final String name, final Map<String, String> uciOptions, final UciProcess process) {
         this(name, uciOptions, null, process);
     }
 
     public UciRunner(final String name, final Map<String, String> uciOptions, final Map<String, String> postSearchOptions,
-                     final UciProcess process) throws IOException {
+                     final UciProcess process) {
         this.name = name;
         this.uciOptions = uciOptions;
         this.postSearchOptions = postSearchOptions;
@@ -316,6 +313,10 @@ public class UciRunner {
         reader = null;
         writer = null;
         initializeProcess();
+    }
+
+    public UciRunner duplicate() {
+        return new UciRunner(name, uciOptions, postSearchOptions, process.duplicate());
     }
 
     private static class TimeBomb implements Callable<Boolean> {

@@ -71,6 +71,11 @@ public class PipedUciProcess implements UciProcess {
         }
     }
 
+    @Override
+    public UciProcess duplicate() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
     private static class UciCallable implements Callable<Boolean> {
         private final UCI uci;
 

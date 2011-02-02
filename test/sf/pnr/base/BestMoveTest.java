@@ -31,7 +31,8 @@ public class BestMoveTest {
             }
         }
         final int depth = Integer.parseInt(System.getProperty("searchTask.depth", "8"));
-        final int printInterval = Integer.parseInt(System.getProperty("searchTest.printInterval", "100"));
+        final int printInterval = Integer.parseInt(System.getProperty("searchTask.printInterval", "10"));
+        final int maxScore = Integer.parseInt(System.getProperty("searchTask.maxScore", "20000"));
 
         final List<String> testFiles = new ArrayList<String>();
         testFiles.add("pos.epd");
@@ -41,7 +42,7 @@ public class BestMoveTest {
         testFiles.add("en passant.epd");
         testFiles.add("ans.epd");
 
-        new EpdProcessor().process(testFiles, new BestMoveTask(players, refEngine, depth, printInterval));
+        new EpdProcessor().process(testFiles, new BestMoveTask(players, refEngine, depth, printInterval, maxScore));
 
         if (debugOs != null) {
             debugOs.close();
@@ -67,12 +68,14 @@ public class BestMoveTest {
         private final long[] moveTimes;
         private final int depth;
         private final int printInterval;
+        private final int maxScore;
         private int testCount;
         private long startTime;
         private int maxNameLen;
 
         private BestMoveTask(final UciRunner[] engines, final UciRunner referenceEngine, final int depth,
-                             final int printInterval) {
+                             final int printInterval, final int maxScore) {
+            this.maxScore = maxScore;
             this.engines = new UciRunner[engines.length + 1];
             this.engines[0] = referenceEngine;
             System.arraycopy(engines, 0, this.engines, 1, engines.length);
@@ -112,13 +115,15 @@ public class BestMoveTest {
                 compute(engine, board, depth);
                 final String bestMoveStr = engine.getBestMove();
                 final int scoreDiff;
+                final int score;
                 if (scoreDiffsMap.containsKey(bestMoveStr)) {
                     scoreDiff = scoreDiffsMap.get(bestMoveStr);
+                    score = referenceScore + scoreDiff;
                 } else {
-                    scoreDiff = getScore(board, bestMoveStr) - referenceScore;
+                    score = getScore(board, bestMoveStr);
+                    scoreDiff = limitScore(score) - limitScore(referenceScore);
                     scoreDiffsMap.put(bestMoveStr, scoreDiff);
                 }
-                final int score = referenceScore + scoreDiff;
                 System.out.printf("  - engine '%s' moved '%s', score: %d\r\n", engine.getName(), bestMoveStr, score);
                 scores[i] += score;
                 scoreDiffs[i] += scoreDiff;
@@ -169,6 +174,16 @@ public class BestMoveTest {
                 board.takeBack(undo);
             }
             return -engines[0].getScore();
+        }
+
+        private int limitScore(final int score) {
+            if (score < -maxScore) {
+                return -maxScore;
+            } else if (score > maxScore) {
+                return maxScore;
+            } else {
+                return score;
+            }
         }
 
         @Override

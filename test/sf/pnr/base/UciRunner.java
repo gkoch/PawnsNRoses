@@ -270,6 +270,10 @@ public class UciRunner {
                 params.put("nodes", Long.parseLong(parts[++i]));
             } else if (parts[i].equals("cp")) {
                 params.put("cp", Integer.parseInt(parts[++i]));
+            } else if (parts[i].equals("mate")) {
+                final int moves = Integer.parseInt(parts[++i]);
+                params.put("cp", moves > 0? Evaluation.VAL_MATE: -Evaluation.VAL_MATE);
+                params.put("mate", moves);
             }
         }
         return params;

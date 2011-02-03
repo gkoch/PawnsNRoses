@@ -164,7 +164,7 @@ public class GameManager {
                 final int fullMoveCount = board.getFullMoveCount();
                 System.out.printf("%3d.\t%6s\t%6s\t%6d\t%7d\t%7d\t%7d\t%7d\t%9.1f\t%6.2f\t%3d\t%5d\t%8s\t%6s\t%7s\t%5s\t%6d\t%5s\r\n",
                     fullMoveCount, whiteMove, blackMove, moveTime, times[0], times[1], player.getNodeCount(),
-                    nodes[currentPlayer] / fullMoveCount, ((double) player.getNodeCount() * 1000) / times[currentPlayer],
+                    nodes[currentPlayer] / fullMoveCount, ((double) player.getNodeCount() * 1000) / player.getMoveTime(),
                     ((double) depths[currentPlayer]) / fullMoveCount, player.getDepth(), player.getScore(),
                     kMove, kTime, kNodes, kScore, scoreDiffs[currentPlayer] / fullMoveCount, kScoreDiff);
                 if (currentPlayer == 1 && fullMoveCount % 5 == 0) {

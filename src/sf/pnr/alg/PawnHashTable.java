@@ -1,5 +1,7 @@
 package sf.pnr.alg;
 
+import sf.pnr.base.Configurable;
+
 import java.util.Arrays;
 
 /**
@@ -13,11 +15,17 @@ public class PawnHashTable {
     public static final int UNSTOPPABLE_PAWN_IF_NEXT_SHIFT = 3;
     public static final int UNSTOPPABLE_PAWN_BLACK_SHIFT = 24;
     public static final int VALUE_OFFSET = (int) (VALUE_MASK >> 1);
-    private static final int HASH_MASK = 0x3FFF;
     private static final int STAGE_IN_FRONT_OF_LIMIT = 10;
     private static final int STAGE_BEHIND_LIMIT = 10;
 
-    private final long[] array = new long[(HASH_MASK + 1)<< 1];
+    @Configurable(Configurable.Key.EVAL_PAWNTABLE_SIZE)
+    private static int TABLE_SIZE = 1;
+
+    private final long[] array;
+
+    public PawnHashTable() {
+        array = new long[TABLE_SIZE * 1024 * 1024 / 8];
+    }
 
     public long get(final long zobrist, final int stage) {
         final int hashed = hash(zobrist);
@@ -38,7 +46,11 @@ public class PawnHashTable {
     }
 
     private int hash(final long zobrist) {
-        return (int) (zobrist & VALUE_MASK);
+        int hash = (int) (zobrist % array.length);
+        if (hash < 0) {
+            hash += array.length;
+        }
+        return hash;
     }
 
     public void clear() {

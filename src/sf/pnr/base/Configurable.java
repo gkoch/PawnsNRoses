@@ -9,6 +9,7 @@ public @interface Configurable {
     public static enum Key {
         POLYGLOT_BOOK("polyglot.book"),
         TRANSP_TABLE_SIZE("transposition.table.size"), EVAL_TABLE_SIZE("evaluation.table.size"),
+        EVAL_PAWNTABLE_SIZE("evaluation.pawnTable.size"),
         EVAL_PENALTY_DOUBLE_PAWN("evaluation.penalty.doublePawn"), EVAL_PENALTY_TRIPLE_PAWN("evaluation.penalty.triplePawn"),
         EVAL_PENALTY_ISOLATED_PAWN("evaluation.penalty.isolatedPawn"), EVAL_PENALTY_WEAK_PAWN("evaluation.penalty.weakPawn"),
         EVAL_BONUS_PAWN_SHIELD("evaluation.bonus.pawnShield"), EVAL_BONUS_PAWN_STORM_MAX("evaluation.bonus.pawnStormMax"),

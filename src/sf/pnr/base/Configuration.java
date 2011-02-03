@@ -1,6 +1,7 @@
 package sf.pnr.base;
 
 import sf.pnr.alg.EvalHashTable;
+import sf.pnr.alg.PawnHashTable;
 import sf.pnr.alg.TranspositionTable;
 
 import java.io.File;
@@ -31,6 +32,7 @@ public final class Configuration {
         initConfigurables(Polyglot.class);
         initConfigurables(TranspositionTable.class);
         initConfigurables(EvalHashTable.class);
+        initConfigurables(PawnHashTable.class);
         initConfigurables(Evaluation.class);
     }
 
@@ -44,7 +46,6 @@ public final class Configuration {
             }
         }
     }
-
 
     public Class<?> getType(final Configurable.Key key) {
         final Field field = keyToField.get(key);

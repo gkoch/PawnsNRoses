@@ -127,7 +127,7 @@ public final class TranspositionTable {
     }
 
     private long[] getArraySegment(final long zobrist) {
-        int arrayIndex = (int) (zobrist % arrays.length);
+        int arrayIndex = (int) ((zobrist >> 32) % arrays.length);
         if (arrayIndex < 0) {
             arrayIndex += arrays.length;
         }

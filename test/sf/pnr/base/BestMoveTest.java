@@ -160,6 +160,12 @@ public class BestMoveTest {
                 engine.position(board);
                 engine.go(depth, 0);
             } catch (IOException e) {
+                try {
+                    engine.close();
+                } catch (IOException e1) {
+                    // do nothing, propagate the outer exception
+                    e1.printStackTrace(System.out);
+                }
                 throw new UndeclaredThrowableException(e, String.format("Engine '%s' failed on test FEN '%s'",
                     engine.getName(), StringUtils.toFen(board)));
             }

@@ -40,9 +40,9 @@ public final class Engine {
     @Configurable(Configurable.Key.ENGINE_RAZORING_THRESHOLD)
     private static int VAL_RAZORING_THRESHOLD = 125;
     @Configurable(Configurable.Key.ENGINE_LMR_MIN_DEPTH)
-    private static int LATE_MOVE_REDUCTION_MIN_DEPTH = 6 << SHIFT_PLY;
+    private static int LATE_MOVE_REDUCTION_MIN_DEPTH = 1 << SHIFT_PLY;
     @Configurable(Configurable.Key.ENGINE_LMR_MIN_MOVE)
-    private static int LATE_MOVE_REDUCTION_MIN_MOVE = 7;
+    private static int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
 
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_CHECK)
     private static int DEPTH_EXT_CHECK = 16;
@@ -116,12 +116,17 @@ public final class Engine {
                 }
                 break;
             }
-            value = getValueFromSearchResult(result);
-            if (value <= alpha) {
-                result = negascoutRoot(board, depth << SHIFT_PLY, INITIAL_ALPHA, alpha, 0);
+            if (result != 0) {
                 value = getValueFromSearchResult(result);
-            } else if (value >= beta) {
-                result = negascoutRoot(board, depth << SHIFT_PLY, beta, INITIAL_BETA, 0);
+                if (value <= alpha) {
+                    result = negascoutRoot(board, depth << SHIFT_PLY, INITIAL_ALPHA, alpha, 0);
+                    value = getValueFromSearchResult(result);
+                } else if (value >= beta) {
+                    result = negascoutRoot(board, depth << SHIFT_PLY, beta, INITIAL_BETA, 0);
+                    value = getValueFromSearchResult(result);
+                }
+            } else {
+                result = negascoutRoot(board, depth << SHIFT_PLY, INITIAL_ALPHA, INITIAL_BETA, 0);
                 value = getValueFromSearchResult(result);
             }
             final int move = getMoveFromSearchResult(result);
@@ -153,6 +158,7 @@ public final class Engine {
     }
 
     public long negascoutRoot(final Board board, final int depth, int alpha, final int beta, final int searchedPly) {
+        nodeCount++;
         if (board.getRepetitionCount() == 3 || Evaluation.drawByInsufficientMaterial(board)) {
             // three-fold repetition
             return getSearchResult(0, VAL_DRAW);
@@ -173,7 +179,15 @@ public final class Engine {
                     assert ttMove != 0;
                     return getSearchResult(ttMove, value);
                 }
-                alpha = value;
+                if (ttType == TT_TYPE_BETA_CUT) {
+                    if (value >= beta) {
+                        return getSearchResult(ttMove, value);
+                    } else if (value > alpha) {
+                        alpha = value;
+                    }
+                } else if (ttType == TT_TYPE_ALPHA_CUT && value <= alpha) {
+                    return getSearchResult(0, 0);
+                }
             }
         }
 
@@ -189,9 +203,9 @@ public final class Engine {
 
         moveGenerator.pushFrame();
         int b = beta;
-        final int origAlpha = alpha;
+        long bestMoveType = TT_TYPE_ALPHA_CUT;
+        int bestScore = VAL_MIN;
         int bestMove = 0;
-        int bestScore = Integer.MIN_VALUE;
         int legalMoveCount = 0;
         int quietMoveCount = 0;
         for (SearchStage searchStage: searchStages) {
@@ -219,6 +233,18 @@ public final class Engine {
 
                 // register that we had a legal move
                 legalMoveCount++;
+
+                if (board.getRepetitionCount() == 0) {
+                    if (alpha < VAL_DRAW) {
+                        alpha = VAL_DRAW;
+                        bestMoveType = TT_TYPE_EXACT;
+                    }
+                    if (bestScore < VAL_DRAW) {
+                        bestScore = VAL_DRAW;
+                        bestMove = move;
+                    }
+                    continue;
+                }
 
                 final boolean opponentInCheck = (move & CHECKING) > 0;
                 int depthExt = 0;
@@ -249,8 +275,13 @@ public final class Engine {
                         if (cancelled) {
                             moveGenerator.popFrame();
                             board.takeBack(undo);
-                            return bestMove > 0 && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                            return bestMoveType == TT_TYPE_EXACT && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)?
+                                getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                         }
+//                        if (bestScore < qscore) {
+//                            bestScore = qscore;
+//                            bestMove = move;
+//                        }
                         if (qscore < b) {
                             board.takeBack(undo);
                             continue;
@@ -266,18 +297,20 @@ public final class Engine {
                         if (cancelled) {
                             board.takeBack(undo);
                             moveGenerator.popFrame();
-                            return bestMove > 0 && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                            return bestMoveType == TT_TYPE_EXACT && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)?
+                                getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                         }
                     }
                 }
 
                 // evaluate the move
-                if (a > alpha) {
+                if (a > alpha && b >= -VAL_MATE_THRESHOLD) {
                     a = -negascout(board, depth - PLY + depthExt, -b, -alpha, allowQuiescence, true, searchedPly + 1);
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return bestMove > 0 && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                        return bestMoveType == TT_TYPE_EXACT && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)?
+                            getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                     }
 
                     // the other player has a better option, beta cut off
@@ -299,7 +332,8 @@ public final class Engine {
                     if (cancelled) {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
-                        return bestMove > 0 && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+                        return bestMoveType == TT_TYPE_EXACT && (depth <= PLY || legalMoveCount > SEARCH_ROOT_MIN_MOVE)?
+                            getSearchResult(bestMove, alpha): getSearchResult(0, 0);
                     }
                     if (a >= beta) {
                         board.takeBack(undo);
@@ -314,23 +348,20 @@ public final class Engine {
                 }
 
                 board.takeBack(undo);
-                if (a > alpha) {
-                    bestMove = move;
+                if (bestScore < a) {
                     bestScore = a;
+                    bestMove = move;
+                }
+                if (a > alpha) {
+                    bestMoveType = TT_TYPE_EXACT;
                     alpha = a;
-                    assert board.getRepetitionCount() < 3 || a == 0;
                     quietMoveCount = 0;
-                    transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, move);
                     addMoveToKillers(searchedPly, searchStage, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
                 } else {
-                    if (bestScore < a) {
-                        bestMove = move;
-                        bestScore = a;
-                    }
                     quietMoveCount++;
                 }
 
@@ -348,14 +379,14 @@ public final class Engine {
                 return getSearchResult(0, 0);
             }
         }
+        final long result;
+        transpositionTable.set(zobristKey, bestMoveType, bestMove, depth >> SHIFT_PLY, bestScore - VAL_MIN, age);
         if (bestMove != 0) {
-            if (alpha > origAlpha) {
-                transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
-            }
+            result = getSearchResult(bestMove, bestScore);
         } else {
-            bestMove = ttMove;
+            result = getSearchResult(0, 0);
         }
-        return bestMove > 0? getSearchResult(bestMove, alpha): getSearchResult(0, 0);
+        return result;
     }
 
     public int negascout(final Board board, final int depth, int alpha, int beta, final boolean quiescence,
@@ -396,7 +427,15 @@ public final class Engine {
                 if (value > VAL_MATE_THRESHOLD) {
                     return value;
                 }
-                alpha = value;
+                if (ttType == TT_TYPE_BETA_CUT) {
+                    if (value >= beta) {
+                        return value;
+                    } else if (value > alpha) {
+                        alpha = value;
+                    }
+                } else if (ttType == TT_TYPE_ALPHA_CUT && value <= alpha) {
+                    return value;
+                }
             }
         }
 
@@ -456,10 +495,11 @@ public final class Engine {
 
         moveGenerator.pushFrame();
         int b = beta;
+        long bestMoveType = TT_TYPE_ALPHA_CUT;
         int bestMove = 0;
+        int bestScore = VAL_MIN;
         int legalMoveCount = 0;
         int quietMoveCount = 0;
-        boolean hasEvaluatedMove = false;
         for (SearchStage searchStage: searchStages) {
             final boolean highPriorityStage =
                 searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
@@ -490,11 +530,14 @@ public final class Engine {
                 legalMoveCount++;
 
                 if (board.getRepetitionCount() == 0) {
-                    if (alpha < 0) {
-                        alpha = 0;
+                    if (alpha < VAL_DRAW) {
+                        alpha = VAL_DRAW;
+                        bestMoveType = TT_TYPE_EXACT;
+                    }
+                    if (bestScore < VAL_DRAW) {
+                        bestScore = VAL_DRAW;
                         bestMove = move;
                     }
-                    hasEvaluatedMove = true;
                     continue;
                 }
 
@@ -523,7 +566,7 @@ public final class Engine {
                 }
 
                 // razoring
-                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && b == alpha + 1) {
+                if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && legalMoveCount > 1 && beta < VAL_MATE_THRESHOLD) {
                     final int value = -board.getMaterialValue();
                     if (value < beta - VAL_RAZORING_THRESHOLD) {
 //                        final int qscore = -quiescence(board, -b, -alpha);
@@ -534,6 +577,10 @@ public final class Engine {
                             board.takeBack(undo);
                             return alpha;
                         }
+//                        if (bestScore < qscore) {
+//                            bestScore = qscore;
+//                            bestMove = move;
+//                        }
                         if (qscore < b) {
                             board.takeBack(undo);
                             continue;
@@ -592,13 +639,15 @@ public final class Engine {
                         return a;
                     }
                 }
-                hasEvaluatedMove = true;
                 board.takeBack(undo);
-                if (a > alpha) {
+                if (bestScore < a) {
+                    bestScore = a;
                     bestMove = move;
+                }
+                if (a > alpha) {
+                    bestMoveType = TT_TYPE_EXACT;
                     alpha = a;
                     quietMoveCount = 0;
-                    transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, move);
                     addMoveToKillers(searchedPly, searchStage, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
@@ -621,7 +670,7 @@ public final class Engine {
             } else {
                 return 0;
             }
-        } else if (!hasEvaluatedMove) {
+        } else if (bestScore == VAL_MIN) {
             final int value = evaluation.evaluate(board);
             if (value > alpha) {
                 alpha = value;
@@ -629,11 +678,12 @@ public final class Engine {
             if (alpha > beta) {
                 alpha = beta;
             }
+            if (value > bestScore) {
+                bestScore = value;
+            }
         }
 
-        if (bestMove != 0) {
-            transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, depth >> SHIFT_PLY, alpha - VAL_MIN, age);
-        }
+        transpositionTable.set(zobristKey, bestMoveType, bestMove, depth >> SHIFT_PLY, bestScore - VAL_MIN, age);
         assert (Utils.getFromPosition(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
         assert (Utils.getToPosition(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
         assert (Utils.getFromPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
@@ -699,13 +749,19 @@ public final class Engine {
         final long ttValue = removeThreefoldRepetition(board, transpositionTable.read(zobristKey));
         if (ttValue != 0) {
             final long ttType = ttValue & TT_TYPE;
+            final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
             if (ttType == TT_TYPE_EXACT) {
                 assert ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE) != 0;
-                return (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-            } else if (ttType == TT_TYPE_ALPHA_CUT || ttType == TT_TYPE_BETA_CUT) {
-                alpha = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
-                if (alpha > VAL_MATE_THRESHOLD) {
-                    return alpha;
+                return value;
+            } else {
+                if (ttType == TT_TYPE_BETA_CUT) {
+                    if (value >= beta) {
+                        return value;
+                    } else if (value > alpha) {
+                        alpha = value;
+                    }
+                } else if (ttType == TT_TYPE_ALPHA_CUT && value <= alpha) {
+                    return value;
                 }
             }
         }
@@ -714,6 +770,7 @@ public final class Engine {
         boolean hasLegalMove = false;
         int b = beta;
         int bestMove = 0;
+        int bestScore = VAL_MIN;
         for (SearchStage searchStage: searchStages) {
             final int[] moves = getMoves(searchStage, board, 0, MAX_SEARCH_DEPTH - 1);
 
@@ -778,10 +835,12 @@ public final class Engine {
                     }
                 }
                 board.takeBack(undo);
+                if (a > bestScore) {
+                    bestScore = a;
+                }
                 if (a > alpha) {
                     bestMove = move;
                     alpha = a;
-                    transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, move, 0, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
@@ -804,6 +863,8 @@ public final class Engine {
 
         if (bestMove != 0) {
             transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, 0, alpha - VAL_MIN, age);
+        } else {
+            transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, 0, 0, bestScore - VAL_MIN, age);
         }
         return alpha;
     }

@@ -5654,7 +5654,7 @@
 8/8/6Q1/5p2/2Pk4/8/1P1N1K2/8 w - - acd 4; acn 32358; acs 1; bm Qd6#; ce 32766; pv Qd6#;
 8/8/6Q1/5p2/2Pk4/8/1P1N1K2/8 w - - acd 4; acn 32373; acs 1; bm Qd6#; ce 32766; pv Qd6#;
 8/8/6Q1/8/7B/5R2/6q1/R3K1k1 w - - acd 5; acn 432348; acs 1; bm Rf2; ce 32762; pv Bf2+ Kh1 Rh3+ Qxh3 Qg1#;
-8/8/6Q1/8/8/5K1N/2p1p3/4rk2 w - - acd 4; acn 348; acs 1; bm Qg2#; ce 32766; pv Qg2#;
+8/8/6Q1/8/8/5K1N/2p1p3/4rk2 w - - acd 4; acn 348; acs 1; bm Qg2#/Qg1#; ce 32766; pv Qg2#;
 8/8/6QK/6R1/7k/3n3r/3b4/8 w - - acd 4; acn 1053; acs 1; bm Qh5#; ce 32766; pv Qh5#;
 8/8/6R1/1p5p/p1b2K1k/2P2P2/1P4PP/1r6 w - - acd 5; acn 3777; acs 1; bm Rg3; ce 32762; pv Rg3 Be6 Rh3+ Bxh3 g3#;
 8/8/6R1/3Kbk1B/8/3N4/4N3/8 w - - acd 5; acn 59992; acs 1; bm Ndf4; ce 32764; pv Ndf4 Bxf4 Nd4#;

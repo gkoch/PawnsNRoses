@@ -68,10 +68,12 @@ public class GamePlayTest {
         final UciRunner[] players = new UciRunner[executables.length + shift];
         if (includeLatest) {
             final Map<String, String> options = new HashMap<String, String>();
-            options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE),
-                System.getProperty(Configurable.Key.TRANSP_TABLE_SIZE.getKey(), "128"));
-            options.put(UCI.toUciOption(Configurable.Key.EVAL_TABLE_SIZE),
-                System.getProperty(Configurable.Key.EVAL_TABLE_SIZE.getKey(), "8"));
+            options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE), "128");
+            options.put(UCI.toUciOption(Configurable.Key.EVAL_TABLE_SIZE), "8");
+            final Map<Configurable.Key, String> systemProps = Configuration.preprocess(System.getProperties(), true);
+            for (Map.Entry<Configurable.Key, String> entry: systemProps.entrySet()) {
+                options.put(UCI.toUciOption(entry.getKey()), entry.getValue());
+            }
             players[0] = new UciRunner("Pawns N' Roses Latest", options, new PipedUciProcess());
         }
         for (int i = 0, executablesLength = executables.length; i < executablesLength; i++) {

@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
+import static sf.pnr.base.Utils.*;
+
 public class GameManager {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy.MM.dd");
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
@@ -96,6 +98,7 @@ public class GameManager {
             final int[] depths = new int[2];
             final long[] nodes = new long[2];
             final int[] scoreDiffs = new int[2];
+            int fiftyMovesCounter = 0;
             while (true) {
                 final UciRunner player = players[currentPlayer];
                 player.position(moves);
@@ -170,6 +173,21 @@ public class GameManager {
                 if (currentPlayer == 1 && fullMoveCount % 5 == 0) {
                     System.out.println();
                 }
+
+                final int fromPos = getFromPosition(move);
+                final int absPiece = Math.abs(board.getBoard()[fromPos]);
+                if (absPiece != PAWN) {
+                    final int toPos = getToPosition(move);
+                    final int captured = board.getBoard()[toPos];
+                    if (captured == EMPTY) {
+                        fiftyMovesCounter++;
+                    } else {
+                        fiftyMovesCounter = 0;
+                    }
+                } else {
+                    fiftyMovesCounter = 0;
+                }
+
                 board.move(move);
                 moves.add(move);
                 if (board.isMate()) {
@@ -182,6 +200,10 @@ public class GameManager {
                 }
                 if (Evaluation.drawByInsufficientMaterial(board)) {
                     result = GameResult.INSUFFICIENT_MATERIAL;
+                    break;
+                }
+                if (fiftyMovesCounter >= 99) {
+                    result = GameResult.FIFTY_MOVES;
                     break;
                 }
                 currentPlayer = 1 - currentPlayer;
@@ -213,7 +235,7 @@ public class GameManager {
     }
 
     private static enum GameResult {
-        TIME_OUT(0, 'T', 't'), MATE(1, '1', '0'), THREEFOLD_REPETITION(0.5, 'R', 'r'),
+        TIME_OUT(0, 'T', 't'), MATE(1, '1', '0'), THREEFOLD_REPETITION(0.5, 'R', 'r'), FIFTY_MOVES(0.5, 'F', 'f'),
         INSUFFICIENT_MATERIAL(0.5, 'I', 'i'), ERROR(1, 'e', 'E'), ILLEGAL_MOVE(1, 'm', 'M');
 
         private final double whiteScore;

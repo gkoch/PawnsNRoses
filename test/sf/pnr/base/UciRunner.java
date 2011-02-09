@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,16 +117,21 @@ public class UciRunner {
     }
 
     public void position(final Board board) throws IOException {
-        initializeProcess();
-        final String fen = StringUtils.toFen(board);
-        sendCommand("position fen " + fen);
-        ensureReady();
+        position(board, Collections.<Integer>emptyList());
     }
 
     public void position(final List<Integer> moves) throws IOException {
+        position(null, moves);
+    }
+
+    public void position(final Board board, final List<Integer> moves) throws IOException {
         initializeProcess();
         final StringBuilder builder = new StringBuilder();
-        builder.append("position startpos");
+        if (board == null) {
+            builder.append("position startpos");
+        } else {
+            sendCommand("position fen " + StringUtils.toFen(board));
+        }
         if (!moves.isEmpty()) {
             builder.append(" moves");
             for (int move: moves) {

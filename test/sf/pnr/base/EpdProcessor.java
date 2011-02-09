@@ -5,28 +5,113 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
  */
 public class EpdProcessor {
 
-    public void process(final List<String> testFiles, final EpdProcessorTask task) throws IOException {
+    public void process(final List<String> testFiles, final EpdProcessorTask task)
+            throws IOException {
+        process(testFiles, task, -1);
+    }
+
+    public void process(final List<String> testFiles, final EpdProcessorTask task, final long rndSeed)
+            throws IOException {
+        final Random rnd;
+        if (rndSeed == -1) {
+            rnd = null;
+        } else if (rndSeed == 0) {
+            rnd = new Random(System.currentTimeMillis());
+        } else {
+            rnd = new Random(rndSeed);
+        }
+
         final long globalStartTime = System.currentTimeMillis();
-        final Set<String> fens = new HashSet<String>(5000);
-        for (String fileName: testFiles) {
-            System.out.printf("Processing file '%s'\r\n", fileName);
-            if (task instanceof SearchTask) {
-                ((SearchTask) task).resetCounters();
+        final Map<String, List<Fen>> fensToProcess = getFensToProcess(testFiles);
+        int remainingFens = 0;
+        for (String fileName: fensToProcess.keySet()) {
+            remainingFens += fensToProcess.get(fileName).size();
+        }
+        if (task instanceof SearchTask) {
+            ((SearchTask) task).resetCounters();
+        }
+        String prevFileName = null;
+        for (;remainingFens > 0; remainingFens--) {
+            int index = 0;
+            if (rnd != null) {
+                index = rnd.nextInt(remainingFens);
             }
-            final long startTime = System.currentTimeMillis();
+            String fileName = "";
+            Fen fen = null;
+            for (Map.Entry<String, List<Fen>> entry: fensToProcess.entrySet()) {
+                final List<Fen> fens = entry.getValue();
+                if (fens.size() > index) {
+                    fileName = entry.getKey();
+                    fen = fens.remove(fens.size() - 1 - index);
+                    break;
+                }
+                index -= fens.size();
+            }
+            if (rnd == null && !fileName.equals(prevFileName)) {
+                System.out.printf("Processing file '%s'\r\n", fileName);
+                prevFileName = fileName;
+            }
+            int fenCount = 0;
+            final Board board = StringUtils.fromFen(fen.getFen());
+            final Set<String> problems = Utils.checkBoard(board);
+            if (!problems.isEmpty()) {
+                System.out.printf("Skipping FEN '%s' because of the following problem(s):\r\n", fen);
+                for (String problem: problems) {
+                    System.out.println("  - " + problem);
+                }
+                continue;
+            }
+            final Map<String, String> commands = fen.getCommands();
+            fenCount++;
+            try {
+                task.run(fileName, board, commands);
+            } catch (Exception e) {
+                throw new UndeclaredThrowableException(e, "Task failed on FEN: " + fen);
+            } catch (Error e) {
+                System.out.printf("Task failed on FEN #%d: %s\r\n", fenCount, fen);
+                throw e;
+            }
+            if (fenCount % 1000 == 0) {
+                System.out.printf("Processed %d FENs in %.1fs.\r\n", fenCount,
+                    ((double) System.currentTimeMillis() - globalStartTime) / 1000);
+                if (task instanceof SearchTask) {
+                    final SearchTask searchTask = (SearchTask) task;
+                    final int testCount = searchTask.getTestCount();
+                    System.out.printf(" Pass ratio is %.2f%%\r\n",
+                        ((double)(testCount - searchTask.getFailureCount()) * 100) / testCount);
+                }
+            }
+        }
+        task.completed();
+        System.out.printf("Processed all files in %.1fs\r\n",
+            ((double) System.currentTimeMillis() - globalStartTime) / 1000);
+        if (task instanceof SearchTask) {
+            final SearchTask searchTask = (SearchTask) task;
+            final int testCount = searchTask.getTestCount();
+            System.out.printf(" Pass ratio is %.2f%%\r\n",
+                ((double)(testCount - searchTask.getFailureCount()) * 100) / testCount);
+        }
+    }
+
+    public Map<String, List<Fen>> getFensToProcess(final List<String> testFiles) throws IOException {
+        final Set<String> fens = new HashSet<String>(5000);
+        final Map<String, List<Fen>> fensToProcess = new LinkedHashMap<String, List<Fen>>();
+        for (String fileName: testFiles) {
             final InputStream is = EpdProcessor.class.getResourceAsStream("res/" + fileName);
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            int fenCount = 0;
             try {
                 for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                     line = line.trim();
@@ -38,7 +123,6 @@ public class EpdProcessor {
                     final String fen = firstSegments[0] + " " + firstSegments[1] + " " + firstSegments[2] + " " +
                         firstSegments[3] + " 0 1";
                     if (!fens.add(fen)) {
-//                        System.out.printf("Skipping duplicate FEN in file '%s': %s\r\n", fileName, fen);
                         continue;
                     }
                     final Board board = StringUtils.fromFen(fen);
@@ -68,34 +152,40 @@ public class EpdProcessor {
                         }
                         commands.put(command, parameter);
                     }
-                    fenCount++;
-                    try {
-                        task.run(fileName, board, commands);
-                    } catch (Exception e) {
-                        throw new UndeclaredThrowableException(e, "Task failed on FEN: " + fen);
-                    } catch (Error e) {
-                        System.out.printf("Task failed on FEN #%d: %s\r\n", fenCount, fen);
-                        throw e;
+                    List<Fen> fensInFile = fensToProcess.get(fileName);
+                    if (fensInFile == null) {
+                        fensInFile = new ArrayList<Fen>();
+                        fensToProcess.put(fileName, fensInFile);
                     }
-                    if (fenCount % 1000 == 0) {
-                        System.out.printf("Processed %d FENs\r\n", fenCount);
-                    }
+                    fensInFile.add(new Fen(fen, commands));
                 }
             } finally {
                 reader.close();
             }
-            System.out.printf("Processed %d FENs in %.1fs.", fenCount,
-                ((double) System.currentTimeMillis() - startTime) / 1000);
-            if (task instanceof SearchTask) {
-                final SearchTask searchTask = (SearchTask) task;
-                final int testCount = searchTask.getTestCount();
-                System.out.printf(" Pass ratio is %.2f%%",
-                    ((double)(testCount - searchTask.getFailureCount()) * 100) / testCount);
-            }
-            System.out.println();
         }
-        task.completed();
-        System.out.printf("Processed all files in %.1fs\r\n",
-            ((double) System.currentTimeMillis() - globalStartTime) / 1000);
+        return fensToProcess;
+    }
+
+    private static class Fen {
+        private final String fen;
+        private final Map<String, String> commands;
+
+        private Fen(final String fen, final Map<String, String> commands) {
+            this.fen = fen;
+            this.commands = commands;
+        }
+
+        public String getFen() {
+            return fen;
+        }
+
+        public Map<String, String> getCommands() {
+            return commands;
+        }
+
+        @Override
+        public String toString() {
+            return fen;
+        }
     }
 }

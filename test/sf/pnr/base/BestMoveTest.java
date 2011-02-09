@@ -33,6 +33,7 @@ public class BestMoveTest {
         final int depth = Integer.parseInt(System.getProperty("searchTask.depth", "8"));
         final int printInterval = Integer.parseInt(System.getProperty("searchTask.printInterval", "10"));
         final int maxScore = Integer.parseInt(System.getProperty("searchTask.maxScore", "20000"));
+        final long rndSeed = Long.parseLong(System.getProperty("searchTask.rndSeed", "-1"));
 
         final List<String> testFiles = new ArrayList<String>();
         testFiles.add("pos.epd");
@@ -42,7 +43,7 @@ public class BestMoveTest {
         testFiles.add("en passant.epd");
         testFiles.add("ans.epd");
 
-        new EpdProcessor().process(testFiles, new BestMoveTask(players, refEngine, depth, printInterval, maxScore));
+        new EpdProcessor().process(testFiles, new BestMoveTask(players, refEngine, depth, printInterval, maxScore), rndSeed);
 
         if (debugOs != null) {
             debugOs.close();
@@ -50,9 +51,10 @@ public class BestMoveTest {
         for (UciRunner player: players) {
             player.close();
         }
+        refEngine.close();
     }
 
-    private static UciRunner getReferenceEngine() throws IOException {
+    public static UciRunner getReferenceEngine() throws IOException {
         final File executable = new File(System.getProperty("searchTask.referenceEngine"));
         return new UciRunner(GamePlayTest.getPlayerName(executable),
             new ExternalUciProcess(executable.getAbsolutePath()));

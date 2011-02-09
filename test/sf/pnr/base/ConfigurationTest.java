@@ -84,7 +84,8 @@ public class ConfigurationTest {
                 Integer.toString(searchTask.getEliminateMinRemaining()))));
             searchTask.setEliminateMinPercentageDiff(Double.parseDouble(System.getProperty("searchTask.eliminateMinPercentageDiff",
                 Double.toString(searchTask.getEliminateMinPercentageDiff()))));
-            new EpdProcessor().process(testFiles, searchTask);
+            final long rndSeed = Long.parseLong(System.getProperty("searchTask.rndSeed", "-1"));
+            new EpdProcessor().process(testFiles, searchTask, rndSeed);
         } finally {
             for (UciRunner runner : runners) {
                 runner.close();

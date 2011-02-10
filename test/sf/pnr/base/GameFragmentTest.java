@@ -56,19 +56,22 @@ public class GameFragmentTest {
         private final UciRunner[] engines;
         private final long[] scores;
         private final int[] depths;
-        private final long[] nodes;
+        private final long[] nodeCounts;
         private final long[] moveTimes;
+        private final int[] moveCounts;
         private final UciRunner referenceEngine;
         private final int moveTime;
         private final int moveCount;
+        private int testCount;
 
         private GameFragmentTask(final UciRunner[] engines, final UciRunner referenceEngine, final int moveTime,
                                  final int moveCount) {
             this.engines = engines;
             scores = new long[engines.length];
             depths = new int[engines.length];
-            nodes = new long[engines.length];
+            nodeCounts = new long[engines.length];
             moveTimes = new long[engines.length];
+            moveCounts = new int[engines.length];
             this.moveTime = moveTime;
             this.moveCount = moveCount;
             this.referenceEngine = referenceEngine;
@@ -76,11 +79,13 @@ public class GameFragmentTest {
 
         @Override
         public void run(final String fileName, final Board board, final Map<String, String> commands) {
+            testCount++;
             final String fen = StringUtils.toFen(board);
-            System.out.println(fen);
+            System.out.println(testCount + ": " + fen);
             for (int i = 0; i < engines.length; i++) {
                 runTest(i, StringUtils.fromFen(fen));
             }
+            System.out.println();
         }
 
         private int runTest(final int engineIndex, final Board board) {
@@ -123,8 +128,17 @@ public class GameFragmentTest {
                     }
                     score = -referenceEngine.getScore();
                 }
-                System.out.printf("\r\ndepth: %.2f, nodes: %d, time: %dms, nps: %.1f, cp: %d\r\n",
-                    ((double) testDepth) / i, testNodeCount, testMoveTime, ((double) testNodeCount * 1000) / testMoveTime, score);
+                depths[engineIndex] += testDepth;
+                nodeCounts[engineIndex] += testNodeCount;
+                moveTimes[engineIndex] += testMoveTime;
+                scores[engineIndex] += score;
+                moveCounts[engineIndex] += i;
+                System.out.printf("\r\ndepth: %.2f (%.2f), nodes: %d (%.1f), time: %dms (%.1f), nps: %.1f (%.1f), cp: %d (%.1f)\r\n",
+                    ((double) testDepth) / i, ((double) depths[engineIndex]) / moveCounts[engineIndex],
+                    testNodeCount, ((double) nodeCounts[engineIndex]) / moveCounts[engineIndex],
+                    testMoveTime, ((double) moveTimes[engineIndex]) / moveCounts[engineIndex],
+                    ((double) testNodeCount * 1000) / testMoveTime, ((double) nodeCounts[engineIndex] * 1000) / moveTimes[engineIndex],
+                    score, ((double) scores[engineIndex]) / testCount);
                 return score;
             } catch (IOException e) {
                 throw new UndeclaredThrowableException(e, String.format("Engine '%s' failed on test FEN '%s'",

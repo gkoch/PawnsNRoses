@@ -29,7 +29,9 @@ public class EpdProcessor {
         if (rndSeed == -1) {
             rnd = null;
         } else if (rndSeed == 0) {
-            rnd = new Random(System.currentTimeMillis());
+            final long seed = System.currentTimeMillis();
+            System.out.println("Using random seed: " + seed);
+            rnd = new Random(seed);
         } else {
             rnd = new Random(rndSeed);
         }

@@ -189,51 +189,51 @@ public class MoveGeneratorTest extends TestCase {
         final int toMove = state & WHITE_TO_MOVE;
         final int kingPos = board.getKing(toMove);
         final MoveGenerator.Frame frame = new MoveGenerator.Frame();
-        MoveGenerator.generatePseudoLegalMovesNonSliding(board, DELTA_KING, kingPos, frame);
+        new MoveGenerator().generatePseudoLegalMovesNonSliding(board, DELTA_KING, kingPos, frame);
         final int[] moves = frame.getMoves();
         assertTrue(containsMove(moves, fromSimple("g1f2")));
     }
 
     public void testStaticExchangeEvaluation() {
         final Board board = fromFen("r3r1k1/6p1/1pqp2Np/2p1nP1P/N1PbPQ2/1P3PR1/P2K4/7R w - - 0 1");
-        final int value = MoveGenerator.staticExchangeEvaluation(board, fromString0x88("f4"), fromString0x88("e5"));
+        final int value = new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("f4"), fromString0x88("e5"));
         assertEquals(VAL_KNIGHT - VAL_QUEEN, value);
     }
 
     public void testStaticExchangeEvaluation2() {
         final Board board = fromFen("3rk2r/pp1n1pb1/2pBpn1p/5Q2/2qP4/5N2/PP3PPP/R3R1K1 w - - 0 2");
-        final int value = MoveGenerator.staticExchangeEvaluation(board, fromString0x88("e1"), fromString0x88("e6"));
+        final int value = new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("e1"), fromString0x88("e6"));
         assertEquals(VAL_PAWN - VAL_ROOK, value);
     }
 
     public void testStaticExchangeEvaluation3() {
         final Board board = fromFen("1B2kb1r/1R2p2p/5p2/3N2p1/2nPn3/4P3/2r3PP/2N1R1K1 w k - 0 1");
         assertEquals(VAL_PAWN - VAL_KNIGHT,
-            MoveGenerator.staticExchangeEvaluation(board, fromString0x88("d5"), fromString0x88("e7")));
+            new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("d5"), fromString0x88("e7")));
     }
 
     public void testStaticExchangeEvaluation4() {
         final Board board = fromFen("1B2kb1r/1R2p2p/5p2/3N2p1/2nPn3/4P3/2r3PP/2N1R1K1 b k - 0 2");
         assertEquals(VAL_KNIGHT - VAL_ROOK,
-            MoveGenerator.staticExchangeEvaluation(board, fromString0x88("c2"), fromString0x88("c1")));
+            new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("c2"), fromString0x88("c1")));
     }
 
     public void testStaticExchangeEvaluation5() {
         final Board board = fromFen("1n2r1k1/q2p1ppp/8/1P6/8/5PKN/P3B1PP/R3R3 b - - 0 2");
         assertEquals(VAL_BISHOP - VAL_ROOK,
-            MoveGenerator.staticExchangeEvaluation(board, fromString0x88("e8"), fromString0x88("e2")));
+            new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("e8"), fromString0x88("e2")));
     }
 
     public void testStaticExchangeEvaluation6() {
         final Board board = fromFen("r1b1r1k1/1p1nqpbp/p1pp2p1/4p3/2PPP1n1/1PN2NP1/PBQ2PBP/R2R2K1 w - - 2 3");
         assertEquals(VAL_PAWN - VAL_PAWN,
-            MoveGenerator.staticExchangeEvaluation(board, fromString0x88("d4"), fromString0x88("e5")));
+            new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("d4"), fromString0x88("e5")));
     }
 
     public void testStaticExchangeEvaluation7() {
         final Board board = fromFen("r1b1r1k1/pp1n1pp1/5n1p/q2p1B2/2pP3B/2Q1PN2/PP3PPP/R1R3K1 b - - 0 14");
         assertEquals(VAL_QUEEN - VAL_QUEEN,
-            MoveGenerator.staticExchangeEvaluation(board, fromString0x88("a5"), fromString0x88("c3")));
+            new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("a5"), fromString0x88("c3")));
     }
 
     public static boolean containsMoves(final int[] moves, final int... containedMoves) {

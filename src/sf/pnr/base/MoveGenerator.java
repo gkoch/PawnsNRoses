@@ -14,6 +14,15 @@ public class MoveGenerator {
     private static final int MAX_PROMOTION_COUNT = 32;
 
     private final ReinitStack<Frame> frames = new ReinitStack<Frame>(Frame.class, MAX_SEARCH_DEPTH);
+    private final int[] seeDefenders;
+    private final int[] seeList;
+    private final int[] seeAttackers;
+
+    public MoveGenerator() {
+        seeDefenders = new int[32];
+        seeList = new int[32];
+        seeAttackers = new int[32];
+    }
 
     public void generatePseudoLegalMoves(final Board board) {
         final Frame frame = frames.peek();
@@ -117,8 +126,8 @@ public class MoveGenerator {
 		}
 	}
 
-    public static void generatePseudoLegalMovesSliding(final Board board, final int[] deltas, final int startingPos,
-                                                       final Frame frame) {
+    public void generatePseudoLegalMovesSliding(final Board board, final int[] deltas, final int startingPos,
+                                                final Frame frame) {
         final int[] squares = board.getBoard();
         final int side = squares[startingPos] >>> 31;
         final int[] moves = frame.getMoves();
@@ -149,8 +158,8 @@ public class MoveGenerator {
         moves[0] = idx;
     }
 
-    public static void generatePseudoLegalMovesNonSliding(final Board board, final int[] deltas, final int startingPos,
-                                                          final Frame frame) {
+    public void generatePseudoLegalMovesNonSliding(final Board board, final int[] deltas, final int startingPos,
+                                                   final Frame frame) {
         final int[] squares = board.getBoard();
 		final int signum = Integer.signum(squares[startingPos]);
         final int[] moves = frame.getMoves();
@@ -182,7 +191,7 @@ public class MoveGenerator {
         loosingCaptures[0] = loosingCaptureIdx;
 	}
 
-    public static void generatePseudoLegalMovesPawnCapture(final Board board, final int[] captures) {
+    public void generatePseudoLegalMovesPawnCapture(final Board board, final int[] captures) {
         final int[] squares = board.getBoard();
         final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
@@ -324,7 +333,7 @@ public class MoveGenerator {
         return frame.getPromotions();
 	}
 
-    public static int staticExchangeEvaluation(final Board board, final int fromPos, final int toPos) {
+    public int staticExchangeEvaluation(final Board board, final int fromPos, final int toPos) {
         final int[] squares = board.getBoard();
         assert squares[fromPos] != EMPTY;
         assert squares[toPos] != EMPTY;
@@ -335,50 +344,47 @@ public class MoveGenerator {
         final int captured = squares[toPos];
         final int signumOpponent = -signum;
         final int absCaptured = signumOpponent * captured;
-        final int[] defenders = new int[32];
         final int toMove = (signum + 1) >> 1;
-        board.getAttackers(toPos, 1 - toMove, defenders);
-        if (defenders[0] == 0) {
+        board.getAttackers(toPos, 1 - toMove, seeDefenders);
+        if (seeDefenders[0] == 0) {
             return VAL_PIECES[absCaptured];
         }
-        int[] seeList = new int[32];
         int exchangePos = 0;
         seeList[exchangePos++] = VAL_PIECES[absCaptured];
-        final int[] attackers = new int[32];
-        board.getAttackers(toPos, toMove, attackers);
+        board.getAttackers(toPos, toMove, seeAttackers);
 
         // remove first attacker standing on fromPos
-        final int count = attackers[0];
-        if (attackers[count] != fromPos) {
-            int tmp = attackers[count];
+        final int count = seeAttackers[0];
+        if (seeAttackers[count] != fromPos) {
+            int tmp = seeAttackers[count];
             for (int i = count - 1; i > 0 && tmp != fromPos; i--) {
-                final int tmp2 = attackers[i];
-                attackers[i] = tmp;
+                final int tmp2 = seeAttackers[i];
+                seeAttackers[i] = tmp;
                 tmp = tmp2;
             }
         }
-        attackers[0] = count - 1;
+        seeAttackers[0] = count - 1;
 
         // populate value arrays
         final int[] valDefenders = new int[32];
-        for (int i = defenders[0]; i > 0; i--) {
-            assert squares[defenders[i]] != EMPTY;
-            valDefenders[i] = VAL_PIECES[signumOpponent * squares[defenders[i]]];
+        for (int i = seeDefenders[0]; i > 0; i--) {
+            assert squares[seeDefenders[i]] != EMPTY;
+            valDefenders[i] = VAL_PIECES[signumOpponent * squares[seeDefenders[i]]];
         }
-        valDefenders[0] = defenders[0];
+        valDefenders[0] = seeDefenders[0];
         final int[] valAttackers = new int[32];
-        for (int i = attackers[0]; i > 0; i--) {
-            assert squares[attackers[i]] != EMPTY;
-            valAttackers[i] = VAL_PIECES[signum * squares[attackers[i]]];
+        for (int i = seeAttackers[0]; i > 0; i--) {
+            assert squares[seeAttackers[i]] != EMPTY;
+            valAttackers[i] = VAL_PIECES[signum * squares[seeAttackers[i]]];
         }
-        valAttackers[0] = attackers[0];
+        valAttackers[0] = seeAttackers[0];
 
         addHiddenAttackers(
-            board, toPos, attackers, valAttackers, defenders, valDefenders, signum, fromPos, absPiece);
+            board, toPos, seeAttackers, valAttackers, seeDefenders, valDefenders, signum, fromPos, absPiece);
         int captureVal = VAL_PIECES[absPiece];
-        int[] currentPosArray = defenders;
+        int[] currentPosArray = seeDefenders;
         int[] currentValArray = valDefenders;
-        int[] opponentPosArray = attackers;
+        int[] opponentPosArray = seeAttackers;
         int[] opponentValArray = valAttackers;
         int currentSignum = signumOpponent;
         int valSignum = -1;

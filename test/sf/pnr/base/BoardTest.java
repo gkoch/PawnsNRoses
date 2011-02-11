@@ -304,7 +304,7 @@ public class BoardTest extends TestCase {
     }
 
     public void testIsCheckingMoveEnPassantBishop() {
-        final Board board = fromFen("b7/8/8/8/4Pp2/8/8/4k2K w - e3 0 1");
+        final Board board = fromFen("b7/8/8/8/4Pp2/8/8/4k2K b - e3 0 1");
         assertTrue(board.isCheckingMove(StringUtils.fromSimple("f4e3") | MT_EN_PASSANT));
     }
 

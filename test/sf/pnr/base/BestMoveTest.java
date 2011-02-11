@@ -110,22 +110,20 @@ public class BestMoveTest {
             System.out.printf("Reference engine '%s' moved '%s', score: %d\r\n", engines[0].getName(),
                 referenceBestMove, referenceScore);
 
-            final Map<String, Integer> scoreDiffsMap = new HashMap<String, Integer>();
-            scoreDiffsMap.put(referenceBestMove, 0);
+            final Map<String, Integer> scoresMap = new HashMap<String, Integer>();
+            scoresMap.put(referenceBestMove, referenceScore);
             for (int i = 1, enginesLength = engines.length; i < enginesLength; i++) {
                 final UciRunner engine = engines[i];
                 compute(engine, board, depth);
                 final String bestMoveStr = engine.getBestMove();
-                final int scoreDiff;
                 final int score;
-                if (scoreDiffsMap.containsKey(bestMoveStr)) {
-                    scoreDiff = scoreDiffsMap.get(bestMoveStr);
-                    score = referenceScore + scoreDiff;
+                if (scoresMap.containsKey(bestMoveStr)) {
+                    score = scoresMap.get(bestMoveStr);
                 } else {
                     score = getScore(board, bestMoveStr);
-                    scoreDiff = limitScore(score) - limitScore(referenceScore);
-                    scoreDiffsMap.put(bestMoveStr, scoreDiff);
+                    scoresMap.put(bestMoveStr, score);
                 }
+                final int scoreDiff = limitScore(score) - limitScore(referenceScore);
                 System.out.printf("  - engine '%s' moved '%s', score: %d\r\n", engine.getName(), bestMoveStr, score);
                 scores[i] += score;
                 scoreDiffs[i] += scoreDiff;

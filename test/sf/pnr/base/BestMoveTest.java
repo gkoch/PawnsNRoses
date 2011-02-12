@@ -107,8 +107,8 @@ public class BestMoveTest {
             scores[0] += engines[0].getScore();
             nodeCounts[0] += engines[0].getNodeCount();
             moveTimes[0] += engines[0].getMoveTime();
-            System.out.printf("Reference engine '%s' moved '%s', score: %d\r\n", engines[0].getName(),
-                referenceBestMove, referenceScore);
+            System.out.printf("Reference engine '%s' moved '%s', score: %d (%s)\r\n", engines[0].getName(),
+                referenceBestMove, referenceScore, StringUtils.toFen(board));
 
             final Map<String, Integer> scoresMap = new HashMap<String, Integer>();
             scoresMap.put(referenceBestMove, referenceScore);

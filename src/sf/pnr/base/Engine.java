@@ -42,7 +42,7 @@ public final class Engine {
     @Configurable(Configurable.Key.ENGINE_LMR_MIN_DEPTH)
     private static int LATE_MOVE_REDUCTION_MIN_DEPTH = 1 << SHIFT_PLY;
     @Configurable(Configurable.Key.ENGINE_LMR_MIN_MOVE)
-    private static int LATE_MOVE_REDUCTION_MIN_MOVE = 4;
+    private static int LATE_MOVE_REDUCTION_MIN_MOVE = 2;
 
     @Configurable(Configurable.Key.ENGINE_DEPTH_EXT_CHECK)
     private static int DEPTH_EXT_CHECK = 16;

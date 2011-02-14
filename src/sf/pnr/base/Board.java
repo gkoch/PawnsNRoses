@@ -573,8 +573,7 @@ public final class Board {
     }
 
     public boolean isAttackedBySliding(final int targetPos, final int attackBits, final int piecePos) {
-        final int attackArrayIndex = targetPos - piecePos + 120;
-        final int attackValue = ATTACK_ARRAY[attackArrayIndex];
+        final int attackValue = ATTACK_ARRAY[(targetPos - piecePos + 120)];
         if ((attackValue & attackBits) > 0) {
             final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
             int testPos = piecePos + delta;
@@ -622,8 +621,13 @@ public final class Board {
                 (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_Q & ATTACK_ARRAY[kingPos - fromPos + 120]) > 0) {
             return false;
         }
-
-        if (isDiscoveredCheck(kingPos, fromPos, signum)) {
+        // if we are in the attack line (blocked check) no need to look for discovered check and also if we move
+        // somewhere where we can't attack the king then it can't be a check
+        if (absPiece != PAWN && (ATTACK_ARRAY[kingPos - fromPos + 120] & ATTACK_BITS[absPiece]) > 0) {
+            if (!Utils.isCastling(move) && (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_BITS[absPiece]) == 0) {
+                return false;
+            }
+        } else if (isDiscoveredCheck(kingPos, fromPos, signum)) {
             return true;
         }
         switch (absPiece) {

@@ -342,21 +342,11 @@ public final class Board {
     }
 
     public int getStage() {
-        final int fullMoves = (state & FULL_MOVES) >> SHIFT_FULL_MOVES;
-        final int moveCount;
-        if (fullMoves < STAGE_MOVE_MIN) {
-            moveCount = 0;
-        } else if (fullMoves > STAGE_MOVE_MAX) {
-            moveCount =  STAGE_MOVE_RANGE;
-        } else {
-            moveCount = fullMoves - STAGE_MOVE_MIN;
-        }
         final int capturedMax = Math.max(capturedValue[BLACK_TO_MOVE], capturedValue[WHITE_TO_MOVE]);
         if (capturedMax > STAGE_CAPTURED_MAX) {
             return STAGE_MAX;
         }
-        return moveCount * STAGE_WEIGHT_MOVE / STAGE_MOVE_RANGE +
-            capturedMax * STAGE_WEIGHT_CAPTURED / STAGE_CAPTURED_MAX;
+        return capturedMax * STAGE_MAX / STAGE_CAPTURED_MAX;
     }
 
     public void takeBack(final long undo) {

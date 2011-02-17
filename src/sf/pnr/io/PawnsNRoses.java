@@ -134,13 +134,15 @@ public class PawnsNRoses {
     }
 
     @Executable()
-    public void scanHashTables() {
+    public String scanHashTables() {
+        final StringBuilder stats = new StringBuilder();
         if (engine != null) {
-            engine.getTranspositionTable().scan();
+            stats.append("Number of free entries in transposition table: ").append(engine.getTranspositionTable().scan());
             final Evaluation evaluation = engine.getEvaluation();
-            evaluation.getEvalHashTable().scan();
-            evaluation.getPawnHashTable().scan();
+            stats.append(" in evaluation hash table: ").append(evaluation.getEvalHashTable().scan());
+            stats.append(" in pawn hash table: ").append(evaluation.getPawnHashTable().scan());
         }
+        return stats.toString();
     }
 
     @Executable()

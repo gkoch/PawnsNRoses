@@ -50,7 +50,7 @@ public class PawnHashTable {
         if (hash < 0) {
             hash += array.length;
         }
-        return hash >> 1;
+        return hash & (~1);
     }
 
     public void clear() {

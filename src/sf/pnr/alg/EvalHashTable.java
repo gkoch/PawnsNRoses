@@ -1,45 +1,44 @@
 package sf.pnr.alg;
 
 import sf.pnr.base.Configurable;
-import sf.pnr.base.Configuration;
 
 import java.util.Arrays;
 
 /**
  */
 public final class EvalHashTable {
-    private static final int MAX_CHECK_INDEX = 3 * 20;
+    private static final int MAX_CHECK_INDEX = 10;
+    private static final long VALUE_MASK = 0xFFFFL;
+    private static final long ZOBRIST_MASK = ~VALUE_MASK;
     @Configurable(Configurable.Key.EVAL_TABLE_SIZE)
     private static int TABLE_SIZE = 1;
 
-    private final int[] array;
+    private final long[] array;
 
     public EvalHashTable() {
-        array = new int[TABLE_SIZE * 1024 * 1024 / 12 * 3];
+        array = new long[TABLE_SIZE * 1024 * 1024 / 8];
     }
 
     public int read(final long zobrist) {
-        final int hashed = hash(zobrist);
-        final int startIndex = hashed / 3 * 3;
-        final int zobristHigh = (int) (zobrist >>> 32);
-        final int zobristLow = (int) (zobrist & 0xFFFFFFFFL);
-
-        for (int i = startIndex; i < array.length; i += 3) {
-            if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
-                return array[i + 2];
-            } else if ((array[i] | array[i + 1]) == 0) {
+        final int startIndex = hash(zobrist);
+        final long maskedZobrist = zobrist & ZOBRIST_MASK;
+        final int toCheck1 = startIndex + MAX_CHECK_INDEX;
+        for (int i = startIndex; i < array.length; i++) {
+            if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
+                return (int) (array[i] & VALUE_MASK);
+            } else if (array[i] == 0) {
                 return 0;
-            } else if (i > startIndex + MAX_CHECK_INDEX) {
+            } else if (i > toCheck1) {
                 return 0;
             }
         }
-        final int toCheck = MAX_CHECK_INDEX - (array.length - startIndex);
+        final int toCheck2 = MAX_CHECK_INDEX - (array.length - startIndex);
         for (int i = 0; i < startIndex; i += 3) {
-            if (array[i] == zobristHigh && array[i + 1] == zobristLow) {
-                return array[i + 2];
-            } else if ((array[i] | array[i + 1]) == 0) {
+            if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
+                return (int) (array[i] & VALUE_MASK);
+            } else if (array[i] == 0) {
                 return 0;
-            } else if (i > toCheck) {
+            } else if (i > toCheck2) {
                 return 0;
             }
         }
@@ -47,47 +46,34 @@ public final class EvalHashTable {
     }
 
     public void set(final long zobrist, final int value) {
-        final int hashed = hash(zobrist);
-        final int startIndex = hashed / 3 * 3;
-        final int zobristHigh = (int) (zobrist >>> 32);
-        final int zobristLow = (int) (zobrist & 0xFFFFFFFFL);
+        assert value > 0;
+        final int startIndex = hash(zobrist);
+        final long maskedZobrist = zobrist & ZOBRIST_MASK;
 
         final int toCheck1 = startIndex + MAX_CHECK_INDEX;
-        for (int i = startIndex; i < array.length; i += 3) {
-            if (array[i] == 0 && array[i + 1] == 0) {
-                array[i] = zobristHigh;
-                array[i + 1] = zobristLow;
-                array[i + 2] = value;
+        for (int i = startIndex; i < array.length; i++) {
+            if (array[i] == 0) {
+                array[i] = maskedZobrist + value;
                 return;
             } else if (i >= toCheck1) {
-                array[i] = zobristHigh;
-                array[i + 1] = zobristLow;
-                array[i + 2] = value;
+                array[startIndex] = maskedZobrist + value;
                 return;
             }
         }
         final int toCheck2 = MAX_CHECK_INDEX - (array.length - startIndex);
         for (int i = 0; i < startIndex; i += 3) {
-            if (array[i] == 0 && array[i + 1] == 0) {
-                array[i] = zobristHigh;
-                array[i + 1] = zobristLow;
-                array[i + 2] = value;
+            if (array[i] == 0) {
+                array[i] = maskedZobrist + value;
                 return;
             } else if (i >= toCheck2) {
-                array[i] = zobristHigh;
-                array[i + 1] = zobristLow;
-                array[i + 2] = value;
+                array[startIndex] = maskedZobrist + value;
                 return;
             }
         }
     }
 
     private int hash(final long zobrist) {
-        int hash = (int) (zobrist % array.length);
-        if (hash < 0) {
-            hash += array.length;
-        }
-        return hash;
+        return (int) ((zobrist & 0x0FFFFFFF) % array.length);
     }
 
     public void clear() {
@@ -96,8 +82,8 @@ public final class EvalHashTable {
 
     public int scan() {
         int emptySlots = 0;
-        for (int i = 0; i < array.length; i += 3) {
-            if (array[i] == 0 && array[i + 1] == 0) {
+        for (long entry : array) {
+            if (entry == 0) {
                 emptySlots++;
             }
         }

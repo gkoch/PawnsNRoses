@@ -251,7 +251,7 @@ public final class Evaluation {
         int score = board.getMaterialValueAsWhite();
         score += computePositionalBonusNoPawnAsWhite(board);
         score += computeMobilityBonusAsWhite(board);
-        final long pawnHashValue = pawnEval(board);
+        final int pawnHashValue = pawnEval(board);
         score += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
         if ((board.getMaterialValueWhite() == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]]) &&
                 (board.getMaterialValueBlack() == VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]])) {
@@ -521,10 +521,10 @@ public final class Evaluation {
         return !(bishopOnWhite && bishopOnBlack);
     }
 
-    public long pawnEval(final Board board) {
+    public int pawnEval(final Board board) {
         final int stage = board.getStage();
         final long zobristPawn = board.getZobristPawn();
-        long pawnHashValue = pawnHashTable.get(zobristPawn, stage);
+        int pawnHashValue = pawnHashTable.get(zobristPawn, stage);
         if (pawnHashValue == 0) {
             pawnHashValue = pawnEval(board, stage);
             pawnHashTable.set(zobristPawn, pawnHashValue);
@@ -532,8 +532,7 @@ public final class Evaluation {
         return pawnHashValue;
     }
 
-    public static long pawnEval(final Board board, final int stage) {
-
+    public static int pawnEval(final Board board, final int stage) {
         int score = 0;
 
         // pawn storm

@@ -159,21 +159,21 @@ public class EvaluationTest extends TestCase {
 
     public void testPromotionDistanceStoppableWhite() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/8/1P6/4K3 w - - 0 1");
-        final long pawnHashValue = eval.pawnEval(board);
+        final int pawnHashValue = eval.pawnEval(board);
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
     }
 
     public void testPromotionDistanceStoppable2White() {
         final Board board = StringUtils.fromFen("4k3/8/8/1P6/8/8/8/4K3 w - - 0 1");
-        final long pawnHashValue = eval.pawnEval(board);
+        final int pawnHashValue = eval.pawnEval(board);
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
     }
 
     public void testPromotionDistanceUnstoppableWhite() {
         final Board board = StringUtils.fromFen("4k3/8/1P6/8/8/8/8/4K3 w - - 0 1");
-        final long pawnHashValue = eval.pawnEval(board);
+        final int pawnHashValue = eval.pawnEval(board);
         assertEquals(2, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, BLACK_TO_MOVE));
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
@@ -181,7 +181,7 @@ public class EvaluationTest extends TestCase {
 
     public void testPromotionDistanceUnstoppable2White() {
         final Board board = StringUtils.fromFen("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1");
-        final long pawnHashValue = eval.pawnEval(board);
+        final int pawnHashValue = eval.pawnEval(board);
         assertEquals(1, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(1, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, BLACK_TO_MOVE));
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
@@ -189,21 +189,21 @@ public class EvaluationTest extends TestCase {
 
     public void testPromotionDistanceStoppableBlack() {
         final Board board = StringUtils.fromFen("4k3/8/1p6/8/8/8/8/4K3 w - - 0 1");
-        final long pawnHashValue = eval.pawnEval(board);
+        final int pawnHashValue = eval.pawnEval(board);
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
     }
 
     public void testPromotionDistanceStoppable2Black() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/1p6/8/8/4K3 w - - 0 1");
-        final long pawnHashValue = eval.pawnEval(board);
+        final int pawnHashValue = eval.pawnEval(board);
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
     }
 
     public void testPromotionDistanceUnstoppableBlack() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/1p6/8/4K3 w - - 0 1");
-        final long pawnHashValue = eval.pawnEval(board);
+        final int pawnHashValue = eval.pawnEval(board);
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(2, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
@@ -211,7 +211,7 @@ public class EvaluationTest extends TestCase {
 
     public void testPromotionDistanceUnstoppable2Black() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/8/1p6/4K3 w - - 0 1");
-        final long pawnHashValue = eval.pawnEval(board);
+        final int pawnHashValue = eval.pawnEval(board);
         assertEquals(7, PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(1, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, WHITE_TO_MOVE));
         assertEquals(1, PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, BLACK_TO_MOVE));
@@ -243,12 +243,12 @@ public class EvaluationTest extends TestCase {
 
     public void testPawnMirrorEvalPawnStorm() {
         final Board boardWhite = StringUtils.fromFen("1k6/8/1P6/P1P5/8/8/8/6K1 w - - 0 1");
-        final long pawnHashValueWhite = eval.pawnEval(boardWhite);
+        final int pawnHashValueWhite = eval.pawnEval(boardWhite);
         final int pawnValueWhite = PawnHashTable.getValueFromPawnHashValue(pawnHashValueWhite);
         final int valueWhite = eval.evaluate(boardWhite);
 
         final Board boardBlack = StringUtils.fromFen("1k6/8/8/8/5p1p/6p1/8/6K1 b - - 0 1");
-        final long pawnHashValueBlack = eval.pawnEval(boardBlack);
+        final int pawnHashValueBlack = eval.pawnEval(boardBlack);
         final int pawnValueBlack = PawnHashTable.getValueFromPawnHashValue(pawnHashValueBlack);
         final int valueBlack = eval.evaluate(boardBlack);
 
@@ -258,12 +258,12 @@ public class EvaluationTest extends TestCase {
 
     public void testPawnMirrorEvalHalfInitial() {
         final Board boardWhite = StringUtils.fromFen("5k2/8/8/8/8/8/PPPPPPPP/RNBKQBNR w KQ - 0 1");
-        final long pawnHashValueWhite = eval.pawnEval(boardWhite);
+        final int pawnHashValueWhite = eval.pawnEval(boardWhite);
         final int pawnValueWhite = PawnHashTable.getValueFromPawnHashValue(pawnHashValueWhite);
         final int valueWhite = eval.evaluate(boardWhite);
 
         final Board boardBlack = StringUtils.fromFen("rnbqkbnr/pppppppp/8/8/8/8/8/2K5 b kq - 0 1 ");
-        final long pawnHashValueBlack = eval.pawnEval(boardBlack);
+        final int pawnHashValueBlack = eval.pawnEval(boardBlack);
         final int pawnValueBlack = PawnHashTable.getValueFromPawnHashValue(pawnHashValueBlack);
         final int valueBlack = eval.evaluate(boardBlack);
 

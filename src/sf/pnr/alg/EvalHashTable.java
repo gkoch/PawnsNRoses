@@ -26,9 +26,7 @@ public final class EvalHashTable {
         for (int i = startIndex; i < array.length; i++) {
             if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
                 return (int) (array[i] & VALUE_MASK);
-            } else if (array[i] == 0) {
-                return 0;
-            } else if (i > toCheck1) {
+            } else if (array[i] == 0 || i > toCheck1) {
                 return 0;
             }
         }
@@ -36,9 +34,7 @@ public final class EvalHashTable {
         for (int i = 0; i < startIndex; i += 3) {
             if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
                 return (int) (array[i] & VALUE_MASK);
-            } else if (array[i] == 0) {
-                return 0;
-            } else if (i > toCheck2) {
+            } else if (array[i] == 0 || i > toCheck2) {
                 return 0;
             }
         }
@@ -52,7 +48,7 @@ public final class EvalHashTable {
 
         final int toCheck1 = startIndex + MAX_CHECK_INDEX;
         for (int i = startIndex; i < array.length; i++) {
-            if (array[i] == 0) {
+            if (array[i] == 0 || (array[i] & ZOBRIST_MASK) == maskedZobrist) {
                 array[i] = maskedZobrist + value;
                 return;
             } else if (i >= toCheck1) {
@@ -62,7 +58,7 @@ public final class EvalHashTable {
         }
         final int toCheck2 = MAX_CHECK_INDEX - (array.length - startIndex);
         for (int i = 0; i < startIndex; i += 3) {
-            if (array[i] == 0) {
+            if (array[i] == 0 || (array[i] & ZOBRIST_MASK) == maskedZobrist) {
                 array[i] = maskedZobrist + value;
                 return;
             } else if (i >= toCheck2) {

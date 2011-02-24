@@ -29,9 +29,8 @@ public final class TranspositionTable {
     public static final int TT_SHIFT_AGE = 2 + TT_SHIFT_TYPE; // 2 + 49
     public static final long TT_AGE = 0x0FFFL << TT_SHIFT_AGE;
 
-    private static final int MAX_CHECK_COUNT_EXACT = 20;
-    private static final int MAX_CHECK_COUNT_CUT = 10;
-    private static final int MAX_CHECK_INDEX = 2 * MAX_CHECK_COUNT_EXACT;
+    private static final int MAX_CHECK_COUNT = 40;
+    private static final int MAX_CHECK_INDEX = 2 * MAX_CHECK_COUNT;
 
     @Configurable(Configurable.Key.TRANSP_TABLE_SIZE)
     private static int TABLE_SIZE = 1;
@@ -81,6 +80,8 @@ public final class TranspositionTable {
         final long[] array = getArraySegment(zobrist);
         final long ttValue = type | (((long) (move & BASE_INFO)) << TT_SHIFT_MOVE) | (depth << TT_SHIFT_DEPTH) |
             (value << TT_SHIFT_VALUE) | (((long) age) << TT_SHIFT_AGE);
+        int minAge = Integer.MAX_VALUE;
+        int minAgeIndex = startIndex;
         for (int i = startIndex; i < ARRAY_LENGHT; i += 2) {
             if (array[i] == zobrist) {
                 array[i + 1] = ttValue;
@@ -89,20 +90,19 @@ public final class TranspositionTable {
                 array[i] = zobrist;
                 array[i + 1] = ttValue;
                 return;
+            } else if (i > startIndex + MAX_CHECK_INDEX) {
+                array[minAgeIndex] = zobrist;
+                array[minAgeIndex + 1] = ttValue;
+                return;
             } else {
-                final int distance = (i - startIndex) >> 1;
-                final long ttStored = array[i + 1];
-                // if it's too old or we've tried at least 20 and it's not an exact match then overwrite it
-                final long ttAge = (ttStored & TT_AGE) >>> TT_SHIFT_AGE;
-                if ((ttAge < age - 15 + (distance >> 1)) || distance >= MAX_CHECK_COUNT_EXACT ||
-                        distance > MAX_CHECK_COUNT_CUT && (ttStored & TT_TYPE) != TT_TYPE_EXACT) {
-                    array[i] = zobrist;
-                    array[i + 1] = ttValue;
-                    return;
+                final int ttAge = (int) ((array[i + 1] & TT_AGE) >>> TT_SHIFT_AGE);
+                if (ttAge < minAge) {
+                    minAge = ttAge;
+                    minAgeIndex = i;
                 }
             }
         }
-        final int checked = ARRAY_LENGHT - startIndex;
+        final int toCheck = MAX_CHECK_INDEX - (ARRAY_LENGHT - startIndex);
         for (int i = 0; i < startIndex; i += 2) {
             if (array[i] == zobrist) {
                 array[i + 1] = ttValue;
@@ -111,16 +111,15 @@ public final class TranspositionTable {
                 array[i] = zobrist;
                 array[i + 1] = ttValue;
                 return;
+            } else if (i > toCheck) {
+                array[minAgeIndex] = zobrist;
+                array[minAgeIndex + 1] = ttValue;
+                return;
             } else {
-                final int distance = (i + checked) >> 1;
-                final long ttStored = array[i + 1];
-                // if it's too old or we've tried at least 20 and it's not an exact match then overwrite it
-                final long ttAge = (ttStored & TT_AGE) >>> TT_SHIFT_AGE;
-                if ((ttAge < age - 15 + (distance >> 1)) || distance >= MAX_CHECK_COUNT_EXACT ||
-                        distance > MAX_CHECK_COUNT_CUT && (ttStored & TT_TYPE) != TT_TYPE_EXACT) {
-                    array[i] = zobrist;
-                    array[i + 1] = ttValue;
-                    return;
+                final int ttAge = (int) ((array[i + 1] & TT_AGE) >>> TT_SHIFT_AGE);
+                if (ttAge < minAge) {
+                    minAge = ttAge;
+                    minAgeIndex = i;
                 }
             }
         }

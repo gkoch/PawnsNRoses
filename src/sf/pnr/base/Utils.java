@@ -62,7 +62,7 @@ public class Utils {
 	public static final int FROM       = 0x0000007F;
 	public static final int TO         = 0x00003F80;
 	public static final int MOVE_TYPE  = 0x0001C000;
-    public static final int CHECKING   = 0x00020000;
+    //public static final int CHECKING   = 0x00020000;
     public static final int CAPTURED   = 0x000E0000;
     public static final int MOVE_VALUE = 0x7FFC0000;
     public static final int FROM_TO  = FROM | TO;

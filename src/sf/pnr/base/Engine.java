@@ -246,7 +246,8 @@ public final class Engine {
                     continue;
                 }
 
-                final boolean opponentInCheck = (move & CHECKING) > 0;
+                final int signum = (toMove << 1) - 1;
+                final boolean opponentInCheck = board.attacksKing(toMove);
                 int depthExt = 0;
                 if (opponentInCheck) {
                     depthExt += DEPTH_EXT_CHECK;
@@ -254,7 +255,6 @@ public final class Engine {
                 final int toPos = getToPosition(move);
                 if (getRank(toPos) == 1 || getRank(toPos) == 6) {
                     final int piece = board.getBoard()[toPos];
-                    final int signum = (toMove << 1) - 1;
                     final int absPiece = signum * piece;
                     if (absPiece == PAWN) {
                         depthExt += DEPTH_EXT_7TH_RANK_PAWN;
@@ -541,7 +541,8 @@ public final class Engine {
                     continue;
                 }
 
-                final boolean opponentInCheck = (move & CHECKING) > 0;
+                final int signum = (toMove << 1) - 1;
+                final boolean opponentInCheck = board.attacksKing(toMove);
                 if (!allowToRecurseDown && !opponentInCheck) {
                     board.takeBack(undo);
                     break;
@@ -554,7 +555,6 @@ public final class Engine {
                 final int toPos = getToPosition(move);
                 if (getRank(toPos) == 1 || getRank(toPos) == 6) {
                     final int piece = board.getBoard()[toPos];
-                    final int signum = (toMove << 1) - 1;
                     final int absPiece = signum * piece;
                     if (absPiece == PAWN) {
                         depthExt += DEPTH_EXT_7TH_RANK_PAWN;
@@ -922,11 +922,7 @@ public final class Engine {
                 if ((ttMove & BASE_INFO) > 0) {
                     moves = new int[2];
                     moves[0] = 1;
-                    if (board.isCheckingMove(ttMove)) {
-                        moves[1] = ttMove | CHECKING;
-                    } else {
-                        moves[1] = ttMove & ~CHECKING;
-                    }
+                    moves[1] = ttMove;
                 } else {
                     moves = NO_MOVE_ARRAY;
                 }
@@ -944,11 +940,7 @@ public final class Engine {
                 int killerCount = 0;
                 for (int move: killerMoves[searchedPly]) {
                     if (isValidKillerMove(board, getFromPosition(move), getToPosition(move))) {
-                        if (board.isCheckingMove(move)) {
-                            moves[++killerCount] = move | CHECKING;
-                        } else {
-                            moves[++killerCount] = move & ~CHECKING;
-                        }
+                        moves[++killerCount] = move;
                     }
                 }
                 moves[0] = killerCount;
@@ -994,17 +986,10 @@ public final class Engine {
                 final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromPos, toPos, stage);
                 final int valPositional = ((positionalGain + 100) >> MOVE_ORDER_POSITIONAL_GAIN_SHIFT);
                 final int checkBonus;
-                final int checkingBit;
-                if (board.isCheckingMove(move)) {
-                    checkBonus = MOVE_ORDER_CHECK_BONUS;
-                    checkingBit = CHECKING;
+                if (SLIDING[absPiece] && (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_BITS[absPiece]) > 0) {
+                    checkBonus = MOVE_ORDER_BLOCKED_CHECK_BONUS;
                 } else {
-                    checkingBit = 0;
-                    if (SLIDING[absPiece] && (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_BITS[absPiece]) > 0) {
-                        checkBonus = MOVE_ORDER_BLOCKED_CHECK_BONUS;
-                    } else {
-                        checkBonus = 0;
-                    }
+                    checkBonus = 0;
                 }
                 final int toRank = getRank(toPos);
                 final int pawnBonus;

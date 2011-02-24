@@ -596,6 +596,10 @@ public final class Board {
     }
 
     public boolean isCheckingMove(final int move) {
+        return isCheckingMove(move, true);
+    }
+
+    public boolean isCheckingMove(final int move, final boolean testDiscoveredCheck) {
         final int toMove = state & WHITE_TO_MOVE;
         final int fromPos = getFromPosition(move);
         final int signum = (toMove << 1) - 1;
@@ -617,7 +621,7 @@ public final class Board {
             if (!Utils.isCastling(move) && (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_BITS[absPiece]) == 0) {
                 return false;
             }
-        } else if (isDiscoveredCheck(kingPos, fromPos, signum)) {
+        } else if (testDiscoveredCheck && isDiscoveredCheck(kingPos, fromPos, signum)) {
             return true;
         }
         switch (absPiece) {

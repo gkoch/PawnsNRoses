@@ -31,7 +31,9 @@ public class GamePlayTest {
         final int initialTime = Integer.parseInt(System.getProperty("searchTask.initialTime", "120000"));
         final int increment = Integer.parseInt(System.getProperty("searchTask.incrementTime", "6000"));
         final int rounds = Integer.parseInt(System.getProperty("searchTask.rounds", "20"));
-        final GameManager manager = new GameManager(getEngineDir().getName(), initialTime, increment, rounds);
+        final boolean restartBeforeMoves = Boolean.parseBoolean(System.getProperty("searchTask.restartBeforeMoves", "false"));
+        final GameManager manager =
+            new GameManager(getEngineDir().getName(), initialTime, increment, rounds, restartBeforeMoves);
         final String kibitzerPath = System.getProperty("searchTask.kibitzer");
         if (kibitzerPath != null) {
             final UciRunner kibitzer =

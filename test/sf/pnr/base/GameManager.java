@@ -32,12 +32,14 @@ public class GameManager {
     private final int increments;
     private final int rounds;
     private UciRunner kibitzer;
+    private boolean restartBeforeMoves;
 
-    public GameManager(final String event, final int initialTime, final int increment, final int rounds) {
+    public GameManager(final String event, final int initialTime, final int increment, final int rounds, final boolean restartBeforeMoves) {
         this.event = event;
         this.initialTimes = initialTime;
         this.increments = increment;
         this.rounds = rounds;
+        this.restartBeforeMoves = restartBeforeMoves;
     }
 
     public void setKibitzer(final UciRunner kibitzer) {
@@ -101,6 +103,10 @@ public class GameManager {
             int fiftyMovesCounter = 0;
             while (true) {
                 final UciRunner player = players[currentPlayer];
+                if (restartBeforeMoves) {
+                    player.restart();
+                    player.uciNewGame();
+                }
                 player.position(moves);
                 final int timeWhite = times[0];
                 final int timeBlack = times[1];

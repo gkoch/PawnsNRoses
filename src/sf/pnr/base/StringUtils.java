@@ -511,15 +511,15 @@ public class StringUtils {
 
     public static int fromShort(final Board board, final String moveStr) {
         final int state = board.getState();
-        final int whiteToMove = state & WHITE_TO_MOVE;
+        final int toMove = state & WHITE_TO_MOVE;
         if (moveStr.startsWith("0-0-0") || moveStr.startsWith("O-O-O")) {
-            if (whiteToMove > 0) {
+            if (toMove > 0) {
                 return (C[0] << SHIFT_TO) | E[0] | MT_CASTLING_QUEENSIDE;
             } else {
                 return (C[7] << SHIFT_TO) | E[7] | MT_CASTLING_QUEENSIDE;
             }
         } else if (moveStr.startsWith("0-0") || moveStr.startsWith("O-O")) {
-            if (whiteToMove > 0) {
+            if (toMove > 0) {
                 return (G[0] << SHIFT_TO) | E[0] | MT_CASTLING_KINGSIDE;
             } else {
                 return (G[7] << SHIFT_TO) | E[7] | MT_CASTLING_KINGSIDE;
@@ -563,9 +563,9 @@ public class StringUtils {
         assert toRank != -1;
 
         final int toPos = getPosition(toFile, toRank);
-        final int[] pieces = board.getPieces(whiteToMove, pieceType);
+        final int[] pieces = board.getPieces(toMove, pieceType);
         if (pieceType == PAWN) {
-            final int signum = (whiteToMove << 1) - 1;
+            final int signum = (toMove << 1) - 1;
             final int[] squares = board.getBoard();
             for (int i = 1; i <= pieces[0]; i++) {
                 final int piecePos = pieces[i];
@@ -590,7 +590,7 @@ public class StringUtils {
                         fromRank = pieceRank;
                         break;
                     } else if (((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1 == toFile &&
-                            toRank == 3 + whiteToMove * 3) {
+                            toRank == 3 + toMove * 3) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         moveType = MT_EN_PASSANT;
@@ -610,13 +610,15 @@ public class StringUtils {
                     continue;
                 }
                 if (board.isSliding(pieceType)) {
-                    if (board.isAttackedBySliding(toPos, ATTACK_BITS[pieceType], piecePos)) {
+                    if (board.isAttackedBySliding(toPos, ATTACK_BITS[pieceType], piecePos) &&
+                            !isPinned(board, toPos << SHIFT_TO | getPosition(pieceFile, pieceRank) | moveType)) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         break;
                     }
                 } else {
-                    if (board.isAttackedByNonSliding(toPos, ATTACK_BITS[pieceType], piecePos)) {
+                    if (board.isAttackedByNonSliding(toPos, ATTACK_BITS[pieceType], piecePos) &&
+                            !isPinned(board, toPos << SHIFT_TO | getPosition(pieceFile, pieceRank) | moveType)) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         break;
@@ -625,6 +627,13 @@ public class StringUtils {
             }
         }
         return toPos << SHIFT_TO | getPosition(fromFile, fromRank) | moveType;
+    }
+
+    private static boolean isPinned(final Board board, final int move) {
+        final long undo = board.move(move);
+        final boolean result = board.attacksKing(board.getState() & WHITE_TO_MOVE);
+        board.takeBack(undo);
+        return  result;
     }
 
     public static String toString0x88(final int position) {
@@ -656,38 +665,9 @@ public class StringUtils {
     public static Board fromPgn(final String pgn) {
         final Board board = new Board();
         board.restart();
-        boolean inHeader = false;
-        boolean inQuotes = false;
-        final StringBuilder builder = new StringBuilder(5);
-        for (int i = 0; i < pgn.length(); i++) {
-            final char ch = pgn.charAt(i);
-            if (ch == '"') {
-                if (inHeader) {
-                    inQuotes = !inQuotes;
-                } else {
-                    throw new IllegalStateException("Quote outside PGN header: " + pgn);
-                }
-            } else if (inQuotes) {
-                // ignore
-            } else if (ch == ']') {
-                inHeader = false;
-            } else if (inHeader) {
-                // ignore
-            } else if (ch == '[') {
-                inHeader = true;
-            } else if (Character.isWhitespace(ch)) {
-                if (builder.length() > 0) {
-                    board.move(fromShort(board, builder.toString()));
-                    builder.delete(0, builder.length());
-                }
-            } else if (builder.length() == 0 && (Character.isDigit(ch) || ch == '.' || ch == '-' || ch == '/')) {
-                // ignore
-            } else {
-                builder.append(ch);
-            }
-        }
-        if (builder.length() > 0) {
-            board.move(fromShort(board, builder.toString()));
+        final int[] moves = fromPgnToMoves(pgn);
+        for (int move: moves) {
+            board.move(move);
         }
         return board;
     }
@@ -717,7 +697,14 @@ public class StringUtils {
                 inHeader = true;
             } else if (Character.isWhitespace(ch)) {
                 if (builder.length() > 0) {
-                    final int move = fromShort(board, builder.toString());
+                    final int move;
+                    try {
+                        move = fromShort(board, builder.toString());
+                    } catch (RuntimeException e) {
+                        System.out.printf("Failed to parse move #%d: %s (current FEN: %s)\r\n",
+                            moveList.size(), builder.toString(), StringUtils.toFen(board));
+                        throw e;
+                    }
                     moveList.add(move);
                     board.move(move);
                     builder.delete(0, builder.length());
@@ -731,7 +718,6 @@ public class StringUtils {
         if (builder.length() > 0) {
             final int move = fromShort(board, builder.toString());
             moveList.add(move);
-            board.move(move);
         }
         final int[] moves = new int[moveList.size()];
         for (int i = 0; i < moves.length; i++){

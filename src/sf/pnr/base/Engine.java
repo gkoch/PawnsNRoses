@@ -72,6 +72,9 @@ public final class Engine {
     private long nodeCountAtNextTimeCheck;
     private volatile boolean cancelled;
     private int historyMax = 0;
+    private int historyMaxGlobal = 0;
+    private int historyShift = 0;
+    private int historyShiftGlobal = 0;
     private BestMoveListener listener;
     private int age;
 
@@ -875,9 +878,25 @@ public final class Engine {
         final int pieceHistoryIdx = board.getBoard()[fromPos] + 7;
         final int fromPos64 = convert0x88To64(fromPos);
         final int toPos64 = convert0x88To64(toPos);
+        history[7][fromPos64][toPos64]++;
+        if (history[7][fromPos64][toPos64] > historyMaxGlobal) {
+            historyMaxGlobal = history[7][fromPos64][toPos64];
+            historyShiftGlobal = 0;
+            final int leadingZerosGlobal = Integer.numberOfLeadingZeros(historyMaxGlobal);
+            if (leadingZerosGlobal < 34 - MOVE_ORDER_HISTORY_MAX_BITS) {
+                // normalise history counts
+                historyShiftGlobal = 34 - MOVE_ORDER_HISTORY_MAX_BITS - leadingZerosGlobal;
+            }
+        }
         history[pieceHistoryIdx][fromPos64][toPos64]++;
         if (history[pieceHistoryIdx][fromPos64][toPos64] > historyMax) {
             historyMax = history[pieceHistoryIdx][fromPos64][toPos64];
+            historyShift = 0;
+            final int leadingZeros = Integer.numberOfLeadingZeros(historyMax);
+            if (leadingZeros < 32 - MOVE_ORDER_HISTORY_MAX_BITS) {
+                // normalise history counts
+                historyShift = 32 - MOVE_ORDER_HISTORY_MAX_BITS - leadingZeros;
+            }
         }
     }
 
@@ -963,12 +982,6 @@ public final class Engine {
     }
 
     private void addMoveValuesAndRemoveTTMove(final int[] moves, final Board board, final int ttMove, final int[] killers) {
-        int shift = 0;
-        final int leadingZeros = Integer.numberOfLeadingZeros(historyMax);
-        if (leadingZeros < 32 - MOVE_ORDER_HISTORY_MAX_BITS) {
-            // normalise history counts
-            shift = 32 - MOVE_ORDER_HISTORY_MAX_BITS - leadingZeros;
-        }
         final int toMove = board.getState() & WHITE_TO_MOVE;
         final int kingPos = board.getKing(1 - toMove);
         final int signum = (toMove << 1) - 1;
@@ -981,7 +994,8 @@ public final class Engine {
                 final int fromPos64 = convert0x88To64(fromPos);
                 final int toPos64 = convert0x88To64(toPos);
                 final int piece = board.getBoard()[fromPos];
-                final int historyValue = history[piece + 7][fromPos64][toPos64] >>> shift;
+                final int historyValue = history[piece + 7][fromPos64][toPos64] >>> historyShift;
+                final int historyValueGlobal = history[7][fromPos64][toPos64] >>> historyShiftGlobal;
                 final int absPiece = piece * signum;
                 final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromPos, toPos, stage);
                 final int valPositional = ((positionalGain + 100) >> MOVE_ORDER_POSITIONAL_GAIN_SHIFT);
@@ -999,8 +1013,8 @@ public final class Engine {
                     pawnBonus = 0;
                 }
                 final int moveValue =
-                    ((move & MOVE_VALUE) >> SHIFT_MOVE_VALUE) + historyValue + checkBonus + valPositional + pawnBonus;
-                moves[i] = (move & ~MOVE_VALUE) | checkingBit | (moveValue << SHIFT_MOVE_VALUE);
+                    ((move & MOVE_VALUE) >> SHIFT_MOVE_VALUE) + historyValue + historyValueGlobal + checkBonus + valPositional + pawnBonus;
+                moves[i] = (move & ~MOVE_VALUE) | (moveValue << SHIFT_MOVE_VALUE);
                 assert (moves[i] & (1 << 31)) == 0: Integer.toHexString(moves[i]); 
             } else {
                 moves[i] = moves[moves[0]];
@@ -1037,6 +1051,7 @@ public final class Engine {
             }
         }
         historyMax = 0;
+        historyMaxGlobal = 0;
     }
 
     public TranspositionTable getTranspositionTable() {

@@ -2,6 +2,7 @@ package sf.pnr.base;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static sf.pnr.base.Utils.*;
 
@@ -590,7 +591,7 @@ public class StringUtils {
                         fromRank = pieceRank;
                         break;
                     } else if (((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1 == toFile &&
-                            toRank == 3 + toMove * 3) {
+                            toRank == 2 + toMove * 3) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         moveType = MT_EN_PASSANT;
@@ -665,38 +666,61 @@ public class StringUtils {
     public static Board fromPgn(final String pgn) {
         final Board board = new Board();
         board.restart();
-        final int[] moves = fromPgnToMoves(pgn);
+        final int[] moves = fromPgnToMoves(pgn, null);
         for (int move: moves) {
             board.move(move);
         }
         return board;
     }
 
-    public static int[] fromPgnToMoves(final String pgn) {
-        final Board board = new Board();
-        board.restart();
+    public static int[] fromPgnToMoves(final String pgn, final Map<String, String> properties) {
+        Board board = null;
         boolean inHeader = false;
         boolean inQuotes = false;
         final StringBuilder builder = new StringBuilder(5);
         final List<Integer> moveList = new ArrayList<Integer>(150);
+        final StringBuilder propertyName = new StringBuilder();
+        final StringBuilder propertyValue = new StringBuilder();
+        StringBuilder propertyBuilder = propertyName;
         for (int i = 0; i < pgn.length(); i++) {
             final char ch = pgn.charAt(i);
             if (ch == '"') {
                 if (inHeader) {
+                    propertyBuilder = propertyValue;
+                    propertyBuilder.append(ch);
                     inQuotes = !inQuotes;
                 } else {
                     throw new IllegalStateException("Quote outside PGN header: " + pgn);
                 }
             } else if (inQuotes) {
+                propertyBuilder.append(ch);
                 // ignore
             } else if (ch == ']') {
+                if (properties != null) {
+                    if (propertyValue.charAt(0) == '"' && propertyValue.charAt(propertyValue.length() - 1) == '"') {
+                        propertyValue.delete(0, 1);
+                        propertyValue.delete(propertyValue.length() - 1, propertyValue.length());
+                    }
+                    properties.put(propertyName.toString().trim(), propertyValue.toString());
+                }
+                propertyName.delete(0, propertyName.length());
+                propertyValue.delete(0, propertyValue.length());
                 inHeader = false;
             } else if (inHeader) {
-                // ignore
+                propertyBuilder.append(ch);
             } else if (ch == '[') {
+                propertyBuilder = propertyName;
                 inHeader = true;
             } else if (Character.isWhitespace(ch)) {
                 if (builder.length() > 0) {
+                    if (moveList.isEmpty()) {
+                        if (properties != null && properties.containsKey("FEN")) {
+                            board = StringUtils.fromFen(properties.get("FEN"));
+                        } else {
+                            board = new Board();
+                            board.restart();
+                        }
+                    }
                     final int move;
                     try {
                         move = fromShort(board, builder.toString());
@@ -709,13 +733,21 @@ public class StringUtils {
                     board.move(move);
                     builder.delete(0, builder.length());
                 }
-            } else if (builder.length() == 0 && (Character.isDigit(ch) || ch == '.' || ch == '-' || ch == '/')) {
+            } else if (builder.length() == 0 && (Character.isDigit(ch) || ch == '.' || ch == '-' || ch == '/' || ch == '*')) {
                 // ignore
             } else {
                 builder.append(ch);
             }
         }
         if (builder.length() > 0) {
+            if (moveList.isEmpty()) {
+                if (properties != null && properties.containsKey("FEN")) {
+                    board = StringUtils.fromFen(properties.get("FEN"));
+                } else {
+                    board = new Board();
+                    board.restart();
+                }
+            }
             final int move = fromShort(board, builder.toString());
             moveList.add(move);
         }

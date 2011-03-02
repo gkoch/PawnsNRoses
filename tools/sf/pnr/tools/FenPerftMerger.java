@@ -1,4 +1,4 @@
-package tools;
+package sf.pnr.tools;
 
 import java.io.*;
 

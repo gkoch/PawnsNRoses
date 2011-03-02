@@ -1,4 +1,4 @@
-package tools;
+package sf.pnr.tools;
 
 import sf.pnr.base.Board;
 import sf.pnr.base.StringUtils;

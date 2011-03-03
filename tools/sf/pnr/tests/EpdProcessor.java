@@ -1,4 +1,8 @@
-package sf.pnr.base;
+package sf.pnr.tests;
+
+import sf.pnr.base.Board;
+import sf.pnr.base.StringUtils;
+import sf.pnr.base.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +21,16 @@ import java.util.Set;
 /**
  */
 public class EpdProcessor {
+
+    private final Class resourceBaseClass;
+
+    public EpdProcessor() {
+        this(EpdProcessor.class);
+    }
+
+    public EpdProcessor(final Class resourceBaseClass) {
+        this.resourceBaseClass = resourceBaseClass;
+    }
 
     public void process(final List<String> testFiles, final EpdProcessorTask task)
             throws IOException {
@@ -112,7 +126,7 @@ public class EpdProcessor {
         final Set<String> fens = new HashSet<String>(5000);
         final Map<String, List<Fen>> fensToProcess = new LinkedHashMap<String, List<Fen>>();
         for (String fileName: testFiles) {
-            final InputStream is = EpdProcessor.class.getResourceAsStream("res/" + fileName);
+            final InputStream is = resourceBaseClass.getResourceAsStream("res/" + fileName);
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             try {
                 for (String line = reader.readLine(); line != null; line = reader.readLine()) {

@@ -1,5 +1,7 @@
-package sf.pnr.base;
+package sf.pnr.tests;
 
+import sf.pnr.base.Configurable;
+import sf.pnr.base.Configuration;
 import sf.pnr.io.UCI;
 
 import java.io.File;

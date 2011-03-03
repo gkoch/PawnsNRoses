@@ -1,4 +1,8 @@
-package sf.pnr.base;
+package sf.pnr.tests;
+
+import sf.pnr.base.Board;
+import sf.pnr.base.Engine;
+import sf.pnr.base.Evaluation;
 
 import java.io.IOException;
 import java.util.ArrayList;

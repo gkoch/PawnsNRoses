@@ -1,4 +1,9 @@
-package sf.pnr.base;
+package sf.pnr.tests;
+
+import sf.pnr.base.Board;
+import sf.pnr.base.Engine;
+import sf.pnr.base.StringUtils;
+import sf.pnr.base.Utils;
 
 import java.util.Map;
 

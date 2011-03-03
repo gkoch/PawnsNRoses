@@ -2,7 +2,8 @@ package sf.pnr.base;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import sf.pnr.alg.TranspositionTable;
+import sf.pnr.tests.EpdProcessor;
+import sf.pnr.tests.EpdProcessorTask;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ public class MateTest extends TestCase {
     public void testAll() throws IOException {
         final List<String> testFiles = new ArrayList<String>();
         testFiles.add("mates.epd");
-//        testFiles.add("dm004.epd");
         final long maxNodeCount = Long.parseLong(System.getProperty("searchTest.maxNodeCount", "1000000000"));
         final MateTask task = new MateTask(maxNodeCount);
         final long startTime = System.currentTimeMillis();

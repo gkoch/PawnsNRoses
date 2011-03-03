@@ -1,5 +1,8 @@
-package sf.pnr.base;
+package sf.pnr.tests;
 
+import sf.pnr.base.Board;
+import sf.pnr.base.Evaluation;
+import sf.pnr.base.StringUtils;
 import sf.pnr.io.PrefixOutputStream;
 import sf.pnr.io.TeeInputStream;
 import sf.pnr.io.TeeOutputStream;

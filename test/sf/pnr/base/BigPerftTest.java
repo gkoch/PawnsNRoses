@@ -1,6 +1,8 @@
 package sf.pnr.base;
 
 import junit.framework.TestCase;
+import sf.pnr.tests.EpdProcessor;
+import sf.pnr.tests.EpdProcessorTask;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ public class BigPerftTest extends TestCase {
         final int maxDepth = Integer.parseInt(System.getProperty("perftBig.maxDepth", "100"));
         final boolean failOnFirstError = Boolean.parseBoolean(System.getProperty("perftBig.failOnFirstError", "true"));
         final PerftTask task = new PerftTask(maxDepth, failOnFirstError);
-        new EpdProcessor().process(testFiles, task);
+        new EpdProcessor(this.getClass()).process(testFiles, task);
         assertTrue(task.getFailures().isEmpty());
     }
 

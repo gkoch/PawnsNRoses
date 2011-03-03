@@ -1,5 +1,9 @@
-package sf.pnr.base;
+package sf.pnr.tests;
 
+import sf.pnr.base.Board;
+import sf.pnr.base.Evaluation;
+import sf.pnr.base.StringUtils;
+import sf.pnr.base.Utils;
 import sf.pnr.io.UncloseableOutputStream;
 
 import java.io.FileOutputStream;
@@ -12,12 +16,12 @@ import java.util.concurrent.ExecutionException;
 
 public class GameFragmentTest {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
-        final UciRunner[] players = GamePlayTest.getPlayers();
+        final UciRunner[] players = TestUtils.getEngines();
         System.out.println("Running tournament with the following engines:");
         for (UciRunner player: players) {
             System.out.println("  - " + player.getName());
         }
-        final UciRunner refEngine = BestMoveTest.getReferenceEngine();
+        final UciRunner refEngine = TestUtils.getReferenceEngines()[0];
         System.out.println("against reference engine " + refEngine.getName());
         FileOutputStream debugOs = null;
         final String debugFile = System.getProperty("searchTask.debugFile");

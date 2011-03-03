@@ -1,8 +1,8 @@
-package sf.pnr.base;
+package sf.pnr.tests;
 
+import sf.pnr.base.Configurable;
 import sf.pnr.io.UCI;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;

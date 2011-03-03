@@ -1,4 +1,4 @@
-package sf.pnr.base;
+package sf.pnr.tests;
 
 import sf.pnr.io.UCI;
 import sf.pnr.io.UciProcess;

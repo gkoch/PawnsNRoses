@@ -1,6 +1,14 @@
-package sf.pnr.base;
+package sf.pnr.tests;
 
-import sf.pnr.alg.TranspositionTable;
+import sf.pnr.base.Board;
+import sf.pnr.base.Configurable;
+import sf.pnr.base.Configuration;
+import sf.pnr.base.Engine;
+import sf.pnr.base.Evaluation;
+import sf.pnr.base.MoveGenerator;
+import sf.pnr.base.PerftTest;
+import sf.pnr.base.StringUtils;
+import sf.pnr.base.Utils;
 
 public class SelfPlayTest {
     private static final int TIME_TO_MOVE = 6000;

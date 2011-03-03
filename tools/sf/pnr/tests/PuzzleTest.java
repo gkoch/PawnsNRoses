@@ -1,4 +1,4 @@
-package sf.pnr.base;
+package sf.pnr.tests;
 
 import java.io.IOException;
 import java.util.ArrayList;

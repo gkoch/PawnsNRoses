@@ -319,7 +319,7 @@ public final class Evaluation {
 
     public static int computePositionalGain(final int absPiece, final int toMove, final int fromPos, final int toPos,
                                             final int stage) {
-        final int shift = toMove << 3;
+        final int shift = SHIFT_POSITION_BONUS[toMove];
         final int[] typeBonusOpening = VAL_POSITION_BONUS_OPENING[absPiece];
         final int[] typeBonusEndGame = VAL_POSITION_BONUS_ENDGAME[absPiece];
         return ((typeBonusOpening[toPos + shift] - typeBonusOpening[fromPos + shift]) * (STAGE_MAX - stage) +

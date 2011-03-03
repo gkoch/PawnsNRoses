@@ -6,6 +6,7 @@ import java.io.OutputStream;
 public class UncloseableOutputStream extends OutputStream {
 
     private final OutputStream os;
+    private int counter;
 
     public UncloseableOutputStream(final OutputStream os) {
         this.os = os;
@@ -33,6 +34,13 @@ public class UncloseableOutputStream extends OutputStream {
 
     @Override
     public void close() throws IOException {
-        //os.close();
+        counter--;
+        if (counter == 0) {
+            os.close();
+        }
+    }
+
+    public void incCounter() {
+        counter++;
     }
 }

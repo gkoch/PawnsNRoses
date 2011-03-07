@@ -138,7 +138,7 @@ public class PgnToFenListGenerator {
         for (final int move: moves) {
             board.move(move);
             final int fullMoves = (board.getState() & Utils.FULL_MOVES) >> Utils.SHIFT_FULL_MOVES;
-            if (fullMoves > skipMoves) {
+            if (fullMoves > skipMoves && !board.isMate()) {
                 final String fen = StringUtils.toFen(board);
                 final String fenRoot = getFenWithoutMoveCounts(fen);
                 final Integer count = fenRoots.get(fenRoot);

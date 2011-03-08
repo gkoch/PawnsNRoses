@@ -452,6 +452,13 @@ public class EngineTest extends TestCase {
         assertEquals("f4", StringUtils.toShort(board, Engine.getMoveFromSearchResult(result)));
     }
 
+    public void testAvoidMate() {
+        final Board board = fromFen("3k1r2/pQ6/3q1p2/8/2Bb4/1P1R4/P6P/7K w - - 0 1");
+        final long result = engine.search(board, 7, 0);
+        final int move = Engine.getMoveFromSearchResult(result);
+        assertTrue(!"b7a7".equals(StringUtils.toSimple(move)));
+    }
+
     public void testConsistency() {
         final Board board = fromFen("6qk/7p/p1pp1Q2/4p3/4P1b1/8/2P3PP/6NK b - - 6 32");
         final long result1 = engine.search(board, 8, 0);

@@ -437,7 +437,11 @@ public final class Engine {
                         alpha = value;
                     }
                 } else if (ttType == TT_TYPE_ALPHA_CUT && value <= alpha) {
-                    return value;
+                    if (value != VAL_MIN) {
+                        return value;
+                    } else {
+                        return alpha;
+                    }
                 }
             }
         }
@@ -736,6 +740,7 @@ public final class Engine {
         if (eval > alpha) {
             alpha = eval;
             if (alpha >= beta && !board.attacksKing(1 - toMove)) {
+                assert alpha > VAL_MIN;
                 return alpha;
             }
         }
@@ -755,16 +760,22 @@ public final class Engine {
             final int value = (int) ((ttValue & TT_VALUE) >> TT_SHIFT_VALUE) + VAL_MIN;
             if (ttType == TT_TYPE_EXACT) {
                 assert ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE) != 0;
+                assert value > VAL_MIN;
                 return value;
             } else {
                 if (ttType == TT_TYPE_BETA_CUT) {
                     if (value >= beta) {
+                        assert value > VAL_MIN;
                         return value;
                     } else if (value > alpha) {
                         alpha = value;
                     }
                 } else if (ttType == TT_TYPE_ALPHA_CUT && value <= alpha) {
-                    return value;
+                    if (value != VAL_MIN) {
+                        return value;
+                    } else {
+                        return alpha;
+                    }
                 }
             }
         }
@@ -818,6 +829,7 @@ public final class Engine {
                     assert board.getBoard()[getFromPosition(move)] != EMPTY;
                     transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN, age);
                     addMoveToHistoryTable(board, move);
+                    assert a > VAL_MIN;
                     return a;
                 }
                 if (a >= b) {
@@ -834,6 +846,7 @@ public final class Engine {
                         assert board.getBoard()[getFromPosition(move)] != EMPTY;
                         transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN, age);
                         addMoveToHistoryTable(board, move);
+                        assert a > VAL_MIN;
                         return a;
                     }
                 }
@@ -869,6 +882,7 @@ public final class Engine {
         } else {
             transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, 0, 0, bestScore - VAL_MIN, age);
         }
+        assert alpha > VAL_MIN;
         return alpha;
     }
 

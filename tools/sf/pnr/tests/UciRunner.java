@@ -100,6 +100,8 @@ public class UciRunner {
                 throw new IllegalStateException(String.format("%s is not a UCI engine", name));
             }
             ensureReady();
+            setOptions(uciOptions);
+            ensureReady();
         }
     }
 

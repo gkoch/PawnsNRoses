@@ -91,8 +91,10 @@ public class UCI implements UciProcess {
                 out.println("uciok");
                 final Configuration config = Configuration.getInstance();
                 for (Configurable.Key key: Configurable.Key.values()) {
-                    out.printf("option name %s type %s default %s\r\n", toUciOption(key),
-                        toUciType(config.getType(key)), config.getString(key));
+                    final String name = toUciOption(key);
+                    final String type = toUciType(config.getType(key));
+                    final String value = config.getString(key);
+                    out.printf("option name %s type %s default %s\r\n", name, type, value);
                 }
             } else if (line.startsWith("debug ")) {
                 uciListener.setDebug("on".equals(line.substring(6).trim()));

@@ -7,12 +7,14 @@ import sf.pnr.io.UncloseableOutputStream;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class TestUtils {
@@ -53,18 +55,35 @@ public class TestUtils {
         final File parent = getRootDir(patternStr);
         final List<File> allFiles = collectAllFiles(parent);
         final List<File> matches = new ArrayList<File>();
-        final Pattern pattern = Pattern.compile(patternStr.replace("\\", "\\\\"));
-        for (File child: allFiles) {
-            if (pattern.matcher(child.getAbsolutePath()).matches()) {
-                matches.add(child);
+        int patternStart = parent.getAbsolutePath().length();
+        if (!parent.getAbsolutePath().endsWith(File.pathSeparator)) {
+            patternStart++;
+        }
+        if (patternStart < patternStr.length()) {
+            final Pattern pattern = Pattern.compile(patternStr.substring(patternStart));
+            for (File child: allFiles) {
+                if (pattern.matcher(child.getAbsolutePath().substring(patternStart)).matches()) {
+                    matches.add(child);
+                }
+            }
+        } else {
+            matches.addAll(allFiles);
+        }
+        Map<String, String> defaults = getDefaultConfigs();
+        final List<UciRunner> engines = new ArrayList<UciRunner>(matches.size());
+        for (final File file: matches) {
+            final String name = getPlayerName(file);
+            if (file.getName().endsWith(".ini")) {
+                try {
+                    engines.add(new UciRunner(name, getConfigs(file, defaults), new PipedUciProcess()));
+                } catch (Throwable e) {
+                    // skip the file
+                }
+            } else {
+                engines.add(new UciRunner(name, new ExternalUciProcess(file.getAbsolutePath())));
             }
         }
-        final UciRunner[] engines = new UciRunner[matches.size()];
-        for (int i = 0; i < matches.size(); i++) {
-            final File file = matches.get(i);
-            engines[i] = new UciRunner(getPlayerName(file), new ExternalUciProcess(file.getAbsolutePath()));
-        }
-        return engines;
+        return engines.toArray(new UciRunner[engines.size()]);
     }
 
     private static File getRootDir(final String patternStr) {
@@ -102,5 +121,30 @@ public class TestUtils {
             name = fileName;
         }
         return name;
+    }
+
+    static Map<String, String> getDefaultConfigs() {
+        final Map<String, String> defaults = new HashMap<String, String>();
+        for (Configurable.Key key: Configurable.Key.values()) {
+            final String value = Configuration.getInstance().getString(key);
+            defaults.put(UCI.toUciOption(key), value);
+        }
+        return defaults;
+    }
+
+    static Map<String, String> getConfigs(final File file, final Map<String, String> defaults) throws IOException {
+        final Properties properties = new Properties();
+        final FileReader reader = new FileReader(file);
+        try {
+            properties.load(reader);
+        } finally {
+            reader.close();
+        }
+        final Map<Configurable.Key, String> configs = Configuration.preprocess(properties);
+        final Map<String, String> uciOptions = new HashMap<String, String>(defaults);
+        for (Map.Entry<Configurable.Key, String> entry: configs.entrySet()) {
+            uciOptions.put(UCI.toUciOption(entry.getKey()), entry.getValue());
+        }
+        return uciOptions;
     }
 }

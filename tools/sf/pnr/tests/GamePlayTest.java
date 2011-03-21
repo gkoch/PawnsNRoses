@@ -1,5 +1,6 @@
 package sf.pnr.tests;
 
+import sf.pnr.base.Configuration;
 import sf.pnr.io.UncloseableOutputStream;
 
 import java.io.File;
@@ -36,6 +37,7 @@ public class GamePlayTest {
             manager.setKibitzer(kibitzer);
             System.out.println("Kibitzer: " + kibitzer.getName());
         }
+        Configuration.getInstance().loadFromSystemProperties();
         manager.play(players);
         if (debugOs != null) {
             debugOs.close();

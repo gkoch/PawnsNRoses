@@ -1094,23 +1094,25 @@ public final class Engine {
         }
         final int[] line = new int[depth];
         final long[] undos = new long[depth];
-        int len = 1;
+        int len = 0;
         for (int i = 0; i < (depth - 1) && move != 0; i++, len++) {
             line[i] = move;
             undos[i] = board.move(move);
-            zobristKey = board.getZobristKey();
-            ttValue = transpositionTable.read(zobristKey);
-            final long ttType = ttValue & TT_TYPE;
-            if (ttType == TT_TYPE_EXACT) {
-                move = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
-            } else {
+            if (board.getRepetitionCount() == 3) {
                 move = 0;
+            } else {
+                zobristKey = board.getZobristKey();
+                ttValue = transpositionTable.read(zobristKey);
+                final long ttType = ttValue & TT_TYPE;
+                if (ttType == TT_TYPE_EXACT) {
+                    move = (int) ((ttValue & TT_MOVE) >> TT_SHIFT_MOVE);
+                } else {
+                    move = 0;
+                }
             }
         }
         if (move != 0) {
-            line[len - 1] = move;
-        } else {
-            len--;
+            line[len++] = move;
         }
         for (int i = len - 1; i >= 0; i--) {
             final long undo = undos[i];

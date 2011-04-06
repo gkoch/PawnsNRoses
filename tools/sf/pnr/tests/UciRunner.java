@@ -249,13 +249,6 @@ public class UciRunner {
             if (line.startsWith("info")) {
                 final String[] parts = line.split(" ");
                 final Map<String, Number> params = parseInfoLine(parts);
-                final Integer newDepth = (Integer) params.get("depth");
-                if (newDepth != null) {
-                    if (depth != newDepth) {
-                        resetFields();
-                    }
-                    depth = newDepth;
-                }
                 final Long newNodeCount = (Long) params.get("nodes");
                 if (newNodeCount != null) {
                     nodeCount = newNodeCount;
@@ -263,6 +256,10 @@ public class UciRunner {
                 final Integer newScore = (Integer) params.get("cp");
                 if (newScore != null) {
                     score = newScore;
+                    final Integer newDepth = (Integer) params.get("depth");
+                    if (newDepth != null) {
+                        depth = newDepth;
+                    }
                 }
             }
         }

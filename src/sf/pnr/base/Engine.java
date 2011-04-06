@@ -29,7 +29,7 @@ public final class Engine {
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_RND_MAX)
     private static int MOVE_ORDER_RND_MAX = 1;
     @Configurable(Configurable.Key.ENGINE_NULL_MOVE_MIN_DEPTH)
-    private static int NULL_MOVE_MIN_DEPTH = 3 * PLY;
+    private static int NULL_MOVE_MIN_DEPTH = 4 * PLY;
     @Configurable(Configurable.Key.ENGINE_NULL_MOVE_DEPTH_CHANGE_THRESHOLD)
     private static int NULL_MOVE_DEPTH_CHANGE_THRESHOLD = 6 * PLY;
     @Configurable(Configurable.Key.ENGINE_NULL_MOVE_DEPTH_HIGH)

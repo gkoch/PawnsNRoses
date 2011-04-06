@@ -11,10 +11,6 @@ import java.util.concurrent.ExecutionException;
 public class GamePlayTest {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         final UciRunner[] players = TestUtils.getEngines();
-        System.out.println("Running tournament with the following engines:");
-        for (UciRunner player: players) {
-            System.out.println("  - " + player.getName());
-        }
         FileOutputStream debugOs = null;
         final String debugFile = System.getProperty("searchTask.debugFile");
         if (debugFile != null) {

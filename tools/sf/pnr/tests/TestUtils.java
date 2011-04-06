@@ -1,7 +1,9 @@
 package sf.pnr.tests;
 
+import sf.pnr.base.Board;
 import sf.pnr.base.Configurable;
 import sf.pnr.base.Configuration;
+import sf.pnr.base.StringUtils;
 import sf.pnr.io.UCI;
 import sf.pnr.io.UncloseableOutputStream;
 
@@ -9,7 +11,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,15 +47,18 @@ public class TestUtils {
                 os.incCounter();
             }
         }
-
+        System.out.println("Engines found: " + Arrays.toString(engines));
         return engines;
     }
 
     public static UciRunner[] getReferenceEngines() throws IOException {
-        return getEngines(System.getProperty("searchTask.referenceEngines"));
+        final UciRunner[] engines = getEngines(System.getProperty("searchTask.referenceEngines"));
+        System.out.println("Reference engines found: " + Arrays.toString(engines));
+        return engines;
     }
 
     public static UciRunner[] getEngines(final String patternStr) throws IOException {
+        System.out.println("Searching for engines with pattern " + patternStr);
         final File parent = getRootDir(patternStr);
         final List<File> allFiles = collectAllFiles(parent);
         final List<File> matches = new ArrayList<File>();
@@ -69,7 +76,7 @@ public class TestUtils {
         } else {
             matches.addAll(allFiles);
         }
-        Map<String, String> defaults = getDefaultConfigs();
+        final Map<String, String> defaults = getDefaultConfigs();
         final List<UciRunner> engines = new ArrayList<UciRunner>(matches.size());
         for (final File file: matches) {
             final String name = getPlayerName(file);
@@ -123,11 +130,25 @@ public class TestUtils {
         return name;
     }
 
-    static Map<String, String> getDefaultConfigs() {
+    static Map<String, String> getDefaultConfigs() throws IOException {
         final Map<String, String> defaults = new HashMap<String, String>();
         for (Configurable.Key key: Configurable.Key.values()) {
             final String value = Configuration.getInstance().getString(key);
             defaults.put(UCI.toUciOption(key), value);
+        }
+        final String defaultConfigFile = System.getProperty("searchTask.defaultConfigs");
+        if (defaultConfigFile != null) {
+            System.out.println("Loading default values from " + defaultConfigFile);
+            final Properties defaultOverwrites = new Properties();
+            final FileReader reader = new FileReader(defaultConfigFile);
+            try {
+                defaultOverwrites.load(reader);
+            } finally {
+                reader.close();
+            }
+            for (String name: defaultOverwrites.stringPropertyNames()) {
+                defaults.put(name, defaultOverwrites.getProperty(name));
+            }
         }
         return defaults;
     }
@@ -146,5 +167,44 @@ public class TestUtils {
             uciOptions.put(UCI.toUciOption(entry.getKey()), entry.getValue());
         }
         return uciOptions;
+    }
+
+    public static void compute(final UciRunner engine, final Board board, final int depth, final int time) {
+        compute(engine, board, depth, time, true);
+    }
+
+    public static void compute(final UciRunner engine, final Board board, final int depth, final int time, final boolean newEngine) {
+        Throwable t = null;
+        try {
+            if (newEngine) {
+                engine.restart();
+            }
+            engine.uciNewGame();
+            engine.position(board);
+            if (time == 0) {
+                engine.go(depth, 0);
+            } else {
+                engine.go(0, time);
+            }
+        } catch (IOException e) {
+            t = e;
+        } finally {
+            if (newEngine) {
+                try {
+                    engine.close();
+                } catch (IOException e) {
+                    if (t != null) {
+                        // do nothing, propagate the outer exception
+                        e.printStackTrace(System.out);
+                    } else {
+                        t = e;
+                    }
+                }
+            }
+        }
+        if (t != null) {
+            throw new UndeclaredThrowableException(t, String.format("Engine '%s' failed on test FEN '%s'",
+                engine.getName(), StringUtils.toFen(board)));
+        }
     }
 }

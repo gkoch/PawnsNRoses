@@ -334,6 +334,10 @@ public class UciRunner {
         return new UciRunner(name, uciOptions, postSearchOptions, process.duplicate());
     }
 
+    public String toString() {
+        return name;
+    }
+
     private static class TimeBomb implements Callable<Boolean> {
         private final UciProcess process;
 

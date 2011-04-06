@@ -3,6 +3,7 @@ package sf.pnr.base;
 import sf.pnr.alg.TranspositionTable;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static sf.pnr.alg.TranspositionTable.*;
 import static sf.pnr.base.Evaluation.*;
@@ -25,6 +26,8 @@ public final class Engine {
     private static int MOVE_ORDER_POSITIONAL_GAIN_SHIFT = 1;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_HISTORY_MAX_BITS)
     private static int MOVE_ORDER_HISTORY_MAX_BITS = 8;
+    @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_RND_MAX)
+    private static int MOVE_ORDER_RND_MAX = 1;
     @Configurable(Configurable.Key.ENGINE_NULL_MOVE_MIN_DEPTH)
     private static int NULL_MOVE_MIN_DEPTH = 3 * PLY;
     @Configurable(Configurable.Key.ENGINE_NULL_MOVE_DEPTH_CHANGE_THRESHOLD)
@@ -56,6 +59,16 @@ public final class Engine {
     private static double ITERATIVE_DEEPENING_TIME_LIMIT = 0.9;
     @Configurable(Configurable.Key.ENGINE_SEARCH_ROOT_MIN_MOVE)
     private static int SEARCH_ROOT_MIN_MOVE = 5;
+
+    private static final Random RND = new Random(System.currentTimeMillis());
+    private final static int[] RND_ARRAY = new int[256];
+    private static int RND_INDEX = 0;
+
+    static {
+        for (int i = 0; i < RND_ARRAY.length; i++) {
+            RND_ARRAY[i] = RND.nextInt(MOVE_ORDER_RND_MAX);
+        }
+    }
 
     private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
     private static final SearchStage[] searchStages = SearchStage.values();
@@ -1026,7 +1039,7 @@ public final class Engine {
                 } else {
                     pawnBonus = 0;
                 }
-                final int moveValue =
+                final int moveValue = RND_ARRAY[(RND_INDEX++) & 0xFF] +
                     ((move & MOVE_VALUE) >> SHIFT_MOVE_VALUE) + historyValue + historyValueGlobal + checkBonus + valPositional + pawnBonus;
                 moves[i] = (move & ~MOVE_VALUE) | (moveValue << SHIFT_MOVE_VALUE);
                 assert (moves[i] & (1 << 31)) == 0: Integer.toHexString(moves[i]); 

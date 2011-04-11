@@ -250,6 +250,9 @@ public class UciRunner {
                 final String[] parts = line.split(" ");
                 final Map<String, Number> params = parseInfoLine(parts);
                 final Long newNodeCount = (Long) params.get("nodes");
+                if (newNodeCount != null && newNodeCount > 10000000000L) {
+                    continue;
+                }
                 if (newNodeCount != null) {
                     nodeCount = newNodeCount;
                 }

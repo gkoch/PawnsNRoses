@@ -333,6 +333,7 @@ public class StringUtils {
         }
         return builder.toString();
     }
+
     public static int fromLong(final Board board, final String moveStr) {
         final char fromFile = moveStr.charAt(0);
         final char fromRank = moveStr.charAt(1);
@@ -342,7 +343,7 @@ public class StringUtils {
         final int toPos = getPosition(toFile - 'a', toRank - '1');
         int move = (toPos << SHIFT_TO) + fromPos;
         if (moveStr.length() > 4) {
-            final String suffix = moveStr.substring(4).trim();
+            final String suffix = moveStr.substring(4).trim().toLowerCase();
             if ("n".equals(suffix)) {
                 move |= MT_PROMOTION_KNIGHT;
             } else if ("b".equals(suffix)) {

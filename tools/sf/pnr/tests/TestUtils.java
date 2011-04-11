@@ -8,6 +8,7 @@ import sf.pnr.io.UCI;
 import sf.pnr.io.UncloseableOutputStream;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -52,7 +53,13 @@ public class TestUtils {
     }
 
     public static UciRunner[] getReferenceEngines() throws IOException {
-        final UciRunner[] engines = getEngines(System.getProperty("searchTask.referenceEngines"));
+        final String refEnginePattern = System.getProperty("searchTask.referenceEngines");
+        final UciRunner[] engines;
+        if (refEnginePattern == null) {
+            engines = new UciRunner[0];
+        } else {
+            engines = getEngines(refEnginePattern);
+        }
         System.out.println("Reference engines found: " + Arrays.toString(engines));
         return engines;
     }
@@ -76,18 +83,23 @@ public class TestUtils {
         } else {
             matches.addAll(allFiles);
         }
-        final Map<String, String> defaults = getDefaultConfigs();
+        Map<String, String> defaults = null;
         final List<UciRunner> engines = new ArrayList<UciRunner>(matches.size());
         for (final File file: matches) {
             final String name = getPlayerName(file);
             if (file.getName().endsWith(".ini")) {
                 try {
+                    if (defaults == null) {
+                        defaults = getDefaultConfigs();
+                    }
                     engines.add(new UciRunner(name, getConfigs(file, defaults), new PipedUciProcess()));
                 } catch (Throwable e) {
                     // skip the file
                 }
             } else {
-                engines.add(new UciRunner(name, new ExternalUciProcess(file.getAbsolutePath())));
+                final File configFile = new File(file.getParentFile(), file.getName() + ".ini");
+                final Map<String, String> configs = getUnprocessedConfigs(configFile);
+                engines.add(new UciRunner(name, configs, new ExternalUciProcess(file.getAbsolutePath())));
             }
         }
         return engines.toArray(new UciRunner[engines.size()]);
@@ -130,7 +142,7 @@ public class TestUtils {
         return name;
     }
 
-    static Map<String, String> getDefaultConfigs() throws IOException {
+    public static Map<String, String> getDefaultConfigs() throws IOException {
         final Map<String, String> defaults = new HashMap<String, String>();
         for (Configurable.Key key: Configurable.Key.values()) {
             final String value = Configuration.getInstance().getString(key);
@@ -153,7 +165,7 @@ public class TestUtils {
         return defaults;
     }
 
-    static Map<String, String> getConfigs(final File file, final Map<String, String> defaults) throws IOException {
+    public static Map<String, String> getConfigs(final File file, final Map<String, String> defaults) throws IOException {
         final Properties properties = new Properties();
         final FileReader reader = new FileReader(file);
         try {
@@ -167,6 +179,18 @@ public class TestUtils {
             uciOptions.put(UCI.toUciOption(entry.getKey()), entry.getValue());
         }
         return uciOptions;
+    }
+
+    private static Map<String, String> getUnprocessedConfigs(final File file) throws IOException {
+        final Map<String, String> configs = new HashMap<String, String>();
+        if (file.exists()) {
+            final Properties properties = new Properties();
+            properties.load(new FileReader(file));
+            for (String key: properties.stringPropertyNames()) {
+                configs.put(key, properties.getProperty(key));
+            }
+        }
+        return configs;
     }
 
     public static void compute(final UciRunner engine, final Board board, final int depth, final int time) {

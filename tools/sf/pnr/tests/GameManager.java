@@ -51,21 +51,37 @@ public class GameManager {
         this.kibitzer = kibitzer;
     }
 
-    public TournamentResult play(final UciRunner... players) {
-
+    public TournamentResult play(final UciRunner[] refEngines, final UciRunner[] engines) {
+        final UciRunner[] allEngines;
+        final int refEnginesLen;
+        if (refEngines == null) {
+            allEngines = engines;
+            refEnginesLen = 0;
+        } else {
+            refEnginesLen = refEngines.length;
+            allEngines = new UciRunner[refEnginesLen + engines.length];
+            System.arraycopy(refEngines, 0, allEngines, 0, refEnginesLen);
+            System.arraycopy(engines, 0, allEngines, refEnginesLen, engines.length);
+        }
         final TournamentResult tournamentResult = new TournamentResult();
         int index = 1;
         for (int i = 0; i < rounds; i++) {
-            for (int diff = 1; diff < players.length; diff++) {
-                for (int first = 0; first < players.length - diff; first++) {
+            for (int diff = 1; diff < allEngines.length; diff++) {
+                for (int first = 0; first < allEngines.length - diff; first++) {
                     final int second = first + diff;
-                    play(i, index++, tournamentResult, players[first], players[second]);
+                    if (first < refEnginesLen && second < refEnginesLen) {
+                        continue;
+                    }
+                    play(i, index++, tournamentResult, allEngines[first], allEngines[second]);
                 }
             }
-            for (int diff = 1; diff < players.length; diff++) {
-                for (int first = 0; first < players.length - diff; first++) {
+            for (int diff = 1; diff < allEngines.length; diff++) {
+                for (int first = 0; first < allEngines.length - diff; first++) {
                     final int second = first + diff;
-                    play(i, index++, tournamentResult, players[second], players[first]);
+                    if (first < refEnginesLen && second < refEnginesLen) {
+                        continue;
+                    }
+                    play(i, index++, tournamentResult, allEngines[second], allEngines[first]);
                 }
             }
         }
@@ -119,10 +135,6 @@ public class GameManager {
                 player.go(timeWhite, timeBlack, increments, increments, timeCurrent + increments);
                 final long moveTime = player.getMoveTime();
                 times[currentPlayer] += increments - moveTime;
-                if (times[currentPlayer] < 0) {
-                    result = GameResult.TIME_OUT;
-                    break;
-                }
                 final String bestMove = player.getBestMove();
                 final int move = StringUtils.fromLong(board, bestMove);
                 if (move == 0) {
@@ -201,6 +213,10 @@ public class GameManager {
 
                 board.move(move);
                 moves.add(move);
+                if (times[currentPlayer] < 0) {
+                    result = GameResult.TIME_OUT;
+                    break;
+                }
                 if (board.isMate()) {
                     result = GameResult.MATE;
                     break;

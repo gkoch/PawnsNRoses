@@ -10,13 +10,14 @@ import java.util.concurrent.ExecutionException;
 
 public class GamePlayTest {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
-        final UciRunner[] players = TestUtils.getEngines();
+        final UciRunner[] engines = TestUtils.getEngines();
+        final UciRunner[] referenceEngines = TestUtils.getReferenceEngines();
         FileOutputStream debugOs = null;
         final String debugFile = System.getProperty("searchTask.debugFile");
         if (debugFile != null) {
             debugOs = new FileOutputStream(debugFile);
             final UncloseableOutputStream os = new UncloseableOutputStream(debugOs);
-            for (UciRunner player: players) {
+            for (UciRunner player: engines) {
                 player.setDebugOutputStream(os, player.getName() + " ");
             }
         }
@@ -34,11 +35,11 @@ public class GamePlayTest {
             System.out.println("Kibitzer: " + kibitzer.getName());
         }
         Configuration.getInstance().loadFromSystemProperties();
-        manager.play(players);
+        manager.play(referenceEngines, engines);
         if (debugOs != null) {
             debugOs.close();
         }
-        for (UciRunner player: players) {
+        for (UciRunner player: engines) {
             player.close();
         }
     }

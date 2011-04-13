@@ -42,6 +42,8 @@ public class GamePlayTest {
         for (UciRunner player: engines) {
             player.close();
         }
+        for (UciRunner player: referenceEngines) {
+            player.close();
+        }
     }
-
 }

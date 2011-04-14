@@ -492,6 +492,11 @@ public class Utils {
                 }
             }
         }
+        final long undo = board.move(move);
+        if (board.attacksKing(1 - toMove)) {
+            problems.add("King remained in check");
+        }
+        board.takeBack(undo);
         return problems;
     }
 }

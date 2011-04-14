@@ -3,6 +3,8 @@ package sf.pnr.base;
 import junit.framework.TestCase;
 import sf.pnr.alg.TranspositionTable;
 
+import java.util.Set;
+
 import static sf.pnr.base.Engine.*;
 import static sf.pnr.base.Evaluation.*;
 import static sf.pnr.base.StringUtils.*;
@@ -580,5 +582,11 @@ public class EngineTest extends TestCase {
             "33. Re4 Rb4 34. Re5 Rb5 35. Re4 Rb4 36. Re5 Rb5"); // 37. Re4 Rb4
         final long result = engine.search(board, 6, 0);
         assertTrue(!"Re5".equals(StringUtils.toShort(board, Engine.getMoveFromSearchResult(result))));
+    }
+
+    public void testNotStayingInCheck() {
+        final Board board = StringUtils.fromFen("8/2b5/5p2/1k6/8/p4K2/8/7q w - - 0 73");
+        final long result = engine.search(board, 7, 0);
+        assertFalse(StringUtils.toSimple(Engine.getMoveFromSearchResult(result)).equals("f3g2"));
     }
 }

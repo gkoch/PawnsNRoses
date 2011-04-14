@@ -1,6 +1,9 @@
 package sf.pnr.base;
 
 import junit.framework.TestCase;
+
+import java.util.Set;
+
 import static sf.pnr.base.Utils.*;
 import static sf.pnr.base.StringUtils.*;
 
@@ -74,5 +77,11 @@ public class UtilsTest extends TestCase {
         assertEquals(2, (ATTACK_ARRAY[H[7] - E[0] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
         assertEquals(2, (ATTACK_ARRAY[E[0] - H[7] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
         assertEquals(2, (ATTACK_ARRAY[E[0] - B[7] + 120] & ATTACK_DISTANCE_BISHOP) >> SHIFT_ATTACK_DISTANCE_BISHOP);
+    }
+
+    public void testCheckMove() {
+        final Board board = StringUtils.fromFen("8/2b5/5p2/1k6/8/p4K2/8/7q w - - 0 73");
+        final Set<String> problems = Utils.checkMove(board, StringUtils.fromSimple("f3g2"));
+        assertFalse(problems.isEmpty());
     }
 }

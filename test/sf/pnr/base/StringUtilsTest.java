@@ -75,6 +75,13 @@ public class StringUtilsTest extends TestCase {
         assertEquals(move, fromShort(board, toShort(board, move)));
     }
 
+    public void testShortPromotionCheck() {
+        final Board board = fromFen("8/2b5/5p2/1k6/8/p4K2/7p/8 b - - 1 72");
+        final int move = fromSimple("h2h1") | MT_PROMOTION_QUEEN;
+        assertEquals("h1=Q+", toShort(board, move));
+        assertEquals(move, fromShort(board, toShort(board, move)));
+    }
+
     public void testShortPawnOpening() {
         final Board board = new Board();
         board.restart();

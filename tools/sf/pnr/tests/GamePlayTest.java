@@ -25,8 +25,17 @@ public class GamePlayTest {
         final int increment = Integer.parseInt(System.getProperty("searchTask.incrementTime", "6000"));
         final int rounds = Integer.parseInt(System.getProperty("searchTask.rounds", "20"));
         final boolean restartBeforeMoves = Boolean.parseBoolean(System.getProperty("searchTask.restartBeforeMoves", "false"));
-        final GameManager manager =
-            new GameManager(TestUtils.getEngineDir().getName(), initialTime, increment, rounds, restartBeforeMoves);
+
+        final String event;
+        final File engineDir = TestUtils.getEngineDir();
+        if (engineDir == null) {
+            event = "ADHOC";
+        } else {
+            event = engineDir.getName();
+        }
+
+        final GameManager manager = new GameManager(event, initialTime, increment, rounds, restartBeforeMoves);
+
         final String kibitzerPath = System.getProperty("searchTask.kibitzer");
         if (kibitzerPath != null) {
             final UciRunner kibitzer =

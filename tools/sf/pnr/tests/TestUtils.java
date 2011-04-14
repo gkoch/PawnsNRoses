@@ -34,6 +34,7 @@ public class TestUtils {
             final Map<String, String> options = new HashMap<String, String>();
             options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE), "128");
             options.put(UCI.toUciOption(Configurable.Key.EVAL_TABLE_SIZE), "8");
+            options.putAll(getDefaultConfigs());
             final Map<Configurable.Key, String> systemProps = Configuration.preprocess(System.getProperties(), true);
             for (Map.Entry<Configurable.Key, String> entry: systemProps.entrySet()) {
                 options.put(UCI.toUciOption(entry.getKey()), entry.getValue());
@@ -54,18 +55,16 @@ public class TestUtils {
 
     public static UciRunner[] getReferenceEngines() throws IOException {
         final String refEnginePattern = System.getProperty("searchTask.referenceEngines");
-        final UciRunner[] engines;
-        if (refEnginePattern == null) {
-            engines = new UciRunner[0];
-        } else {
-            engines = getEngines(refEnginePattern);
-        }
+        final UciRunner[] engines = getEngines(refEnginePattern);
         System.out.println("Reference engines found: " + Arrays.toString(engines));
         return engines;
     }
 
     public static UciRunner[] getEngines(final String patternStr) throws IOException {
         System.out.println("Searching for engines with pattern " + patternStr);
+        if (patternStr == null || patternStr.trim().length() == 0) {
+            return new UciRunner[0];
+        }
         final File parent = getRootDir(patternStr);
         final List<File> allFiles = collectAllFiles(parent);
         final List<File> matches = new ArrayList<File>();
@@ -127,7 +126,12 @@ public class TestUtils {
     }
 
     public static File getEngineDir() {
-        return getRootDir(System.getProperty("searchTask.engines"));
+        final String pattern = System.getProperty("searchTask.engines");
+        if (pattern == null || pattern.length() == 0) {
+            return null;
+        } else {
+            return getRootDir(pattern);
+        }
     }
 
     public static String getPlayerName(final File executable) {

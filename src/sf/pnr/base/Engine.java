@@ -250,7 +250,7 @@ public final class Engine {
                 // register that we had a legal move
                 legalMoveCount++;
 
-                if (board.getRepetitionCount() == 0) {
+                if (board.getRepetitionCount() == 3) {
                     if (alpha < VAL_DRAW) {
                         alpha = VAL_DRAW;
                         bestMoveType = TT_TYPE_EXACT;
@@ -259,6 +259,7 @@ public final class Engine {
                         bestScore = VAL_DRAW;
                         bestMove = move;
                     }
+                    board.takeBack(undo);
                     continue;
                 }
 
@@ -549,7 +550,7 @@ public final class Engine {
                 // register that we had a legal move
                 legalMoveCount++;
 
-                if (board.getRepetitionCount() == 0) {
+                if (board.getRepetitionCount() == 3) {
                     if (alpha < VAL_DRAW) {
                         alpha = VAL_DRAW;
                         bestMoveType = TT_TYPE_EXACT;
@@ -558,6 +559,7 @@ public final class Engine {
                         bestScore = VAL_DRAW;
                         bestMove = move;
                     }
+                    board.takeBack(undo);
                     continue;
                 }
 

@@ -239,7 +239,7 @@ public class GameManager {
                     result = GameResult.INSUFFICIENT_MATERIAL;
                     break;
                 }
-                if (fiftyMovesCounter >= 99) {
+                if (fiftyMovesCounter >= 100) {
                     result = GameResult.FIFTY_MOVES;
                     break;
                 }

@@ -235,7 +235,7 @@ public final class Evaluation {
     public int evaluate(final Board board) {
         final int state = board.getState();
         final int halfMoves = (state & HALF_MOVES) >> SHIFT_HALF_MOVES;
-        if (halfMoves >= 50) {
+        if (halfMoves >= 100) {
             return VAL_DRAW;
         }
         final int toMove = state & WHITE_TO_MOVE;

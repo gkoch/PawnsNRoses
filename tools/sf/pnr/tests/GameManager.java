@@ -136,7 +136,20 @@ public class GameManager {
                 final long moveTime = player.getMoveTime();
                 times[currentPlayer] += increments - moveTime;
                 final String bestMove = player.getBestMove();
-                final int move = StringUtils.fromLong(board, bestMove);
+                int move = StringUtils.fromLong(board, bestMove);
+                final int fromPos = Utils.getFromPosition(move);
+                final int toPos = getToPosition(move);
+                final int absPiece = Math.abs(board.getBoard()[fromPos]);
+                if (absPiece == PAWN) {
+                    final int toRank = Utils.getRank(toPos);
+                    if (toRank == 0 || toRank == 7) {
+                        if ((move & MT_PROMOTION) == 0) {
+                            // some engines leaves the promotion part out, so assume promotion to queen
+                            System.out.println("Adding promotion bit");
+                            move |= MT_PROMOTION_QUEEN;
+                        }
+                    }
+                }
                 if (move == 0) {
                     throw new IllegalMoveException(String.format("Zero move at FEN '%s'. Best line: %s",
                         StringUtils.toFen(board), player.getBestMoveLine()));
@@ -197,10 +210,7 @@ public class GameManager {
                     System.out.println();
                 }
 
-                final int fromPos = getFromPosition(move);
-                final int absPiece = Math.abs(board.getBoard()[fromPos]);
                 if (absPiece != PAWN) {
-                    final int toPos = getToPosition(move);
                     final int captured = board.getBoard()[toPos];
                     if (captured == EMPTY) {
                         fiftyMovesCounter++;

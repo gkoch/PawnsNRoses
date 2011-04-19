@@ -82,9 +82,9 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_UNSTOPPABLE_PAWN)
     public static int BONUS_UNSTOPPABLE_PAWN = VAL_QUEEN - VAL_PAWN - 125;
     @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_MISSED)
-    public static int PENALTY_CASTLING_MISSED = -15;
+    public static int PENALTY_CASTLING_MISSED = -25;
     @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_PENDING)
-    public static int PENALTY_CASTLING_PENDING = -16;
+    public static int PENALTY_CASTLING_PENDING = -15;
 
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMEFILE)
     public static int BONUS_ROOKS_ON_SAME_FILE = 12;

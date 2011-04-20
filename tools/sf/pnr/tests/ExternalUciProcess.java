@@ -68,4 +68,8 @@ public class ExternalUciProcess implements UciProcess {
     public UciProcess duplicate() {
         return new ExternalUciProcess(command, workDir);
     }
+
+    public void finalize() {
+        destroy();
+    }
 }

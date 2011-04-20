@@ -254,6 +254,9 @@ public class GameManager {
             result = GameResult.ILLEGAL_MOVE;
             System.out.println(e.getMessage());
             ex=e;
+        } finally {
+            closeEngine(white);
+            closeEngine(black);
         }
 
         final int[] movesArr = new int[moves.size()];
@@ -269,6 +272,15 @@ public class GameManager {
         System.out.println(details.toPgn());
         System.out.printf("[%1$tY%1tm%1$td %1$tH:%1$tM:%1$tS.%1$tL]\r\n%2$s\r\n",
             System.currentTimeMillis(), tournamentResult.toString());
+    }
+
+    private static void closeEngine(final UciRunner engine) {
+        try {
+            engine.close();
+        } catch (IOException e) {
+            System.out.println("Failed to close engine: " + engine.getName());
+            e.printStackTrace();
+        }
     }
 
     private static enum GameResult {

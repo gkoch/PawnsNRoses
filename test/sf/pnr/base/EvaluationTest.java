@@ -80,13 +80,17 @@ public class EvaluationTest extends TestCase {
     public void testPositionalValuePawn() {
         final Board board = new Board();
         board.restart();
-        assertEquals(0, eval.computePositionalBonusNoPawnAsWhite(board));
-        assertEquals(40, Evaluation.computePositionalGain(PAWN, WHITE_TO_MOVE, E[1], E[3], board.getStage()));
+        assertEquals(0, computePositionalBonusNoPawnAsWhite(board));
+        final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
+        final int shiftBlack = SHIFT_POSITION_BONUS[BLACK];
+        assertEquals(VAL_POSITION_BONUS_PAWN[E[3] + shiftWhite] - VAL_POSITION_BONUS_PAWN[E[1] + shiftBlack],
+            computePositionalGain(PAWN, E[1], E[3], board.getStage(), shiftWhite));
         board.move(StringUtils.fromSimple("e2e4"));
-        assertEquals(0, eval.computePositionalBonusNoPawnAsWhite(board));
-        assertEquals(40, Evaluation.computePositionalGain(PAWN, BLACK_TO_MOVE, E[6], E[4], board.getStage()));
+        assertEquals(0, computePositionalBonusNoPawnAsWhite(board));
+        assertEquals(-(VAL_POSITION_BONUS_PAWN[E[6] + shiftBlack] - VAL_POSITION_BONUS_PAWN[E[4] + shiftBlack]),
+            computePositionalGain(PAWN, E[6], E[4], board.getStage(), shiftBlack));
         board.move(StringUtils.fromSimple("e7e5"));
-        assertEquals(0, eval.computePositionalBonusNoPawnAsWhite(board));
+        assertEquals(0, computePositionalBonusNoPawnAsWhite(board));
     }
 
     public void testIsolatedPawnOnFileA() {

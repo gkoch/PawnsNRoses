@@ -317,9 +317,8 @@ public final class Evaluation {
             computeRookBonus(board, WHITE) - computeRookBonus(board, BLACK);
     }
 
-    public static int computePositionalGain(final int absPiece, final int toMove, final int fromPos, final int toPos,
-                                            final int stage) {
-        final int shift = SHIFT_POSITION_BONUS[toMove];
+    public static int computePositionalGain(final int absPiece, final int fromPos, final int toPos,
+                                            final int stage, final int shift) {
         final int[] typeBonusOpening = VAL_POSITION_BONUS_OPENING[absPiece];
         final int[] typeBonusEndGame = VAL_POSITION_BONUS_ENDGAME[absPiece];
         return ((typeBonusOpening[toPos + shift] - typeBonusOpening[fromPos + shift]) * (STAGE_MAX - stage) +

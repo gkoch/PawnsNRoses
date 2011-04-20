@@ -1012,9 +1012,11 @@ public final class Engine {
 
     private void addMoveValuesAndRemoveTTMove(final int[] moves, final Board board, final int ttMove, final int[] killers) {
         final int toMove = board.getState() & WHITE_TO_MOVE;
+        final int shiftPositionBonus = SHIFT_POSITION_BONUS[toMove];
         final int kingPos = board.getKing(1 - toMove);
         final int signum = (toMove << 1) - 1;
         final int stage = board.getStage();
+        final int[] squares = board.getBoard();
         for (int i = moves[0]; i > 0; i--) {
             final int move = moves[i];
             if ((move & BASE_INFO) != ttMove && !isKiller(killers, move)) {
@@ -1022,11 +1024,12 @@ public final class Engine {
                 final int toPos = getToPosition(move);
                 final int fromPos64 = convert0x88To64(fromPos);
                 final int toPos64 = convert0x88To64(toPos);
-                final int piece = board.getBoard()[fromPos];
+                final int piece = squares[fromPos];
                 final int historyValue = history[piece + 7][fromPos64][toPos64] >>> historyShift;
                 final int historyValueGlobal = history[7][fromPos64][toPos64] >>> historyShiftGlobal;
                 final int absPiece = piece * signum;
-                final int positionalGain = Evaluation.computePositionalGain(absPiece, toMove, fromPos, toPos, stage);
+                final int positionalGain =
+                    Evaluation.computePositionalGain(absPiece, fromPos, toPos, stage, shiftPositionBonus);
                 final int valPositional = ((positionalGain + 100) >> MOVE_ORDER_POSITIONAL_GAIN_SHIFT);
                 final int checkBonus;
                 if (SLIDING[absPiece] && (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_BITS[absPiece]) > 0) {

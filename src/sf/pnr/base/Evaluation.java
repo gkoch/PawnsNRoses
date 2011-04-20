@@ -357,8 +357,8 @@ public final class Evaluation {
         } else if (castlingBlack == 0 && (state2 & CASTLED_BLACK) == 0) {
             castlingPenalty -= PENALTY_CASTLING_MISSED;
         }
-        return score + signum * distance[0] * board.getStage() / STAGE_MAX +
-            castlingPenalty * (STAGE_MAX - board.getStage()) / STAGE_MAX;
+        final int stage = board.getStage();
+        return score + (signum * distance[0] * stage + castlingPenalty * (STAGE_MAX - stage)) / STAGE_MAX;
     }
 
     private static int computeMobilityBonusPawn(final Board board, final int side) {

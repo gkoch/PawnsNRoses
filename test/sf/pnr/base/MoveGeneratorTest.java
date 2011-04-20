@@ -183,17 +183,6 @@ public class MoveGeneratorTest extends TestCase {
         assertEquals(0, moves[0]);
     }
 
-    public void testKingMoveIntoCheck() {
-        final Board board = fromFen("8/7p/p5p1/4k3/P1pPn3/8/P5PP/2b3K1 w - - 0 30");
-        final int state = board.getState();
-        final int toMove = state & WHITE_TO_MOVE;
-        final int kingPos = board.getKing(toMove);
-        final MoveGenerator.Frame frame = new MoveGenerator.Frame();
-        new MoveGenerator().generatePseudoLegalMovesNonSliding(board, DELTA_KING, kingPos, frame);
-        final int[] moves = frame.getMoves();
-        assertTrue(containsMove(moves, fromSimple("g1f2")));
-    }
-
     public void testStaticExchangeEvaluation() {
         final Board board = fromFen("r3r1k1/6p1/1pqp2Np/2p1nP1P/N1PbPQ2/1P3PR1/P2K4/7R w - - 0 1");
         final int value = new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("f4"), fromString0x88("e5"));

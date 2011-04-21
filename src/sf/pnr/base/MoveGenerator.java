@@ -17,11 +17,15 @@ public final class MoveGenerator {
     private final int[] seeDefenders;
     private final int[] seeList;
     private final int[] seeAttackers;
+    private final int[] valDefenders;
+    private final int[] valAttackers;
 
     public MoveGenerator() {
         seeDefenders = new int[32];
         seeList = new int[32];
         seeAttackers = new int[32];
+        valDefenders = new int[32];
+        valAttackers = new int[32];
     }
 
     public void generatePseudoLegalMoves(final Board board) {
@@ -351,22 +355,19 @@ public final class MoveGenerator {
         final int count = seeAttackers[0];
         if (seeAttackers[count] != fromPos) {
             int tmp = seeAttackers[count];
-            for (int i = count - 1; i > 0 && tmp != fromPos; i--) {
-                final int tmp2 = seeAttackers[i];
-                seeAttackers[i] = tmp;
-                tmp = tmp2;
+            int i = count - 1;
+            for (; i > 0 && seeAttackers[i] != fromPos; i--) {
             }
+            seeAttackers[i] = tmp;
         }
         seeAttackers[0] = count - 1;
 
         // populate value arrays
-        final int[] valDefenders = new int[32];
         for (int i = seeDefenders[0]; i > 0; i--) {
             assert squares[seeDefenders[i]] != EMPTY;
             valDefenders[i] = VAL_PIECES[signumOpponent * squares[seeDefenders[i]]];
         }
         valDefenders[0] = seeDefenders[0];
-        final int[] valAttackers = new int[32];
         for (int i = seeAttackers[0]; i > 0; i--) {
             assert squares[seeAttackers[i]] != EMPTY;
             valAttackers[i] = VAL_PIECES[signum * squares[seeAttackers[i]]];

@@ -225,6 +225,12 @@ public class MoveGeneratorTest extends TestCase {
             new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("a5"), fromString0x88("c3")));
     }
 
+    public void testStaticExchangeEvaluationUncoveredBishops() {
+        final Board board = fromFen("r2b2k1/pp1nppp1/3r1n1p/q2pPBP1/2p3NB/2Q5/PP3P1P/R1R3K1 w - - 0 14");
+        assertEquals(VAL_KNIGHT - VAL_PAWN,
+            new MoveGenerator().staticExchangeEvaluation(board, fromString0x88("g5"), fromString0x88("f6")));
+    }
+
     public static boolean containsMoves(final int[] moves, final int... containedMoves) {
         for (int move: containedMoves) {
             if (containsMove(moves, move)) {

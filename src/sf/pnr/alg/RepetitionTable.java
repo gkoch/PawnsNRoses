@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 /**
  */
-public class RepetitionTable {
+public final class RepetitionTable {
     private static final int ARRAY_SIZE_SHIFT = 16;
     private static final int ARRAY_SIZE = 1 << ARRAY_SIZE_SHIFT;
     private static final int ARRAY_LENGHT = ARRAY_SIZE >> 3;
@@ -104,5 +104,15 @@ public class RepetitionTable {
 
     public void clear() {
         Arrays.fill(array, 0);
+    }
+
+    public int scan() {
+        int emptySlots = 0;
+        for (long entry: array) {
+            if (entry == 0) {
+                emptySlots++;
+            }
+        }
+        return emptySlots;
     }
 }

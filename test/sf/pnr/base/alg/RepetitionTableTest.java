@@ -39,4 +39,32 @@ public class RepetitionTableTest extends TestCase {
             "89. Kb1 Bd5 90. Be3 Be4 91. Kb2 Kh7 92. Bd4 Kg6 93. Be3");
         assertEquals(3, board.getRepetitionCount());
     }
+
+    public void testRepetitionCount() {
+        final Board board = new Board();
+        board.restart();
+        assertEquals(1, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("b1c3"));
+        assertEquals(1, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("b8c6"));
+        assertEquals(1, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("c3b1"));
+        assertEquals(1, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("c6b8"));
+        assertEquals(2, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("b1c3"));
+        assertEquals(2, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("b8c6"));
+        assertEquals(2, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("c3b1"));
+        assertEquals(2, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("c6b8"));
+        assertEquals(3, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("b1c3"));
+        assertEquals(3, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("b8c6"));
+        assertEquals(3, board.getRepetitionCount());
+        board.move(StringUtils.fromSimple("c3b1"));
+        assertEquals(3, board.getRepetitionCount());
+    }
 }

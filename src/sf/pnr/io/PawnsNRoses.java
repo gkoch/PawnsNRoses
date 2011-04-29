@@ -137,10 +137,11 @@ public class PawnsNRoses {
     public String scanHashTables() {
         final StringBuilder stats = new StringBuilder();
         if (engine != null) {
-            stats.append("Number of free entries in transposition table: ").append(engine.getTranspositionTable().scan());
+            stats.append("Number of free entries in transpTable: ").append(engine.getTranspositionTable().scan());
             final Evaluation evaluation = engine.getEvaluation();
-            stats.append(" in evaluation hash table: ").append(evaluation.getEvalHashTable().scan());
-            stats.append(" in pawn hash table: ").append(evaluation.getPawnHashTable().scan());
+            stats.append(" in evalHashTable: ").append(evaluation.getEvalHashTable().scan());
+            stats.append(" in pawnHashTable: ").append(evaluation.getPawnHashTable().scan());
+            stats.append(" in repetitionTable: ").append(board.getRepetitionTable().scan());
         }
         return stats.toString();
     }

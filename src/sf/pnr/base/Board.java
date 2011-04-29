@@ -715,4 +715,8 @@ public final class Board {
         }
         return found;
     }
+
+    public RepetitionTable getRepetitionTable() {
+        return repetitionTable;
+    }
 }

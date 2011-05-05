@@ -1,6 +1,7 @@
 package sf.pnr.base.alg;
 
 import junit.framework.TestCase;
+import sf.pnr.alg.RepetitionTable;
 import sf.pnr.base.Board;
 import sf.pnr.base.StringUtils;
 
@@ -66,5 +67,21 @@ public class RepetitionTableTest extends TestCase {
         assertEquals(3, board.getRepetitionCount());
         board.move(StringUtils.fromSimple("c3b1"));
         assertEquals(3, board.getRepetitionCount());
+    }
+
+    public void testOverlaps() {
+        final RepetitionTable table = new RepetitionTable();
+        table.clear();
+        table.increment(0x01ABCDEFL);
+        assertEquals(1, table.get(0x01ABCDEFL));
+        table.increment(0x02ABCDEFL);
+        assertEquals(1, table.get(0x01ABCDEFL));
+        assertEquals(1, table.get(0x02ABCDEFL));
+        table.decrement(0x01ABCDEFL);
+        assertEquals(0, table.get(0x01ABCDEFL));
+        assertEquals(1, table.get(0x02ABCDEFL));
+        table.decrement(0x02ABCDEFL);
+        assertEquals(0, table.get(0x01ABCDEFL));
+        assertEquals(0, table.get(0x02ABCDEFL));
     }
 }

@@ -5,30 +5,22 @@ import java.util.Arrays;
 /**
  */
 public final class RepetitionTable {
-    private static final int ARRAY_SIZE_SHIFT = 16;
-    private static final int ARRAY_SIZE = 1 << ARRAY_SIZE_SHIFT;
-    private static final int ARRAY_LENGHT = ARRAY_SIZE >> 3;
-    private static final int SHIFT_ENTRIES_PER_HASH = 4;
-    private static final int ARRAY_MASK = (ARRAY_LENGHT >> SHIFT_ENTRIES_PER_HASH) - 1;
-    private static final int COUNT_MASK = 0x0C;
-    private static final int SHIFT_COUNT = 2;
-    private static final int COUNT_INC = 1 << SHIFT_COUNT;
+    private static final int ARRAY_LENGHT_BITS = 16 - 3;
+    private static final int USABLE_ARRAY_LENGHT = 1 << ARRAY_LENGHT_BITS;
+    private static final long ARRAY_MASK = USABLE_ARRAY_LENGHT - 1;
+    private static final int ARRAY_LENGHT = USABLE_ARRAY_LENGHT + 128;
+    private static final int SHIFT_COUNT = ARRAY_LENGHT_BITS - 2;
+    private static final long COUNT_MASK = 0x03L << SHIFT_COUNT;
     private static final long ZOBRIST_MASK = ~COUNT_MASK;
+    private static final long ZOBRIST_MASK_IN_HASH = ARRAY_MASK & ~COUNT_MASK;
+    private static final long COUNT_INC = 1L << SHIFT_COUNT;
 
     private final long[] array = new long[ARRAY_LENGHT];
 
     public int get(final long zobrist) {
-        final int hashed = hash(zobrist);
-        final int startIndex = hashed << SHIFT_ENTRIES_PER_HASH;
+        final int startIndex = hash(zobrist);
         final long maskedZobrist = zobrist & ZOBRIST_MASK;
         for (int i = startIndex; i < ARRAY_LENGHT; i++) {
-            if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
-                return (int) ((array[i] & COUNT_MASK) >> SHIFT_COUNT);
-            } else if (array[i] == 0) {
-                return 0;
-            }
-        }
-        for (int i = 0; i < startIndex; i++) {
             if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
                 return (int) ((array[i] & COUNT_MASK) >> SHIFT_COUNT);
             } else if (array[i] == 0) {
@@ -39,56 +31,38 @@ public final class RepetitionTable {
     }
 
     public void increment(final long zobrist) {
-        final int hashed = hash(zobrist);
-        final int startIndex = hashed << SHIFT_ENTRIES_PER_HASH;
+        final int startIndex = hash(zobrist);
         final long maskedZobrist = zobrist & ZOBRIST_MASK;
         for (int i = startIndex; i < ARRAY_LENGHT; i++) {
             if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
-                array[i] = maskedZobrist | ((array[i] & COUNT_MASK) + COUNT_INC);
+                array[i] += COUNT_INC;
                 return;
             } else if (array[i] == 0) {
                 array[i] = maskedZobrist | COUNT_INC;
                 return;
             }
         }
-        for (int i = 0; i < startIndex; i++) {
-            if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
-                array[i] += COUNT_INC;
-                return;
-            } else if (array[i] == 0) {
-                array[i] = maskedZobrist;
-                return;
-            }
-        }
     }
 
     public void decrement(final long zobrist) {
-        final int hashed = hash(zobrist);
-        final int startIndex = hashed << SHIFT_ENTRIES_PER_HASH;
+        final int startIndex = hash(zobrist);
         final long maskedZobrist = zobrist & ZOBRIST_MASK;
         for (int i = startIndex; i < ARRAY_LENGHT; i++) {
             if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
                 final long count = array[i] & COUNT_MASK;
                 if (count == COUNT_INC) {
-                    array[i] = 0;
+                    for (int j = i; j < ARRAY_LENGHT; j++) {
+                        final int next = j + 1;
+                        if ((array[next] != 0) && (array[next] & ZOBRIST_MASK_IN_HASH) != (next & ZOBRIST_MASK_IN_HASH)) {
+                            array[j] = array[next];
+                        } else {
+                            array[j] = 0;
+                            break;
+                        }
+                    }
                     return;
                 } else {
-                    array[i] = maskedZobrist | (count - COUNT_INC);
-                    return;
-                }
-            } else if (array[i] == 0) {
-                assert false;
-                return;
-            }
-        }
-        for (int i = 0; i < startIndex; i++) {
-            if ((array[i] & ZOBRIST_MASK) == maskedZobrist) {
-                final long count = array[i] & COUNT_MASK;
-                if (count == COUNT_INC) {
-                    array[i] = 0;
-                    return;
-                } else {
-                    array[i] = maskedZobrist | (count - COUNT_INC);
+                    array[i] -= COUNT_INC;
                     return;
                 }
             } else if (array[i] == 0) {

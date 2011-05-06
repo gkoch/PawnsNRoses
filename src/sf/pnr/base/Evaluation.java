@@ -439,8 +439,10 @@ public final class Evaluation {
                         score += BONUS_MOBILITY;
                     } else if (side == side(squares[pos])) {
                         score += BONUS_DEFENSE;
+                        break;
                     } else {
                         score += BONUS_ATTACK;
+                        break;
                     }
                 }
             }

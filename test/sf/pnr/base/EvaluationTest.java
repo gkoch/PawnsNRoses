@@ -280,4 +280,10 @@ public class EvaluationTest extends TestCase {
         final int endgameBonus = VAL_POSITION_BONUS_PAWN_ENDGAME[position + shift] * stage;
         return (openingBonus + endgameBonus) / STAGE_MAX;
     }
+
+    public void testMobility() {
+        final Board board = StringUtils.fromFen("8/1R2K2k/8/8/8/8/8/8 w - - 0 1");
+        final int score = Evaluation.computeMobilityBonusAsWhite(board);
+        assertEquals((10 + 8 - 5) * BONUS_MOBILITY + BONUS_DEFENSE + BONUS_DISTANCE_ROOK[1], score);
+    }
 }

@@ -675,8 +675,7 @@ public final class Board {
             if ((testPos & 0x88) == 0) {
                 final int absAttacker = board[testPos] * signum;
                 if (absAttacker > 0) {
-                    assert (ATTACK_BITS[absAttacker] & attackBits) < 0 || SLIDING[absAttacker];
-                    return (ATTACK_BITS[absAttacker] & attackBits) > 0;
+                    return SLIDING[absAttacker] && (ATTACK_BITS[absAttacker] & attackBits) > 0;
                 }
             }
         }

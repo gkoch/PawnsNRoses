@@ -38,6 +38,8 @@ public class GameManager {
     private final int rounds;
     private UciRunner kibitzer;
     private boolean restartBeforeMoves;
+    private boolean gamesBetweenRefEngines;
+    private boolean gamesBetweenTestEngines;
 
     public GameManager(final String event, final int initialTime, final int increment, final int rounds, final boolean restartBeforeMoves) {
         this.event = event;
@@ -69,7 +71,10 @@ public class GameManager {
             for (int diff = 1; diff < allEngines.length; diff++) {
                 for (int first = 0; first < allEngines.length - diff; first++) {
                     final int second = first + diff;
-                    if (first < refEnginesLen && second < refEnginesLen) {
+                    if (!gamesBetweenRefEngines && first < refEnginesLen && second < refEnginesLen) {
+                        continue;
+                    }
+                    if (!gamesBetweenTestEngines && first >= refEnginesLen && second >= refEnginesLen) {
                         continue;
                     }
                     play(i, index++, tournamentResult, allEngines[first], allEngines[second]);
@@ -78,7 +83,10 @@ public class GameManager {
             for (int diff = 1; diff < allEngines.length; diff++) {
                 for (int first = 0; first < allEngines.length - diff; first++) {
                     final int second = first + diff;
-                    if (first < refEnginesLen && second < refEnginesLen) {
+                    if (!gamesBetweenRefEngines && first < refEnginesLen && second < refEnginesLen) {
+                        continue;
+                    }
+                    if (!gamesBetweenTestEngines && first >= refEnginesLen && second >= refEnginesLen) {
                         continue;
                     }
                     play(i, index++, tournamentResult, allEngines[second], allEngines[first]);
@@ -281,6 +289,14 @@ public class GameManager {
             System.out.println("Failed to close engine: " + engine.getName());
             e.printStackTrace();
         }
+    }
+
+    public void setGamesBetweenRefEngines(final boolean gamesBetweenRefEngines) {
+        this.gamesBetweenRefEngines = gamesBetweenRefEngines;
+    }
+
+    public void setGamesBetweenTestEngines(final boolean gamesBetweenTestEngines) {
+        this.gamesBetweenTestEngines = gamesBetweenTestEngines;
     }
 
     private static enum GameResult {

@@ -25,6 +25,8 @@ public class GamePlayTest {
         final int increment = Integer.parseInt(System.getProperty("searchTask.incrementTime", "6000"));
         final int rounds = Integer.parseInt(System.getProperty("searchTask.rounds", "20"));
         final boolean restartBeforeMoves = Boolean.parseBoolean(System.getProperty("searchTask.restartBeforeMoves", "false"));
+        final boolean gamesBetweenRefEngines = Boolean.parseBoolean(System.getProperty("searchTask.gamesBetweenRefEngines", "false"));
+        final boolean gamesBetweenTestEngines = Boolean.parseBoolean(System.getProperty("searchTask.gamesBetweenTestEngines", "false"));
 
         final String event;
         final File engineDir = TestUtils.getEngineDir();
@@ -44,6 +46,8 @@ public class GamePlayTest {
             System.out.println("Kibitzer: " + kibitzer.getName());
         }
         Configuration.getInstance().loadFromSystemProperties();
+        manager.setGamesBetweenRefEngines(gamesBetweenRefEngines);
+        manager.setGamesBetweenTestEngines(gamesBetweenTestEngines);
         manager.play(referenceEngines, engines);
         if (debugOs != null) {
             debugOs.close();

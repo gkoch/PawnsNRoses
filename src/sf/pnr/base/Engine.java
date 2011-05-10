@@ -1032,7 +1032,7 @@ public final class Engine {
                     Evaluation.computePositionalGain(absPiece, fromPos, toPos, stage, shiftPositionBonus);
                 final int valPositional = ((positionalGain + 100) >> MOVE_ORDER_POSITIONAL_GAIN_SHIFT);
                 final int checkBonus;
-                if (SLIDING[absPiece] && (ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_BITS[absPiece]) > 0) {
+                if ((ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_BITS[absPiece]) > 0) {
                     checkBonus = MOVE_ORDER_BLOCKED_CHECK_BONUS;
                 } else {
                     checkBonus = 0;
@@ -1190,7 +1190,7 @@ public final class Engine {
             return false;
         }
         final int absPiece = signum * piece;
-        if (board.isSliding(absPiece)) {
+        if (SLIDING[absPiece]) {
             return board.isAttackedBySliding(toPos, ATTACK_BITS[absPiece], fromPos);
         } else if (absPiece == PAWN) {
             final int squareInFront = fromPos + signum * UP;

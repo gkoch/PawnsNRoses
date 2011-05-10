@@ -217,9 +217,9 @@ public class Utils {
     public static final boolean[] SLIDING = new boolean[7];
 
     static {
-        ATTACK_BITS = new int[6];
+        ATTACK_BITS = new int[7];
         ATTACK_BITS[KING] = ATTACK_K; ATTACK_BITS[QUEEN] = ATTACK_Q; ATTACK_BITS[ROOK] = ATTACK_R;
-        ATTACK_BITS[BISHOP] = ATTACK_B; ATTACK_BITS[KNIGHT] = ATTACK_N;
+        ATTACK_BITS[BISHOP] = ATTACK_B; ATTACK_BITS[KNIGHT] = ATTACK_N; ATTACK_BITS[PAWN] = 0;
 
         DELTA[KNIGHT] = DELTA_KNIGHT;
         DELTA[BISHOP] = DELTA_BISHOP;
@@ -480,7 +480,7 @@ public class Utils {
                 StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos), StringUtils.toString0x88(toPos)));
         }
         if (moveType == MT_NORMAL) {
-            if (board.isSliding(absPiece)) {
+            if (SLIDING[absPiece]) {
                 if (!board.isAttackedBySliding(toPos, ATTACK_BITS[absPiece], fromPos)) {
                     problems.add(String.format("The %s on %s is trying to move to %s which is not possible",
                         StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos), StringUtils.toString0x88(toPos)));

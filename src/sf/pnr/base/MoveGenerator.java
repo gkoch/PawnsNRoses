@@ -443,7 +443,7 @@ public final class MoveGenerator {
                 final int foundPiece = squares[foundPos];
                 final int foundSignum = Integer.signum(foundPiece);
                 final int foundAbsPiece = foundSignum * foundPiece;
-                if (!board.isSliding(foundAbsPiece) || (attackValue & ATTACK_BITS[foundAbsPiece]) == 0) {
+                if (!SLIDING[foundAbsPiece] || (attackValue & ATTACK_BITS[foundAbsPiece]) == 0) {
                     // this piece cannot attack the target position
                     // (sliding pieces so it's OK not to recompute the attackValue)
                     return;

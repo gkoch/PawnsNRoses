@@ -611,7 +611,7 @@ public class StringUtils {
                 if (fromRank >= 0 && pieceRank != fromRank) {
                     continue;
                 }
-                if (board.isSliding(pieceType)) {
+                if (SLIDING[pieceType]) {
                     if (board.isAttackedBySliding(toPos, ATTACK_BITS[pieceType], piecePos) &&
                             !isPinned(board, toPos << SHIFT_TO | getPosition(pieceFile, pieceRank) | moveType)) {
                         fromFile = pieceFile;

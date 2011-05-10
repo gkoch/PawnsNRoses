@@ -582,10 +582,6 @@ public final class Board {
         return (attackValue & attackBits) > 0;
     }
 
-    public boolean isSliding(final int absPiece) {
-        return SLIDING[absPiece];
-    }
-
     public int getMinorMajorPieceCount(final int toMove) {
         return pieces[KNIGHT][toMove][0] + pieces[BISHOP][toMove][0] + pieces[ROOK][toMove][0] + pieces[QUEEN][toMove][0];
     }
@@ -679,7 +675,8 @@ public final class Board {
             if ((testPos & 0x88) == 0) {
                 final int absAttacker = board[testPos] * signum;
                 if (absAttacker > 0) {
-                    return SLIDING[absAttacker] && (ATTACK_BITS[absAttacker] & attackBits) > 0;
+                    assert (ATTACK_BITS[absAttacker] & attackBits) < 0 || SLIDING[absAttacker];
+                    return (ATTACK_BITS[absAttacker] & attackBits) > 0;
                 }
             }
         }

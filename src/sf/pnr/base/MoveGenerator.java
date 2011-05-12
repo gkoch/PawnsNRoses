@@ -384,18 +384,28 @@ public final class MoveGenerator {
         int currentSignum = signumOpponent;
         int valSignum = -1;
         while (currentPosArray[0] > 0) {
-            final int currentVal = currentValArray[1];
+            final int currentLen = currentPosArray[0];
+            int currentVal = currentValArray[currentLen];
+            int currentPos = currentPosArray[currentLen];
+            for (int i = currentLen - 1; i > 0; i--) {
+                if (currentValArray[i] < currentVal) {
+                    int tmp = currentVal;
+                    currentVal = currentValArray[i];
+                    currentValArray[i] = tmp;
+                    tmp = currentPos;
+                    currentPos = currentPosArray[i];
+                    currentPosArray[i] = tmp;
+                }
+            }
+
             if (currentVal == VAL_KING && opponentValArray[0] > 0) {
                 // can't capture with king as we'd move into check
                 break;
             }
-            final int currentPos = currentPosArray[1];
-            final int currentAbsPiece = currentSignum * squares[currentPos];
-            final int currentLen = currentPosArray[0];
 
-            // remove current attacker
-            System.arraycopy(currentPosArray, 2, currentPosArray, 1, currentLen - 1);
-            System.arraycopy(currentValArray, 2, currentValArray, 1, currentLen - 1);
+            final int currentAbsPiece = currentSignum * squares[currentPos];
+
+            // remove weakest attacker
             currentPosArray[0] = currentLen - 1;
             currentValArray[0] = currentLen - 1;
 
@@ -460,24 +470,11 @@ public final class MoveGenerator {
                     insertIdxArray = opponentPosArray;
                     insertValArray = opponentValArray;
                 }
-                final int insertArrLen = insertValArray[0];
-                for (int i = insertArrLen; i > 0; i--) {
-                    final int tmpVal = insertValArray[i];
-                    if (tmpVal <= foundVal) {
-                        insertValArray[i + 1] = foundVal;
-                        insertIdxArray[i + 1] = foundPos;
-                        break;
-                    }
-                    insertValArray[i + 1] = insertValArray[i];
-                    insertIdxArray[i + 1] = insertIdxArray[i];
-                }
-                insertValArray[0] = insertArrLen + 1;
-                insertIdxArray[0] = insertArrLen + 1;
-                if (insertValArray[0] == 1 || insertValArray[1] > foundVal) {
-                    // we haven't inserted it yet
-                    insertValArray[1] = foundVal;
-                    insertIdxArray[1] = foundPos;
-                }
+                final int insertArrLen = insertValArray[0] + 1;
+                insertValArray[0] = insertArrLen;
+                insertIdxArray[0] = insertArrLen;
+                insertValArray[insertArrLen] = foundVal;
+                insertIdxArray[insertArrLen] = foundPos;
             }
         }
     }

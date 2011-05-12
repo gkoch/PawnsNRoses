@@ -88,8 +88,9 @@ public class XBoard {
             } else if (line.startsWith("accepted ") || line.startsWith("rejected ")) {
                 // do nothing
             } else if (line.equals("random")) {
-                random = !random;
-                chess.setRandom(random);
+                //random = !random;
+                //chess.setRandom(random);
+                // not supported anymore
             } else if (line.startsWith("level ")) {
                 final String[] parts = line.substring(6).split(" ");
                 if (parts.length == 3) {

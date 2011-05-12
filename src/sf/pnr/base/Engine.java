@@ -1152,10 +1152,6 @@ public final class Engine {
         cancelled = true;
     }
 
-    public void setRandomEval(final boolean random) {
-        evaluation.setRandom(random);
-    }
-
     public void setBestMoveListener(final BestMoveListener listener) {
         this.listener = listener;
     }

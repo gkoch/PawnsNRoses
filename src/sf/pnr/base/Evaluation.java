@@ -228,7 +228,6 @@ public final class Evaluation {
         VAL_POSITION_BONUS_ENDGAME[KING] = VAL_POSITION_BONUS_KING_ENDGAME;
     }
 
-    private boolean random;
     private final PawnHashTable pawnHashTable = new PawnHashTable();
     private final EvalHashTable evalHashTable = new EvalHashTable();
 
@@ -266,9 +265,6 @@ public final class Evaluation {
             }
         }
 
-        if (random) {
-            score += RND.nextInt(20);
-        }                                                              
         evalHashTable.set(zobrist, score - VAL_MIN);
         return score * signum;
     }
@@ -764,10 +760,6 @@ public final class Evaluation {
 
         return PawnHashTable.getPawnHashValue(score, stage, unstoppablePawnWhite, unstoppablePawnIfNextWhite,
             unstoppablePawnBlack, unstoppablePawnIfNextBlack);
-    }
-
-    public void setRandom(final boolean random) {
-        this.random = random;
     }
 
     public EvalHashTable getEvalHashTable() {

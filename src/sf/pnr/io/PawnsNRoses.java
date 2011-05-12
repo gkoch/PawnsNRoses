@@ -44,7 +44,6 @@ public class PawnsNRoses {
             if (listener != null) {
                 engine.setBestMoveListener(listener);
             }
-            engine.setRandomEval(random);
         }
     }
 
@@ -107,13 +106,6 @@ public class PawnsNRoses {
     public void cancel() {
         if (engine != null) {
             engine.cancel();
-        }
-    }
-
-    public void setRandom(final boolean random) {
-        this.random = random;
-        if (engine != null) {
-            engine.setRandomEval(this.random);
         }
     }
 

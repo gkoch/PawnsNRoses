@@ -233,7 +233,7 @@ public final class Engine {
                 searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
                     (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
             for (int i = moves[0]; i > 0; i--) {
-                final int move = moves[i];
+                final int move = getBestMove(moves);
                 assert (move & BASE_INFO) != 0;
 
                 // make the move
@@ -534,7 +534,7 @@ public final class Engine {
                     searchStage == SearchStage.PROMOTION);
 
             for (int i = moves[0]; i > 0; i--) {
-                final int move = moves[i];
+                final int move = getBestMove(moves);
                 assert (move & BASE_INFO) != 0;
 
                 // make the move
@@ -747,7 +747,7 @@ public final class Engine {
         if (Evaluation.drawByInsufficientMaterial(board)) {
             return VAL_DRAW;
         }
-        
+
         final int state = board.getState();
         final int toMove = state & WHITE_TO_MOVE;
 
@@ -807,7 +807,7 @@ public final class Engine {
                     searchStage == SearchStage.PROMOTION);
 
             for (int i = moves[0]; i > 0; i--) {
-                final int move = moves[i];
+                final int move = getBestMove(moves);
 
                 assert (move & BASE_INFO) != 0;
 
@@ -1005,7 +1005,6 @@ public final class Engine {
         if (moves[0] > 0) {
             addMoveValuesAndRemoveTTMove(moves, board, ttMove,
                 searchStage == SearchStage.NORMAL? killerMoves[searchedPly]: NO_MOVE_ARRAY);
-            Arrays.sort(moves, 1, moves[0] + 1);
         }
         return moves;
     }
@@ -1055,7 +1054,7 @@ public final class Engine {
         }
     }
 
-    private boolean isKiller(final int[] killers, final int move) {
+    private static boolean isKiller(final int[] killers, final int move) {
         final int fromTo = move & FROM_TO;
         for (int killer: killers) {
             if (killer == fromTo) {
@@ -1173,7 +1172,7 @@ public final class Engine {
         return (((long) (move & BASE_INFO)) << 32) | (((long) value) & 0xFFFFFFFFL);
     }
 
-    public boolean isValidKillerMove(final Board board, final int fromPos, final int toPos) {
+    public static boolean isValidKillerMove(final Board board, final int fromPos, final int toPos) {
         final int[] squares = board.getBoard();
         final int piece = squares[fromPos];
         if (piece == EMPTY || squares[toPos] != EMPTY) {
@@ -1197,5 +1196,19 @@ public final class Engine {
         } else {
             return board.isAttackedByNonSliding(toPos, ATTACK_BITS[absPiece], fromPos);
         }
+    }
+
+    private static int getBestMove(final int[] moves) {
+        final int len = moves[0];
+        int bestMove = moves[len];
+        for (int i = len - 1; i > 0; i--) {
+            if (moves[i] > bestMove) {
+                final int tmp = bestMove;
+                bestMove = moves[i];
+                moves[i] = tmp;
+            }
+        }
+        moves[0] = len - 1;
+        return bestMove;
     }
 }

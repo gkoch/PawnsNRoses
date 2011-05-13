@@ -3,8 +3,6 @@ package sf.pnr.base;
 import junit.framework.TestCase;
 import sf.pnr.alg.TranspositionTable;
 
-import java.util.Set;
-
 import static sf.pnr.base.Engine.*;
 import static sf.pnr.base.Evaluation.*;
 import static sf.pnr.base.StringUtils.*;
@@ -414,17 +412,17 @@ public class EngineTest extends TestCase {
 
     public void testIsValidKillerMovePawnDoubleSquareMove() {
         final Board board = fromFen("8/5N1p/6p1/4Bn1k/8/7K/6P1/2r1q3 w - - 0 1");
-        assertTrue(engine.isValidKillerMove(board, G[1], G[3]));
+        assertTrue(isValidKillerMove(board, G[1], G[3]));
     }
 
     public void testIsValidKillerMovePawnInvalidDoubleSquareMove() {
         final Board board = fromFen("7R/8/4K3/7P/4n1p1/7k/8/8 w - - 1 3");
-        assertFalse(engine.isValidKillerMove(board, H[4], H[6]));
+        assertFalse(isValidKillerMove(board, H[4], H[6]));
     }
 
     public void testIsValidKillerMovePromotion() {
         final Board board = fromFen("8/4k2P/p7/8/8/8/6K1/q7 w - - 0 3");
-        assertFalse(engine.isValidKillerMove(board, H[6], H[7]));
+        assertFalse(isValidKillerMove(board, H[6], H[7]));
     }
 
     public void testAttackedKnight() {

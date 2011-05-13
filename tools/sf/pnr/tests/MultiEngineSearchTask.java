@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -34,7 +32,7 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
         }
     };
 
-    private final List<UciRunner> runners;
+    private final UciRunner[] engines;
     private final int fixedDepth;
     private final int timeToSolve;
     private final int debugPrintInterval;
@@ -48,23 +46,22 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     private int maxNameLen;
     private boolean verbose = false;
 
-    public MultiEngineSearchTask(final List<UciRunner> runners, final int fixedDepth, final int timeToSolve,
+    public MultiEngineSearchTask(final UciRunner[] engines, final int fixedDepth, final int timeToSolve,
                                  final int debugPrintInterval) {
-        this.runners = runners;
+        this.engines = engines;
         this.fixedDepth = fixedDepth;
         this.timeToSolve = timeToSolve;
         this.debugPrintInterval = debugPrintInterval;
         maxNameLen = 0;
-        for (UciRunner runner: runners) {
+        for (UciRunner runner: engines) {
             final int nameLen = runner.getName().length();
             if (nameLen > maxNameLen) {
                 maxNameLen = nameLen;
             }
         }
-        stats = new Stats[runners.size()];
-        final Iterator<UciRunner> iter = runners.iterator();
+        stats = new Stats[engines.length];
         for (int i = 0; i < stats.length; i++) {
-            stats[i] = new Stats(iter.next().getName());
+            stats[i] = new Stats(engines[i].getName());
         }
         startTime = System.currentTimeMillis();
     }
@@ -134,19 +131,19 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
             time = timeToSolve;
         }
         try {
-            for (int i = 0; i < runners.size(); i++) {
+            for (int i = 0; i < engines.length; i++) {
                 if (!stats[i].isAlive()) {
                     continue;
                 }
-                final UciRunner runner = runners.get(i);
-                runner.uciNewGame();
-                runner.position(board);
-                runner.go(depth, time);
+                final UciRunner engine = engines[i];
+                engine.uciNewGame();
+                engine.position(board);
+                engine.go(depth, time);
                 boolean passed = true;
                 try {
                     if (commands.containsKey("bm") || commands.containsKey("pm")) {
                         final String engineBestMove =
-                            StringUtils.toShort(board, StringUtils.fromLong(board, runner.getBestMove()));
+                            StringUtils.toShort(board, StringUtils.fromLong(board, engine.getBestMove()));
                         final String[] bestMoves =
                             (commands.containsKey("bm")? commands.get("bm"): commands.get("pm")).split("/");
                         if (engineBestMove == null || !StringUtils.containsString(bestMoves, engineBestMove)) {
@@ -154,19 +151,19 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
                             if (verbose) {
                                 System.out.printf(
                                     "Engine '%s' failed on test '%s'. Best moves: %s, engine recommended: %s\r\n",
-                                    runner.getName(), StringUtils.toFen(board), commands.get("bm"), engineBestMove);
+                                    engine.getName(), StringUtils.toFen(board), commands.get("bm"), engineBestMove);
                             }
                         }
                     } else if (commands.containsKey("am")) {
                         final String engineBestMove =
-                            StringUtils.toShort(board, StringUtils.fromLong(board, runner.getBestMove()));
+                            StringUtils.toShort(board, StringUtils.fromLong(board, engine.getBestMove()));
                         final String[] avoidMoves = commands.get("am").split("/");
                         if (engineBestMove == null || StringUtils.containsString(avoidMoves, engineBestMove)) {
                             passed = false;
                             if (verbose) {
                                 System.out.printf(
                                     "Engine '%s' failed on test '%s'. Avoid moves: %s, engine recommended: %s\r\n",
-                                    runner.getName(), StringUtils.toFen(board), commands.get("am"), engineBestMove);
+                                    engine.getName(), StringUtils.toFen(board), commands.get("am"), engineBestMove);
                             }
                         }
                     }
@@ -175,10 +172,10 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
                     throw e;
                 }
 
-                stats[i].addResult(runner.getNodeCount(), runner.getDepth(), runner.getMoveTime(), passed);
+                stats[i].addResult(engine.getNodeCount(), engine.getDepth(), engine.getMoveTime(), passed);
                 if (verbose) {
                     System.out.printf("%s - nodes: %d, depth: %d, time: %d\r\n",
-                        runner.getName(), runner.getNodeCount(), runner.getDepth(), runner.getMoveTime());
+                        engine.getName(), engine.getNodeCount(), engine.getDepth(), engine.getMoveTime());
                 }
             }
 
@@ -205,8 +202,8 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
     private void eliminate() throws IOException {
         final TreeMap<Stats, UciRunner> map = new TreeMap<Stats, UciRunner>(FAILURE_COUNT_COMPARATOR);
         int remaining = 0;
-        for (int i = 0; i < runners.size(); i++) {
-            map.put(stats[i], runners.get(i));
+        for (int i = 0; i < engines.length; i++) {
+            map.put(stats[i], engines[i]);
             if (stats[i].isAlive()) {
                 remaining++;
             }

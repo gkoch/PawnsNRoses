@@ -21,12 +21,12 @@ public class PerformanceRegressionTest {
         testFiles.add("best7.epd");
         testFiles.add("wnperm.epd");
         testFiles.add("qtest_easy.epd");
-        final UciRunner[] runners = TestUtils.getEngines();
+        final UciRunner[] engines = TestUtils.getEngines();
         try {
-            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(Arrays.asList(runners), 6, 0, 100));
+            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(engines, 6, 0, 100));
         } finally {
-            for (UciRunner runner : runners) {
-                runner.close();
+            for (UciRunner engine: engines) {
+                engine.close();
             }
         }
     }

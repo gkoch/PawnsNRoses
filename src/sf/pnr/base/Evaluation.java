@@ -70,7 +70,7 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY)
     public static int BONUS_MOBILITY = 2;
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_KNIGHT)
-    public static int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 5, 3, 2, 2, 1, 1, 0};
+    public static int[] BONUS_DISTANCE_KNIGHT = new int[] {0, 10, 3, 2, 2, 1, 1, 0};
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_BISHOP)
     public static int[] BONUS_DISTANCE_BISHOP = new int[] {0, 3, 1, 0, 0, 0, 0, 0};
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_ROOK)
@@ -393,7 +393,7 @@ public final class Evaluation {
         return score;
     }
 
-    private static int computeMobilityBonusKnight(final Board board, final int side, final int[] distance) {
+    public static int computeMobilityBonusKnight(final Board board, final int side, final int[] distance) {
         final long piecesMask = board.getBitboard(side);
         final long opponentPiecesMask = board.getBitboard(1 - side);
         final int opponentKing = board.getKing(1 - side);
@@ -410,7 +410,6 @@ public final class Evaluation {
             final long attacked = knightMask & opponentPiecesMask;
             score += Long.bitCount(attacked) * BONUS_ATTACK;
             score += Long.bitCount(knightMask ^ defended ^ attacked) * BONUS_MOBILITY;
-            score += Long.bitCount(knightMask & opponentKingMask) * BONUS_KING_IN_SIGHT_NON_SLIDING;
             distance[0] += BONUS_DISTANCE_KNIGHT[
                 distance(knight, opponentKing, ATTACK_DISTANCE_KNIGHT, SHIFT_ATTACK_DISTANCE_KNIGHT)];
         }

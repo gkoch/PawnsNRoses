@@ -286,4 +286,12 @@ public class EvaluationTest extends TestCase {
         final int score = Evaluation.computeMobilityBonusAsWhite(board);
         assertEquals((10 + 8 - 5) * BONUS_MOBILITY + BONUS_DEFENSE + BONUS_DISTANCE_ROOK[1], score);
     }
+
+    public void testMobilityKnight() {
+        final Board board = StringUtils.fromFen("8/p3pk2/2N5/8/1P6/1K6/8/8 w - - 0 1");
+        final int[] distance = new int[1];
+        final int score = Evaluation.computeMobilityBonusKnight(board, WHITE, distance);
+        assertEquals(5 * BONUS_MOBILITY + 1 * BONUS_DEFENSE + 2 * BONUS_ATTACK, score);
+        assertEquals(BONUS_DISTANCE_KNIGHT[2], distance[0]);
+    }
 }

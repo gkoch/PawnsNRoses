@@ -84,4 +84,10 @@ public class UtilsTest extends TestCase {
         final Set<String> problems = Utils.checkMove(board, StringUtils.fromSimple("f3g2"));
         assertFalse(problems.isEmpty());
     }
+
+    public void testConvert0x88to64() {
+        assertEquals(0, convert0x88To64(A[0]));
+        assertEquals(1, convert0x88To64(B[0]));
+        assertEquals(2, convert0x88To64(C[0]));
+    }
 }

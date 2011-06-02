@@ -164,7 +164,6 @@ public class GameFragmentTest {
 
         @Override
         public void completed() {
-            //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }

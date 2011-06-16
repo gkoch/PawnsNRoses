@@ -88,13 +88,7 @@ public class BestMoveTest {
             this.depth = depth;
             this.time = time;
             startTime = System.currentTimeMillis();
-            maxNameLen = 0;
-            for (UciRunner engine: engines) {
-                final int nameLen = engine.getName().length();
-                if (nameLen > maxNameLen) {
-                    maxNameLen = nameLen;
-                }
-            }
+            maxNameLen = TestUtils.getMaxNameLen(engines);
         }
 
         @Override

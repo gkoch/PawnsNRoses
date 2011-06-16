@@ -161,6 +161,14 @@ public class PawnsNRoses {
     }
 
     @Executable()
+    public String evaluate() {
+        if (engine != null) {
+            final Evaluation evaluation = engine.getEvaluation();
+            return Integer.toString(evaluation.evaluate(board));
+        }
+        return "NO ENGINE";
+    }
+
     public boolean useBook() {
         return useBook;
     }

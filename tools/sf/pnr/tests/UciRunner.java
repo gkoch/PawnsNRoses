@@ -25,10 +25,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class UciRunner {
 
     private static final ScheduledExecutorService THREAD_POOL = Executors.newScheduledThreadPool(2);
+    public static final Pattern PATTERN_COMMAND_RESULT = Pattern.compile("info string (Result: (.*)|Done.)");
 
     private final String name;
     private final Map<String, String> uciOptions;
@@ -199,14 +201,24 @@ public class UciRunner {
         }
     }
 
-
-    private void setOptions(final Map<String, String> options) throws IOException {
+    public void setOptions(final Map<String, String> options) throws IOException {
         if (options != null) {
             for (Map.Entry<String, String> entry: options.entrySet()) {
-                sendCommand(String.format("setoption name %s value %s", entry.getKey(), entry.getValue()));
+                setOption(entry.getKey(), entry.getValue());
             }
-            ensureReady();
         }
+    }
+
+    public String setOption(final String name, final String value) throws IOException {
+        sendCommand(String.format("setoption name %s value %s", name, value));
+        final String response;
+        if ("Command".equals(name)) {
+            response = getNextResponse(PATTERN_COMMAND_RESULT);
+        } else {
+            response = null;
+        }
+        ensureReady();
+        return response;
     }
 
     public int getDepth() {
@@ -325,6 +337,15 @@ public class UciRunner {
             line = reader.readLine();
         }
         return line != null;
+    }
+
+    public String getNextResponse(final Pattern pattern) throws IOException {
+        initializeProcess();
+        String line = reader.readLine();
+        while (line != null && !pattern.matcher(line).matches()) {
+            line = reader.readLine();
+        }
+        return line;
     }
 
     public void restart() throws IOException {

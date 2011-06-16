@@ -85,6 +85,8 @@ public final class Evaluation {
     public static int PENALTY_CASTLING_MISSED = -25;
     @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_PENDING)
     public static int PENALTY_CASTLING_PENDING = -15;
+    @Configurable(Configurable.Key.EVAL_PENALTY_CASTLING_PENDING_BOTH)
+    public static int PENALTY_CASTLING_PENDING_BOTH = -10;
 
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMEFILE)
     public static int BONUS_ROOKS_ON_SAME_FILE = 12;
@@ -336,23 +338,7 @@ public final class Evaluation {
         final int state2 = board.getState2();
         final int toMove = state & WHITE;
         final int signum = (toMove << 1) - 1;
-        int castlingPenalty = 0;
-        final int castlingWhite = state & CASTLING_WHITE;
-        if (castlingWhite == CASTLING_WHITE_KINGSIDE || castlingWhite == CASTLING_WHITE_QUEENSIDE) {
-            castlingPenalty += PENALTY_CASTLING_MISSED;
-        } else if (castlingWhite == CASTLING_WHITE) {
-            castlingPenalty += PENALTY_CASTLING_PENDING;
-        } else if (castlingWhite == 0 && (state2 & CASTLED_WHITE) == 0) {
-            castlingPenalty += PENALTY_CASTLING_MISSED;
-        }
-        final int castlingBlack = state & CASTLING_BLACK;
-        if (castlingBlack == CASTLING_BLACK_KINGSIDE || castlingBlack == CASTLING_BLACK_QUEENSIDE) {
-            castlingPenalty -= PENALTY_CASTLING_MISSED;
-        } else if (castlingBlack == CASTLING_BLACK) {
-            castlingPenalty -= PENALTY_CASTLING_PENDING;
-        } else if (castlingBlack == 0 && (state2 & CASTLED_BLACK) == 0) {
-            castlingPenalty -= PENALTY_CASTLING_MISSED;
-        }
+        final int castlingPenalty = getCastlingPenaltyAsWhite(state, state2);
         final int stage = board.getStage();
         return score + (signum * distance[0] * stage + castlingPenalty * (STAGE_MAX - stage)) / STAGE_MAX;
     }
@@ -464,6 +450,27 @@ public final class Evaluation {
             }
         }
         return score;
+    }
+
+    public static int getCastlingPenaltyAsWhite(final int state, final int state2) {
+        int castlingPenalty = 0;
+        final int castlingWhite = state & CASTLING_WHITE;
+        if (castlingWhite == CASTLING_WHITE) {
+            castlingPenalty += PENALTY_CASTLING_PENDING_BOTH;
+        } else if ((castlingWhite & CASTLING_WHITE) != 0) {
+            castlingPenalty += PENALTY_CASTLING_PENDING;
+        } else if (castlingWhite == 0 && (state2 & CASTLED_WHITE) == 0) {
+            castlingPenalty += PENALTY_CASTLING_MISSED;
+        }
+        final int castlingBlack = state & CASTLING_BLACK;
+        if (castlingBlack == CASTLING_BLACK) {
+            castlingPenalty -= PENALTY_CASTLING_PENDING_BOTH;
+        } else if ((castlingBlack & CASTLING_BLACK) != 0) {
+            castlingPenalty -= PENALTY_CASTLING_PENDING;
+        } else if (castlingBlack == 0 && (state2 & CASTLED_BLACK) == 0) {
+            castlingPenalty -= PENALTY_CASTLING_MISSED;
+        }
+        return castlingPenalty;
     }
 
     public static int computeRookBonus(final Board board, final int side) {

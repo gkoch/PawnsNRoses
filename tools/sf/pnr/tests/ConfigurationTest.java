@@ -2,6 +2,7 @@ package sf.pnr.tests;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -19,7 +20,12 @@ public class ConfigurationTest {
         testFiles.add("en passant.epd");
         testFiles.add("ans.epd");
 
+        final HashMap<String, String> postSearchOptions = new HashMap<String, String>();
+        postSearchOptions.put("Command", "releaseEngine");
         final UciRunner[] engines = TestUtils.getEngines();
+        for (UciRunner engine: engines) {
+            engine.setPostSearchOptions(postSearchOptions);
+        }
         try {
             final int depth = Integer.parseInt(System.getProperty("searchTest.maxDepth", "0"));
             final int time = Integer.parseInt(System.getProperty("searchTest.maxTime", "100"));

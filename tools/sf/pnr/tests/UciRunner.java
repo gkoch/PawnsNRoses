@@ -32,7 +32,7 @@ public class UciRunner {
 
     private final String name;
     private final Map<String, String> uciOptions;
-    private final Map<String, String> postSearchOptions;
+    private Map<String, String> postSearchOptions;
     private final UciProcess process;
     private BufferedWriter writer;
     private BufferedReader reader;
@@ -70,6 +70,10 @@ public class UciRunner {
 
     public OutputStream getDebugOutputStream() {
         return debugOs;
+    }
+
+    public void setPostSearchOptions(final Map<String, String> postSearchOptions) {
+        this.postSearchOptions = postSearchOptions;
     }
 
     private void initializeProcess() throws IOException {

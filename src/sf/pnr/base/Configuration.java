@@ -119,11 +119,18 @@ public final class Configuration {
                 }
             } else if (int[].class.equals(type)) {
                 final String[] valStrs = value.split(",");
-                final int[] values = new int[valStrs.length];
-                for (int i = 0; i < valStrs.length; i++) {
-                    values[i] = Integer.parseInt(valStrs[i].trim());
+                int[] oldValues = (int[]) field.get(null);
+                if (oldValues == null) {
+                    oldValues = new int[valStrs.length];
+                    field.set(null, oldValues);
+                } else if (oldValues.length != valStrs.length) {
+                    throw new IllegalStateException(String.format(
+                        "Trying to change the size of int array field '%s'. Old size: %d, new size: %d",
+                        key, oldValues.length, valStrs.length));
                 }
-                field.set(null, values);
+                for (int i = 0; i < valStrs.length; i++) {
+                    oldValues[i] = Integer.parseInt(valStrs[i].trim());
+                }
             } else {
                 throw new IllegalStateException("Unsupported field type: " + type);
             }

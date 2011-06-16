@@ -235,4 +235,15 @@ public class TestUtils {
                 engine.getName(), StringUtils.toFen(board)));
         }
     }
+
+    public static int getMaxNameLen(final UciRunner[] engines) {
+        int maxNameLen = 0;
+        for (UciRunner runner: engines) {
+            final int nameLen = runner.getName().length();
+            if (nameLen > maxNameLen) {
+                maxNameLen = nameLen;
+            }
+        }
+        return maxNameLen;
+    }
 }

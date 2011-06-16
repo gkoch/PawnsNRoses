@@ -52,13 +52,7 @@ public class MultiEngineSearchTask implements EpdProcessorTask {
         this.fixedDepth = fixedDepth;
         this.timeToSolve = timeToSolve;
         this.debugPrintInterval = debugPrintInterval;
-        maxNameLen = 0;
-        for (UciRunner runner: engines) {
-            final int nameLen = runner.getName().length();
-            if (nameLen > maxNameLen) {
-                maxNameLen = nameLen;
-            }
-        }
+        maxNameLen = TestUtils.getMaxNameLen(engines);
         stats = new Stats[engines.length];
         for (int i = 0; i < stats.length; i++) {
             stats[i] = new Stats(engines[i].getName());

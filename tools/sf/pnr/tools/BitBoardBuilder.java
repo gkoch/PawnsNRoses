@@ -18,10 +18,11 @@ public class BitBoardBuilder {
 
     public static void main(final String[] args) {
 //        generateInitialBoard();
-        generatePawnAttack();
+//        generatePawnAttack();
 //        generatePawnShields();
 //        generateFileBitmaps();
-//        generateKnightMoves();
+        //generateKnightMoves();
+        generatePawnMovesAndAttacks();
     }
 
     private static void generateFileBitmaps() {
@@ -132,6 +133,46 @@ public class BitBoardBuilder {
             }
         }
         print("KNIGHT_MOVES", moveBitBoards);
+    }
+
+    private static void generatePawnMovesAndAttacks() {
+        generatePawnMovesAndAttacks(16, "WHITE");
+        generatePawnMovesAndAttacks(-16, "BLACK");
+    }
+
+    private static void generatePawnMovesAndAttacks(final int moveDelta, final String sideStr) {
+        final long[] moveBitBoards = new long[64];
+        final long[] attackBitBoards = new long[64];
+        for (int pos = 0; pos < 120; pos++) {
+            final int rank = getRank(pos);
+            if (rank > 0 && rank < 7 && (pos & 0x88) == 0) {
+                final int to = pos + moveDelta;
+                long moveBitBoard = 0L;
+                long attackBitBoard = 0L;
+                if ((to & 0x88) == 0) {
+                    moveBitBoard |= 1L << convert0x88To64(to);
+                    final int attackQueenSide = to - 1;
+                    if ((attackQueenSide & 0x88) == 0) {
+                        attackBitBoard |= 1L << convert0x88To64(attackQueenSide);
+                    }
+                    final int attackKingSide = to + 1;
+                    if ((attackKingSide & 0x88) == 0) {
+                        attackBitBoard |= 1L << convert0x88To64(attackKingSide);
+                    }
+                    if (rank == 1 || rank == 6) {
+                        final int to2 = to + moveDelta;
+                        if ((to2 & 0x88) == 0) {
+                            moveBitBoard |= 1L << convert0x88To64(to2);
+                        }
+                    }
+                }
+                final int pos64 = convert0x88To64(pos);
+                moveBitBoards[pos64] = moveBitBoard;
+                attackBitBoards[pos64] = attackBitBoard;
+            }
+        }
+        print("PAWN_MOVES_" + sideStr, moveBitBoards);
+        //print("PAWN_ATTACKS_" + sideStr, attackBitBoards);
     }
 
     public static void print(final String name, final long... bitboards) {

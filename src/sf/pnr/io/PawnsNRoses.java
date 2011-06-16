@@ -149,6 +149,18 @@ public class PawnsNRoses {
         return fen;
     }
 
+    @Executable()
+    public void clearHashTables() {
+        if (engine != null) {
+            engine.getTranspositionTable().clear();
+            final Evaluation evaluation = engine.getEvaluation();
+            evaluation.getEvalHashTable().clear();
+            evaluation.getPawnHashTable().clear();
+            board.getRepetitionTable().clear();
+        }
+    }
+
+    @Executable()
     public boolean useBook() {
         return useBook;
     }

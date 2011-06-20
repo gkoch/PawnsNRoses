@@ -127,8 +127,8 @@ public class BestMoveTest {
                 if (score > maxScore) {
                     maxScore = score;
                 }
-                System.out.printf("  - engine '%s' moved '%s' (depth %d, time: %dms, cp:%d) \tscore: %d %s\r\n",
-                    engine.getName(), bestMoveStr, engineDepth, engineMoveTime, engineScore, score,
+                System.out.printf("  - engine '%s' moved '%s' (depth %d, time: %dms, cp:%d, nodes:%d) \tscore: %d %s\r\n",
+                    engine.getName(), bestMoveStr, engineDepth, engineMoveTime, engineScore, engine.getNodeCount(), score,
                     Arrays.toString(scores));
                 engineScores[i] = score;
             }

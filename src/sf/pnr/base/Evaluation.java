@@ -29,17 +29,33 @@ public final class Evaluation {
     public static final int[][] VAL_PIECE_COUNTS;
     public static final int[][] VAL_PIECE_INCREMENTS;
 
-    public static final int[] VAL_POSITION_BONUS_PAWN;
-    public static final int[] VAL_POSITION_BONUS_PAWN_ENDGAME;
-    public static final int[] VAL_POSITION_BONUS_KNIGHT;
-    public static final int[] VAL_POSITION_BONUS_BISHOP;
-    public static final int[] VAL_POSITION_BONUS_ROOK;
-    public static final int[] VAL_POSITION_BONUS_QUEEN;
-    public static final int[] VAL_POSITION_BONUS_KING;
-    public static final int[] VAL_POSITION_BONUS_KING_ENDGAME;
+    @Configurable(Configurable.Key.EVAL_POSITION_PAWN_OPENING)
+    public static int[] VAL_POSITION_BONUS_PAWN;
+    @Configurable(Configurable.Key.EVAL_POSITION_PAWN_ENDGAME)
+    public static int[] VAL_POSITION_BONUS_PAWN_ENDGAME;
+    @Configurable(Configurable.Key.EVAL_POSITION_KNIGHT_OPENING)
+    public static int[] VAL_POSITION_BONUS_KNIGHT;
+    @Configurable(Configurable.Key.EVAL_POSITION_KNIGHT_ENDGAME)
+    public static int[] VAL_POSITION_BONUS_KNIGHT_ENDGAME;
+    @Configurable(Configurable.Key.EVAL_POSITION_BISHOP_OPENING)
+    public static int[] VAL_POSITION_BONUS_BISHOP;
+    @Configurable(Configurable.Key.EVAL_POSITION_BISHOP_ENDGAME)
+    public static int[] VAL_POSITION_BONUS_BISHOP_ENDGAME;
+    @Configurable(Configurable.Key.EVAL_POSITION_ROOK_OPENING)
+    public static int[] VAL_POSITION_BONUS_ROOK;
+    @Configurable(Configurable.Key.EVAL_POSITION_ROOK_ENDGAME)
+    public static int[] VAL_POSITION_BONUS_ROOK_ENDGAME;
+    @Configurable(Configurable.Key.EVAL_POSITION_QUEEN_OPENING)
+    public static int[] VAL_POSITION_BONUS_QUEEN;
+    @Configurable(Configurable.Key.EVAL_POSITION_QUEEN_ENDGAME)
+    public static int[] VAL_POSITION_BONUS_QUEEN_ENDGAME;
+    @Configurable(Configurable.Key.EVAL_POSITION_KING_OPENING)
+    public static int[] VAL_POSITION_BONUS_KING;
+    @Configurable(Configurable.Key.EVAL_POSITION_KING_ENDGAME)
+    public static int[] VAL_POSITION_BONUS_KING_ENDGAME;
 
-    private static final int[][] VAL_POSITION_BONUS_OPENING = new int[7][128];
-    private static final int[][] VAL_POSITION_BONUS_ENDGAME = new int[7][128];
+    public static final int[][] VAL_POSITION_BONUS_OPENING = new int[7][128];
+    public static final int[][] VAL_POSITION_BONUS_ENDGAME = new int[7][128];
 
     public static final int[] SHIFT_POSITION_BONUS = new int[]{8, 0};
 
@@ -128,50 +144,79 @@ public final class Evaluation {
 
         VAL_POSITION_BONUS_PAWN = new int[]
             {
+                // pnr-pawn-opening3
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0,
-                 50, 50, 50, 50, 50, 50, 50, 50,      5, 10, 10,-20,-20, 10, 10,  5,
-                 10, 10, 20, 30, 30, 20, 10, 10,      5, -5,-10,  0,  0,-10, -5,  5,
-                  5,  5, 10, 25, 25, 10,  5,  5,      0,  0,  0, 20, 20,  0,  0,  0,
-                  0,  0,  0, 20, 20,  0,  0,  0,      5,  5, 10, 25, 25, 10,  5,  5,
-                  5, -5,-10,  0,  0,-10, -5,  5,     10, 10, 20, 30, 30, 20, 10, 10,
                   5, 10, 10,-20,-20, 10, 10,  5,     50, 50, 50, 50, 50, 50, 50, 50,
+                  5, -5,-10,  0,  0,-10, -5,  5,     10, 10, 20, 30, 30, 20, 10, 10,
+                  0,  0,  0, 20, 20,  0,  0,  0,      5,  5, 10, 25, 25, 10,  5,  5,
+                  5,  5, 10, 25, 25, 10,  5,  5,      0,  0,  0, 20, 20,  0,  0,  0,
+                 10, 10, 20, 30, 30, 20, 10, 10,      5, -5,-10,  0,  0,-10, -5,  5,
+                 50, 50, 50, 50, 50, 50, 50, 50,      5, 10, 10,-20,-20, 10, 10,  5,
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0
             };
         VAL_POSITION_BONUS_PAWN_ENDGAME = new int[]
             {
+                // pnr-pawn-endgame3
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0,
-                  0,  0,  0,-20,-20,  0,  0,  0,     20, 20, 20, 20, 20, 20, 20, 20,
-                  4,  4,  4,  0,  0,  4,  4,  4,     16, 16, 17, 18, 18, 17, 16, 16,
-                  8,  8, 11, 12, 12, 11,  8,  8,     12, 12, 14, 16, 16, 14,  0, 12,
-                 12, 12, 14, 16, 16, 14,  0, 12,      8,  8, 11, 12, 12, 11,  8,  8,
-                 16, 16, 17, 18, 18, 17, 16, 16,      4,  4,  4,  0,  0,  4,  4,  4,
-                 20, 20, 20, 20, 20, 20, 20, 20,      0,  0,  0,-20,-20,  0,  0,  0,
+                  0,  0,  0,  0,  0,  0,  0,  0,     10, 10, 10, 11, 11, 10, 10, 10,
+                  2,  2,  2,  3,  3,  2,  2,  2,      8,  8,  9,  9,  9,  9,  8,  8,
+                  4,  4,  5,  6,  6,  5,  4,  4,      6,  6,  7,  8,  8,  7,  6,  6,
+                  6,  6,  7,  8,  8,  7,  6,  6,      4,  4,  5,  6,  6,  5,  4,  4,
+                  8,  8,  9,  9,  9,  9,  8,  8,      2,  2,  2,  3,  3,  2,  2,  2,
+                 10, 10, 10, 11, 11, 10, 10, 10,      0,  0,  0,  0,  0,  0,  0,  0,
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0
             };
         VAL_POSITION_BONUS_KNIGHT = new int[]
             {
-                -50,-40,-30,-30,-30,-30,-40,-50,    -50,-40,-25,-30,-30,-25,-40,-50,
-                -40,-20,  0,  0,  0,  0,-20,-40,    -40,-20,  0,  5,  5,  0,-20,-40,
-                -30,  0, 10, 15, 15, 10,  0,-30,    -30,  5, 10, 15, 15, 10,  5,-30,
-                -30,  5, 15, 20, 20, 15,  5,-30,    -30,  0, 15, 20, 20, 15,  0,-30,
-                -30,  0, 15, 20, 20, 15,  0,-30,    -30,  5, 15, 20, 20, 15,  5,-30,
-                -30,  5, 10, 15, 15, 10,  5,-30,    -30,  0, 10, 15, 15, 10,  0,-30,
-                -40,-20,  0,  5,  5,  0,-20,-40,    -40,-20,  0,  0,  0,  0,-20,-40,
-                -50,-40,-25,-30,-30,-25,-40,-50,    -50,-40,-30,-30,-30,-30,-40,-50
+                // pnr-knight-opening3
+                -35,-20,-15,-10,-10,-15,-20,-35,    -35,-20,-15,-10,-10,-15,-20,-35,
+                -20,-10,  0,  3,  3,  0,-10,-20,    -20, -5,  0,  5,  5,  0, -5,-20,
+                -15,  5, 10, 15, 15, 10,  5,-15,    -15,  5, 10, 15, 15, 10,  5,-15,
+                -10,  3, 15, 20, 20, 15,  3,-10,    -10,  3, 15, 20, 20, 15,  3,-10,
+                -10,  3, 15, 20, 20, 15,  3,-10,    -10,  3, 15, 20, 20, 15,  3,-10,
+                -15,  5, 10, 15, 15, 10,  5,-15,    -15,  5, 10, 15, 15, 10,  5,-15,
+                -20, -5,  0,  5,  5,  0, -5,-20,    -20,-10,  0,  3,  3,  0,-10,-20,
+                -35,-20,-15,-10,-10,-15,-20,-35,    -35,-20,-15,-10,-10,-15,-20,-35
+            };
+        VAL_POSITION_BONUS_KNIGHT_ENDGAME = new int[]
+            {
+                // pnr-knight-endgame3
+                -15, -8, -6, -4, -4, -6, -8,-15,    -10, -6, -4, -2, -2, -4, -6,-10,
+                 -8, -5,  0,  2,  2,  0, -5, -8,     -6,  0,  2,  5,  5,  2,  0, -6,
+                 -6,  0,  4,  6,  6,  4,  0, -6,     -4,  5,  8,  9,  9,  8,  5, -4,
+                 -4,  3,  6,  8,  8,  6,  3, -4,     -2,  3,  7, 10, 10,  7,  3, -2,
+                 -2,  3,  7, 10, 10,  7,  3, -2,     -4,  3,  6,  8,  8,  6,  3, -4,
+                 -4,  5,  8,  9,  9,  8,  5, -4,     -6,  0,  4,  6,  6,  4,  0, -6,
+                 -6,  0,  2,  5,  5,  2,  0, -6,     -8, -5,  0,  2,  2,  0, -5, -8,
+                -10, -6, -4, -2, -2, -4, -6,-10,    -15, -8, -6, -4, -4, -6, -8,-15
             };
         VAL_POSITION_BONUS_BISHOP = new int[]
             {
-                -20,-10,-10,-10,-10,-10,-10,-20,    -20,-10,-10,-10,-10,-10,-10,-20,
-                -10,  0,  0,  0,  0,  0,  0,-10,    -10,  5,  0,  0,  0,  0,  5,-10,
-                -10,  0,  5, 10, 10,  5,  0,-10,    -10, 10, 10, 10, 10, 10, 10,-10,
-                -10,  5,  5, 10, 10,  5,  5,-10,    -10,  0, 10, 10, 10, 10,  0,-10,
-                -10,  0, 10, 10, 10, 10,  0,-10,    -10,  5,  5, 10, 10,  5,  5,-10,
-                -10, 10, 10, 10, 10, 10, 10,-10,    -10,  0,  5, 10, 10,  5,  0,-10,
-                -10,  5,  0,  0,  0,  0,  5,-10,    -10,  0,  0,  0,  0,  0,  0,-10,
-                -20,-10,-10,-10,-10,-10,-10,-20,    -20,-10,-10,-10,-10,-10,-10,-20
+                // pnr-bishop-opening3
+                -20,-16,-13,-10,-10,-13,-16,-20,    -10, -8, -6, -4, -4, -6, -8,-10,
+                -16,  5,  0, -2, -2,  0,  5,-16,     -8,  5,  3,  6,  6,  3,  5, -8,
+                -13,  0,  3,  5,  5,  3,  0,-13,     -6,  7,  9, 12, 12,  9,  7, -6,
+                -10,  5,  7, 10, 10,  7,  5,-10,     -8,  3, 10, 10, 10, 10,  3, -8,
+                 -8,  3, 10, 10, 10, 10,  3, -8,    -10,  5,  7, 10, 10,  7,  5,-10,
+                 -6,  7,  9, 12, 12,  9,  7, -6,    -13,  0,  3,  5,  5,  3,  0,-13,
+                 -8,  5,  3,  6,  6,  3,  5, -8,    -16,  5,  0, -2, -2,  0,  5,-16,
+                -10, -8, -6, -4, -4, -6, -8,-10,    -20,-16,-13,-10,-10,-13,-16,-20
+            };
+        VAL_POSITION_BONUS_BISHOP_ENDGAME = new int[]
+            {
+                // pnr-bishop-endgame2
+                -20,-16,-13,-10,-10,-13,-16,-20,    -14,-12,-10,-10,-10,-10,-12,-14,
+                -16,  3,  0,  0,  0,  0,  3,-16,    -12,  5,  0,  3,  3,  0,  5,-12,
+                -13,  0,  5,  7,  7,  5,  0,-13,    -10,  7, 10,  8,  8, 10,  7,-10,
+                -10,  5,  7, 10, 10,  7,  5,-10,     -8,  3, 10, 10, 10, 10,  3, -8,
+                 -8,  3, 10, 10, 10, 10,  3, -8,    -10,  5,  7, 10, 10,  7,  5,-10,
+                -10,  7, 10,  8,  8, 10,  7,-10,    -13,  0,  5,  7,  7,  5,  0,-13,
+                -12,  5,  0,  3,  3,  0,  5,-12,    -16,  3,  0,  0,  0,  0,  3,-16,
+                -14,-12,-10,-10,-10,-10,-12,-14,    -20,-16,-13,-10,-10,-13,-16,-20
             };
         VAL_POSITION_BONUS_ROOK = new int[]
             {
+                // pnr-rook-opening1
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  5,  5,  0,  0,  0,
                   5, 10, 10, 10, 10, 10, 10,  5,     -5,  0,  0,  0,  0,  0,  0, -5,
                  -5,  0,  0,  0,  0,  0,  0, -5,     -5,  0,  0,  0,  0,  0,  0, -5,
@@ -181,19 +226,45 @@ public final class Evaluation {
                  -5,  0,  0,  0,  0,  0,  0, -5,      5, 10, 10, 10, 10, 10, 10,  5,
                   0,  0,  0,  5,  5,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0
             };
+        VAL_POSITION_BONUS_ROOK_ENDGAME = new int[]
+            {
+                // pnr-rook-endgame2
+                 -8,  -5, -1,  1,  1, -1, -5, -8,     -2,  -1,  3,  5,  5,  3, -1, -2,
+                 -7,  -4,  0,  2,  2,  0, -4, -7,     -4,  -2,  2,  4,  4,  2, -2, -4,
+                 -6,  -3,  1,  3,  3,  1, -3, -6,     -6,  -3,  1,  3,  3,  1, -3, -6,
+                 -6,  -3,  1,  3,  3,  1, -3, -6,     -6,  -3,  1,  3,  3,  1, -3, -6,
+                 -6,  -3,  1,  3,  3,  1, -3, -6,     -6,  -3,  1,  3,  3,  1, -3, -6,
+                 -6,  -3,  1,  3,  3,  1, -3, -6,     -6,  -3,  1,  3,  3,  1, -3, -6,
+                 -4,  -2,  2,  4,  4,  2, -2, -4,     -7,  -4,  0,  2,  2,  0, -4, -7,
+                 -2,  -1,  3,  5,  5,  3, -1, -2,     -8,  -5, -1,  1,  1, -1, -5, -8
+            };
         VAL_POSITION_BONUS_QUEEN = new int[]
             {
+                // pnr-queen-opening3
                 -20,-10,-10, -5, -5,-10,-10,-20,    -20,-10,-10, -5, -5,-10,-10,-20,
                 -10,  0,  0,  0,  0,  0,  0,-10,    -10,  0,  5,  0,  0,  0,  0,-10,
                 -10,  0,  5,  5,  5,  5,  0,-10,    -10,  5,  5,  5,  5,  5,  0,-10,
-                 -5,  0,  5,  5,  5,  5,  0, -5,      0,  0,  5,  5,  5,  5,  0, -5,
-                  0,  0,  5,  5,  5,  5,  0, -5,     -5,  0,  5,  5,  5,  5,  0, -5,
+                 -5,  0,  5,  5,  5,  5,  0, -5,      0,  0,  5,  5,  5,  5,  0,  0,
+                  0,  0,  5,  5,  5,  5,  0,  0,     -5,  0,  5,  5,  5,  5,  0, -5,
+                -10,  5,  5,  5,  5,  5,  0,-10,    -10,  0,  5,  5,  5,  5,  0,-10,
+                -10,  0,  5,  0,  0,  0,  0,-10,    -10,  0,  0,  0,  0,  0,  0,-10,
+                -20,-10,-10, -5, -5,-10,-10,-20,    -20,-10,-10, -5, -5,-10,-10,-20
+            };
+        VAL_POSITION_BONUS_QUEEN_ENDGAME = new int[]
+            {
+                // pnr-queen-endgame4
+                -20,-10,-10, -5, -5,-10,-10,-20,    -20,-10,-10, -5, -5,-10,-10,-20,
+                -10,  0,  0,  0,  0,  0,  0,-10,    -10,  0,  5,  0,  0,  0,  0,-10,
+                -10,  0,  5,  5,  5,  5,  0,-10,    -10,  5,  5,  5,  5,  5,  0,-10,
+                 -5,  0,  5,  5,  5,  5,  0, -5,      0,  0,  5,  5,  5,  5,  0,  0,
+                  0,  0,  5,  5,  5,  5,  0,  0,     -5,  0,  5,  5,  5,  5,  0, -5,
                 -10,  5,  5,  5,  5,  5,  0,-10,    -10,  0,  5,  5,  5,  5,  0,-10,
                 -10,  0,  5,  0,  0,  0,  0,-10,    -10,  0,  0,  0,  0,  0,  0,-10,
                 -20,-10,-10, -5, -5,-10,-10,-20,    -20,-10,-10, -5, -5,-10,-10,-20
             };
         VAL_POSITION_BONUS_KING = new int[]
             {
+                // pnr-king-opening1
                  20, 30, 10,  0,  0, 10, 30, 20,    -30,-40,-40,-50,-50,-40,-40,-30,
                  20, 20,  0,  0,  0,  0, 20, 20,    -30,-40,-40,-50,-50,-40,-40,-30,
                 -10,-20,-20,-20,-20,-20,-20,-10,    -30,-40,-40,-50,-50,-40,-40,-30,
@@ -205,14 +276,15 @@ public final class Evaluation {
             };
         VAL_POSITION_BONUS_KING_ENDGAME = new int[]
             {
-                -50,-40,-30,-20,-20,-30,-40,-50,   -50,-30,-30,-30,-30,-30,-30,-50,
-                -30,-20,-10,  0,  0,-10,-20,-30,   -30,-30,  0,  0,  0,  0,-30,-30,
-                -30,-10, 20, 30, 30, 20,-10,-30,   -30,-10, 20, 30, 30, 20,-10,-30,
-                -30,-10, 30, 40, 40, 30,-10,-30,   -30,-10, 30, 40, 40, 30,-10,-30,
-                -30,-10, 30, 40, 40, 30,-10,-30,   -30,-10, 30, 40, 40, 30,-10,-30,
-                -30,-10, 20, 30, 30, 20,-10,-30,   -30,-10, 20, 30, 30, 20,-10,-30,
-                -30,-30,  0,  0,  0,  0,-30,-30,   -30,-20,-10,  0,  0,-10,-20,-30,
-                -50,-30,-30,-30,-30,-30,-30,-50,   -50,-40,-30,-20,-20,-30,-40,-50
+                // pnr-king-endgame2
+                -20,-15,-12, -7, -7,-12,-15,-20,   -20,-15,-13,-12,-12,-13,-15,-20,
+                -14, -8, -3,  0,  0, -3, -8,-14,   -14, -8,  0,  0,  0,  0, -8,-14,
+                -12, -5,  4,  8,  8,  4, -5,-12,   -12, -5,  4,  8,  8,  4, -5,-12,
+                -10, -3,  8, 12, 12,  8, -3,-10,   -10, -3,  8, 12, 12,  8, -3,-10,
+                -10, -3,  8, 12, 12,  8, -3,-10,   -10, -3,  8, 12, 12,  8, -3,-10,
+                -12, -5,  4,  8,  8,  4, -5,-12,   -12, -5,  4,  8,  8,  4, -5,-12,
+                -14, -8,  0,  0,  0,  0, -8,-14,   -14, -8, -3,  0,  0, -3, -8,-14,
+                -20,-15,-13,-12,-12,-13,-15,-20,   -20,-15,-12, -7, -7,-12,-15,-20
             };
 
         VAL_POSITION_BONUS_OPENING[PAWN] = VAL_POSITION_BONUS_PAWN;
@@ -223,10 +295,10 @@ public final class Evaluation {
         VAL_POSITION_BONUS_OPENING[KING] = VAL_POSITION_BONUS_KING;
 
         VAL_POSITION_BONUS_ENDGAME[PAWN] = VAL_POSITION_BONUS_PAWN_ENDGAME;
-        VAL_POSITION_BONUS_ENDGAME[KNIGHT] = VAL_POSITION_BONUS_KNIGHT;
-        VAL_POSITION_BONUS_ENDGAME[BISHOP] = VAL_POSITION_BONUS_BISHOP;
-        VAL_POSITION_BONUS_ENDGAME[ROOK] = VAL_POSITION_BONUS_ROOK;
-        VAL_POSITION_BONUS_ENDGAME[QUEEN] = VAL_POSITION_BONUS_QUEEN;
+        VAL_POSITION_BONUS_ENDGAME[KNIGHT] = VAL_POSITION_BONUS_KNIGHT_ENDGAME;
+        VAL_POSITION_BONUS_ENDGAME[BISHOP] = VAL_POSITION_BONUS_BISHOP_ENDGAME;
+        VAL_POSITION_BONUS_ENDGAME[ROOK] = VAL_POSITION_BONUS_ROOK_ENDGAME;
+        VAL_POSITION_BONUS_ENDGAME[QUEEN] = VAL_POSITION_BONUS_QUEEN_ENDGAME;
         VAL_POSITION_BONUS_ENDGAME[KING] = VAL_POSITION_BONUS_KING_ENDGAME;
     }
 

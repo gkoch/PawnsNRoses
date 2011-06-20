@@ -83,7 +83,7 @@ public class EvaluationTest extends TestCase {
         assertEquals(0, computePositionalBonusNoPawnAsWhite(board));
         final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
         final int shiftBlack = SHIFT_POSITION_BONUS[BLACK];
-        assertEquals(VAL_POSITION_BONUS_PAWN[E[3] + shiftWhite] - VAL_POSITION_BONUS_PAWN[E[1] + shiftBlack],
+        assertEquals(VAL_POSITION_BONUS_PAWN[E[3] + shiftWhite] - VAL_POSITION_BONUS_PAWN[E[1] + shiftWhite],
             computePositionalGain(PAWN, E[1], E[3], board.getStage(), shiftWhite));
         board.move(StringUtils.fromSimple("e2e4"));
         assertEquals(0, computePositionalBonusNoPawnAsWhite(board));
@@ -225,16 +225,32 @@ public class EvaluationTest extends TestCase {
         final Board board = StringUtils.fromFen("8/5p2/3p1kp1/PR2b2p/r7/8/1P6/1K5B w - - 2 45");
         final int stage = board.getStage();
         final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
+        final int shiftBlack = SHIFT_POSITION_BONUS[BLACK];
         final int openingScore =
-            Evaluation.VAL_POSITION_BONUS_ROOK[B[4] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_ROOK[A[3]] +
-            Evaluation.VAL_POSITION_BONUS_BISHOP[H[0] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_BISHOP[E[4]] +
-            Evaluation.VAL_POSITION_BONUS_KING[B[0] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_KING[F[5]];
+            VAL_POSITION_BONUS_ROOK[B[4] + shiftWhite] - VAL_POSITION_BONUS_ROOK[A[3] + shiftBlack] +
+            VAL_POSITION_BONUS_BISHOP[H[0] + shiftWhite] - VAL_POSITION_BONUS_BISHOP[E[4] + shiftBlack] +
+            VAL_POSITION_BONUS_KING[B[0] + shiftWhite] - VAL_POSITION_BONUS_KING[F[5] + shiftBlack];
         final int endGameScore =
-            Evaluation.VAL_POSITION_BONUS_ROOK[B[4] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_ROOK[A[3]] +
-            Evaluation.VAL_POSITION_BONUS_BISHOP[H[0] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_BISHOP[E[4]] +
-            Evaluation.VAL_POSITION_BONUS_KING_ENDGAME[B[0] + shiftWhite] - Evaluation.VAL_POSITION_BONUS_KING_ENDGAME[F[5]];
+            VAL_POSITION_BONUS_ROOK_ENDGAME[B[4] + shiftWhite] - VAL_POSITION_BONUS_ROOK_ENDGAME[A[3] + shiftBlack] +
+            VAL_POSITION_BONUS_BISHOP[H[0] + shiftWhite] - VAL_POSITION_BONUS_BISHOP[E[4] + shiftBlack] +
+            VAL_POSITION_BONUS_KING_ENDGAME[B[0] + shiftWhite] - VAL_POSITION_BONUS_KING_ENDGAME[F[5] + shiftBlack];
         final int bonus = (openingScore * (STAGE_MAX - stage) + endGameScore * stage) / STAGE_MAX;
-        assertEquals(bonus, eval.computePositionalBonusNoPawnAsWhite(board));
+        assertEquals(bonus, computePositionalBonusNoPawnAsWhite(board));
+    }
+
+    public void testPositionalBonusQueens() {
+        final Board board = StringUtils.fromFen("1q4k1/8/8/2Q5/8/8/8/2K5 w - - 0 1");
+        final int stage = board.getStage();
+        final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
+        final int shiftBlack = SHIFT_POSITION_BONUS[BLACK];
+        final int openingScore =
+            VAL_POSITION_BONUS_QUEEN[C[4] + shiftWhite] - VAL_POSITION_BONUS_QUEEN[B[7] + shiftBlack] +
+            VAL_POSITION_BONUS_KING[C[0] + shiftWhite] - VAL_POSITION_BONUS_KING[G[7] + shiftBlack];
+        final int endGameScore =
+            VAL_POSITION_BONUS_QUEEN_ENDGAME[C[4] + shiftWhite] - VAL_POSITION_BONUS_QUEEN_ENDGAME[B[7] + shiftBlack] +
+            VAL_POSITION_BONUS_KING_ENDGAME[C[0] + shiftWhite] - VAL_POSITION_BONUS_KING_ENDGAME[G[7] + shiftBlack];
+        final int bonus = (openingScore * (STAGE_MAX - stage) + endGameScore * stage) / STAGE_MAX;
+        assertEquals(bonus, computePositionalBonusNoPawnAsWhite(board));
     }
 
     public void testPositionalBonus2() {
@@ -243,6 +259,31 @@ public class EvaluationTest extends TestCase {
         final int[] pawnEndGame = Evaluation.VAL_POSITION_BONUS_PAWN_ENDGAME;
         assertTrue(pawnEndGame[A[6] + shiftWhite] >= pawnEndGame[A[1] + shiftWhite]);
         assertTrue(pawnEndGame[A[6] + shiftBlack] <= pawnEndGame[A[1] + shiftBlack]);
+    }
+
+    public void testPositionalBonusSymmetry() throws NoSuchFieldException, IllegalAccessException {
+        final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
+        final int shiftBlack = SHIFT_POSITION_BONUS[BLACK];
+        for (int[] arr: Evaluation.VAL_POSITION_BONUS_OPENING) {
+            assertEquals(128, arr.length);
+            for (int rank = 0; rank < 8; rank++) {
+                for (int file = 0; file < 8; file++) {
+                    final int whitePos = Utils.getPosition(file, rank);
+                    final int blackPos = Utils.getPosition(file, 7 - rank);
+                    assertEquals(StringUtils.toString0x88(whitePos), arr[whitePos + shiftWhite], arr[blackPos + shiftBlack]);
+                }
+            }
+        }
+        for (int[] arr: Evaluation.VAL_POSITION_BONUS_ENDGAME) {
+            assertEquals(128, arr.length);
+            for (int rank = 0; rank < 8; rank++) {
+                for (int file = 0; file < 8; file++) {
+                    final int whitePos = Utils.getPosition(file, rank);
+                    final int blackPos = Utils.getPosition(file, 7 - rank);
+                    assertEquals(StringUtils.toString0x88(whitePos), arr[whitePos + shiftWhite], arr[blackPos + shiftBlack]);
+                }
+            }
+        }
     }
 
     public void testPawnMirrorEvalPawnStorm() {

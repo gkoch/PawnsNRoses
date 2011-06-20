@@ -415,21 +415,24 @@ public final class Evaluation {
         return score + (signum * distance[0] * stage + castlingPenalty * (STAGE_MAX - stage)) / STAGE_MAX;
     }
 
-    private static int computeMobilityBonusPawn(final Board board, final int side) {
+    public static int computeMobilityBonusPawn(final Board board, final int side) {
         final int[] squares = board.getBoard();
         int score = 0;
         final int signum = (side << 1) - 1;
         final int move = signum * UP;
         final int[] pieces = board.getPieces(side, PAWN);
         for (int i = pieces[0]; i > 0; i--) {
-            int pawn = pieces[i];
+            final int pawn = pieces[i];
             for (int delta: DELTA_PAWN_ATTACK[side]) {
                 int pos = pawn + delta;
                 if ((pos & 0x88) == 0 && squares[pos] != EMPTY) {
                     if (side == side(squares[pos])) {
                         score += BONUS_DEFENSE;
-                    } else if (squares[pos] * (-signum) > PAWN) {
-                        score += BONUS_ATTACK + BONUS_HUNG_PIECE;
+                    } else {
+                        score += BONUS_ATTACK;
+                        if (squares[pos] * (-signum) > PAWN) {
+                             score += BONUS_HUNG_PIECE;
+                        }
                     }
                 }
             }
@@ -455,8 +458,6 @@ public final class Evaluation {
         final long piecesMask = board.getBitboard(side);
         final long opponentPiecesMask = board.getBitboard(1 - side);
         final int opponentKing = board.getKing(1 - side);
-        final int opponentKing64 = convert0x88To64(opponentKing);
-        final long opponentKingMask = 1L << opponentKing64;
         int score = 0;
         final int[] knights = board.getPieces(side, KNIGHT);
         for (int i = knights[0]; i > 0; i--) {

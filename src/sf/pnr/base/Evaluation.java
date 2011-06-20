@@ -82,7 +82,7 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_ATTACK)
     public static int BONUS_ATTACK = 1;
     @Configurable(Configurable.Key.EVAL_BONUS_HUNG_PIECE)
-    public static int BONUS_HUNG_PIECE = 2;
+    public static int BONUS_HUNG_PIECE = 50;
     @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY)
     public static int BONUS_MOBILITY = 2;
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_KNIGHT)

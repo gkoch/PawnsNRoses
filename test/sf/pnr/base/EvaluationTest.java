@@ -322,6 +322,15 @@ public class EvaluationTest extends TestCase {
         return (openingBonus + endgameBonus) / STAGE_MAX;
     }
 
+    public void testCastlingPenalty() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/8/8/8/4K2R w K - 1 1");
+        assertEquals(PENALTY_CASTLING_PENDING - PENALTY_CASTLING_MISSED,
+            getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
+        board.move(StringUtils.fromSimple("e1g1") | MT_CASTLING_KINGSIDE);
+        assertEquals(-PENALTY_CASTLING_MISSED,
+            getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
+    }
+
     public void testMobility() {
         final Board board = StringUtils.fromFen("8/1R2K2k/8/8/8/8/8/8 w - - 0 1");
         final int score = Evaluation.computeMobilityBonusAsWhite(board);
@@ -332,7 +341,7 @@ public class EvaluationTest extends TestCase {
         final Board board = StringUtils.fromFen("8/p3pk2/2N5/8/1P6/1K6/8/8 w - - 0 1");
         final int[] distance = new int[1];
         final int score = Evaluation.computeMobilityBonusKnight(board, WHITE, distance);
-        assertEquals(5 * BONUS_MOBILITY + 1 * BONUS_DEFENSE + 2 * BONUS_ATTACK, score);
+        assertEquals(5 * BONUS_MOBILITY + BONUS_DEFENSE + 2 * BONUS_ATTACK, score);
         assertEquals(BONUS_DISTANCE_KNIGHT[2], distance[0]);
     }
 }

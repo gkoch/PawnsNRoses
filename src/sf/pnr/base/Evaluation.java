@@ -3,8 +3,6 @@ package sf.pnr.base;
 import sf.pnr.alg.EvalHashTable;
 import sf.pnr.alg.PawnHashTable;
 
-import java.util.Random;
-
 import static sf.pnr.base.BitBoard.*;
 import static sf.pnr.base.Utils.*;
 
@@ -110,8 +108,6 @@ public final class Evaluation {
     public static int BONUS_ROOKS_ON_SAME_RANK = 12;
 
     public static final int INITIAL_MATERIAL_VALUE;
-
-    private static final Random RND = new Random(System.currentTimeMillis());
 
     static {
         VAL_PIECES = new int[7];
@@ -450,7 +446,25 @@ public final class Evaluation {
                 }
             }
         }
-        // TODO: enpassant?
+
+        // en passant
+        final int state = board.getState();
+        final int toMove = state & WHITE_TO_MOVE;
+        if (toMove == side) {
+            final int enPassant = (state & EN_PASSANT) >> SHIFT_EN_PASSANT;
+            if (enPassant != 0) {
+                final int pawn = signum * PAWN;
+                final int rankStartPos = (3 + side) << 4;
+                final int leftPos = rankStartPos + enPassant - 2;
+                if ((leftPos & 0x88) == 0 && squares[leftPos] == pawn) {
+                    score += BONUS_ATTACK;
+                }
+                final int rightPos = leftPos + 2;
+                if ((rightPos & 0x88) == 0 && squares[rightPos] == pawn) {
+                    score += BONUS_ATTACK;
+                }
+            }
+        }
         return score;
     }
 

@@ -91,6 +91,17 @@ public final class Evaluation {
     public static int[] BONUS_DISTANCE_ROOK = new int[] {0, 3, 1, 0, 0, 0, 0, 0};
     @Configurable(Configurable.Key.EVAL_BONUS_DISTANCE_QUEEN)
     public static int[] BONUS_DISTANCE_QUEEN = new int[] {0, 2, 1, 0, 0, 0, 0, 0};
+    @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY_KNIGHT)
+    public static int[] BONUS_MOBILITY_KNIGHT = new int[] {-10, -6, -3, 0, 3, 6, 8, 9, 10};
+    @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY_BISHOP)
+    public static int[] BONUS_MOBILITY_BISHOP = new int[] {-10, -8, -4, -2, 0, 2, 4, 8, 9, 10, 11, 12, 13, 14};
+    @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY_ROOK)
+    public static int[] BONUS_MOBILITY_ROOK = new int[] {-10, -9, -7, -3, 0, 3, 7, 9, 10, 11, 12, 13, 14, 15, 16};
+    @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY_QUEEN)
+    public static int[] BONUS_MOBILITY_QUEEN = new int[] {-15, -11, -8, -5, -2, 0, 2, 5, 7, 8, 9, 10, 11, 12, 13, 14,
+                                                          15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15};
+    @Configurable(Configurable.Key.EVAL_BONUS_MOBILITY_KING)
+    public static int[] BONUS_MOBILITY_KING = new int[] {-10, -6, -2, 0, 2, 4, 5, 5, 5};
     public static final int BONUS_KING_IN_SIGHT_NON_SLIDING = 5;
     public static final int BONUS_KING_IN_SIGHT_SLIDING = 3;
     @Configurable(Configurable.Key.EVAL_BONUS_UNSTOPPABLE_PAWN)
@@ -395,12 +406,12 @@ public final class Evaluation {
         int score = computeMobilityBonusPawn(board, WHITE) - computeMobilityBonusPawn(board, BLACK);
         final int[] distance = new int[1];
         score += computeMobilityBonusKnight(board, WHITE, distance) - computeMobilityBonusKnight(board, BLACK, distance);
-        score += computeMobilityBonusSliding(board, WHITE, BISHOP, BONUS_DISTANCE_BISHOP, distance) -
-            computeMobilityBonusSliding(board, BLACK, BISHOP, BONUS_DISTANCE_BISHOP, distance);
-        score += computeMobilityBonusSliding(board, WHITE, ROOK, BONUS_DISTANCE_ROOK, distance) -
-            computeMobilityBonusSliding(board, BLACK, ROOK, BONUS_DISTANCE_ROOK, distance);
-        score += computeMobilityBonusSliding(board, WHITE, QUEEN, BONUS_DISTANCE_QUEEN, distance) -
-            computeMobilityBonusSliding(board, BLACK, QUEEN, BONUS_DISTANCE_QUEEN, distance);
+        score += computeMobilityBonusSliding(board, WHITE, BISHOP, BONUS_DISTANCE_BISHOP, BONUS_MOBILITY_BISHOP, distance) -
+            computeMobilityBonusSliding(board, BLACK, BISHOP, BONUS_DISTANCE_BISHOP, BONUS_MOBILITY_BISHOP, distance);
+        score += computeMobilityBonusSliding(board, WHITE, ROOK, BONUS_DISTANCE_ROOK, BONUS_MOBILITY_ROOK, distance) -
+            computeMobilityBonusSliding(board, BLACK, ROOK, BONUS_DISTANCE_ROOK, BONUS_MOBILITY_ROOK, distance);
+        score += computeMobilityBonusSliding(board, WHITE, QUEEN, BONUS_DISTANCE_QUEEN, BONUS_MOBILITY_QUEEN, distance) -
+            computeMobilityBonusSliding(board, BLACK, QUEEN, BONUS_DISTANCE_QUEEN, BONUS_MOBILITY_QUEEN, distance);
         score += computeMobilityBonusKing(board, WHITE) - computeMobilityBonusKing(board, BLACK);
         final int state = board.getState();
         final int state2 = board.getState2();
@@ -482,7 +493,7 @@ public final class Evaluation {
             score += Long.bitCount(defended) * BONUS_DEFENSE;
             final long attacked = knightMask & opponentPiecesMask;
             score += Long.bitCount(attacked) * BONUS_ATTACK;
-            score += Long.bitCount(knightMask ^ defended ^ attacked) * BONUS_MOBILITY;
+            score += BONUS_MOBILITY_KNIGHT[Long.bitCount(knightMask ^ defended ^ attacked)];
             distance[0] += BONUS_DISTANCE_KNIGHT[
                 distance(knight, opponentKing, ATTACK_DISTANCE_KNIGHT, SHIFT_ATTACK_DISTANCE_KNIGHT)];
         }
@@ -494,17 +505,19 @@ public final class Evaluation {
     }
 
     private static int computeMobilityBonusSliding(final Board board, final int side, final int type,
-                                                   final int[] distanceBonus, final int[] distance) {
+                                                   final int[] distanceBonus, final int[] mobilityArr,
+                                                   final int[] distance) {
         final int opponentKing = board.getKing(1 - side);
         final int[] squares = board.getBoard();
         int score = 0;
         final int[] pieces = board.getPieces(side, type);
         for (int i = pieces[0]; i > 0; i--) {
             final int piecePos = pieces[i];
+            int mobility = 0;
             for (int delta: DELTA[type]) {
                 for (int pos = piecePos + delta; (pos & 0x88) == 0; pos += delta) {
                     if (squares[pos] == EMPTY) {
-                        score += BONUS_MOBILITY;
+                        mobility++;
                     } else if (side == side(squares[pos])) {
                         score += BONUS_DEFENSE;
                         break;
@@ -514,6 +527,7 @@ public final class Evaluation {
                     }
                 }
             }
+            score += mobilityArr[mobility];
             distance[0] += distanceBonus[distance(piecePos, opponentKing, ATTACK_DISTANCE_MASKS[type],
                 SHIFT_ATTACK_DISTANCES[type])];
         }
@@ -524,11 +538,12 @@ public final class Evaluation {
         final int[] squares = board.getBoard();
         int score = 0;
         final int kingPos = board.getKing(side);
+        int mobility = 0;
         for (int delta: DELTA_KING) {
             int pos = kingPos + delta;
             if ((pos & 0x88) == 0) {
                 if (squares[pos] == EMPTY) {
-                    score += BONUS_MOBILITY;
+                    mobility++;
                 } else if (side == side(squares[pos])) {
                     score += BONUS_DEFENSE;
                 } else {
@@ -536,7 +551,7 @@ public final class Evaluation {
                 }
             }
         }
-        return score;
+        return score + BONUS_MOBILITY_KING[mobility];
     }
 
     public static int getCastlingPenaltyAsWhite(final int state, final int state2) {

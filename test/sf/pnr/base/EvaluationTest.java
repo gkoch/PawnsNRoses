@@ -337,6 +337,14 @@ public class EvaluationTest extends TestCase {
         assertEquals((10 + 8 - 5) * BONUS_MOBILITY + BONUS_DEFENSE + BONUS_DISTANCE_ROOK[1], score);
     }
 
+    public void testMobilityBonusArraySizes() {
+        assertEquals(8 + 1, BONUS_MOBILITY_KNIGHT.length);
+        assertEquals(13 + 1, BONUS_MOBILITY_BISHOP.length);
+        assertEquals(14 + 1, BONUS_MOBILITY_ROOK.length);
+        assertEquals(27 + 1, BONUS_MOBILITY_QUEEN.length);
+        assertEquals(8 + 1, BONUS_MOBILITY_KING.length);
+    }
+
     public void testMobilityPawnEnPassant() {
         final Board board = StringUtils.fromFen("4k3/8/8/5Pp1/8/8/8/4K3 w - g6 0 1");
         final int scoreWhite = Evaluation.computeMobilityBonusPawn(board, WHITE);

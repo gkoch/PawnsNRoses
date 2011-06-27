@@ -246,4 +246,16 @@ public class TestUtils {
         }
         return maxNameLen;
     }
+
+    public static String getFileNameWithoutExtension(final File file) {
+        final String name = file.getName();
+        final int pos = name.lastIndexOf('.');
+        final String result;
+        if (pos > 0) {
+            result = name.substring(0, pos);
+        } else {
+            result = name;
+        }
+        return result;
+    }
 }

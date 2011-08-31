@@ -39,8 +39,8 @@ public class BestMoveTest {
         //testFiles.add("qtest_easy.epd");
         //testFiles.add("en passant.epd");
         //testFiles.add("ans.epd");
-        //testFiles.add("gmgames-min3.epd");
-        testFiles.add("med-games.epd");
+        testFiles.add("gmgames-min3.epd");
+        //testFiles.add("med-games.epd");
 
         new EpdProcessor().process(testFiles, new BestMoveTask(players, refEngines, depth, time, printInterval, maxScore), rndSeed);
 

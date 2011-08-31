@@ -22,7 +22,7 @@ public final class TranspositionTable {
     public static final int TT_SHIFT_DEPTH = 16;
     public static final int TT_SHIFT_MOVE  = 32;
     public static final long TT_MOVE  = ((long) BASE_INFO) << TT_SHIFT_MOVE;
-    public static final int TT_SHIFT_TYPE  = 32 + Integer.bitCount(BASE_INFO); // 32 + 17
+    public static final int TT_SHIFT_TYPE  = TT_SHIFT_MOVE + Integer.bitCount(BASE_INFO); // 32 + 17
     public static final long TT_TYPE = 0x03L << TT_SHIFT_TYPE;
     public static final long TT_TYPE_EXACT = 0x00L << TT_SHIFT_TYPE;
     public static final long TT_TYPE_ALPHA_CUT = 0x01L << TT_SHIFT_TYPE;

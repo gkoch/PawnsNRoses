@@ -499,4 +499,13 @@ public class Utils {
         board.takeBack(undo);
         return problems;
     }
+
+    public static int bitCount(long bitboard) {
+        int count = 0;
+        while (bitboard != 0) {
+            bitboard &= bitboard - 1;
+            count++;
+        }
+        return count;
+    }
 }

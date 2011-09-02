@@ -67,15 +67,11 @@ public final class MoveGenerator {
             if ((pos & 0x88) == 0) {
                 final int attacked = squares[pos];
                 if (attacked == EMPTY) {
-                    if (!board.isAttacked(pos, opponent)) {
-                        moves[++idx] = (pos << SHIFT_TO) + kingPos;
-                    }
+                    moves[++idx] = (pos << SHIFT_TO) + kingPos;
                 } else if (toMove == (attacked >>> 31)) {
-                    if (!board.isAttacked(pos, opponent)) {
-                        final int move = (pos << SHIFT_TO) | kingPos |
-                            (VAL_PIECES[signumOpponent * attacked] << SHIFT_MOVE_VALUE);
-                        winningCaptures[++winningCaptureIdx] = move;
-                    }
+                    final int move = (pos << SHIFT_TO) | kingPos |
+                        (VAL_PIECES[signumOpponent * attacked] << SHIFT_MOVE_VALUE);
+                    winningCaptures[++winningCaptureIdx] = move;
                 }
             }
         }

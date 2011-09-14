@@ -1,7 +1,6 @@
 package sf.pnr.tests;
 
 import sf.pnr.base.Board;
-import sf.pnr.base.Evaluation;
 import sf.pnr.base.StringUtils;
 import sf.pnr.base.Utils;
 import sf.pnr.io.UncloseableOutputStream;
@@ -17,12 +16,8 @@ import java.util.concurrent.ExecutionException;
 public class GameFragmentTest {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         final UciRunner[] players = TestUtils.getEngines();
-        System.out.println("Running tournament with the following engines:");
-        for (UciRunner player: players) {
-            System.out.println("  - " + player.getName());
-        }
         final UciRunner refEngine = TestUtils.getReferenceEngines()[0];
-        System.out.println("against reference engine " + refEngine.getName());
+        final UciRunner kibitzer = TestUtils.getKibitzer();
         FileOutputStream debugOs = null;
         final String debugFile = System.getProperty("searchTask.debugFile");
         if (debugFile != null) {
@@ -44,7 +39,7 @@ public class GameFragmentTest {
         testFiles.add("en passant.epd");
         testFiles.add("ans.epd");
 
-        new EpdProcessor().process(testFiles, new GameFragmentTask(players, refEngine, moveTime, moveCount), rndSeed);
+        new EpdProcessor().process(testFiles, new GameFragmentTask(players, refEngine, kibitzer, moveTime, moveCount), rndSeed);
 
         if (debugOs != null) {
             debugOs.close();
@@ -58,27 +53,29 @@ public class GameFragmentTest {
     private static class GameFragmentTask implements EpdProcessorTask {
 
         private final UciRunner[] engines;
-        private final long[] scores;
+        private final UciRunner kibitzer;
         private final int[] depths;
         private final long[] nodeCounts;
         private final long[] moveTimes;
         private final int[] moveCounts;
+        private final int[] kibitzerScoreDiffs;
         private final UciRunner referenceEngine;
         private final int moveTime;
         private final int moveCount;
         private int testCount;
 
-        private GameFragmentTask(final UciRunner[] engines, final UciRunner referenceEngine, final int moveTime,
-                                 final int moveCount) {
+        private GameFragmentTask(final UciRunner[] engines, final UciRunner referenceEngine, final UciRunner kibitzer,
+                                 final int moveTime, final int moveCount) {
             this.engines = engines;
-            scores = new long[engines.length];
+            this.referenceEngine = referenceEngine;
+            this.kibitzer = kibitzer;
             depths = new int[engines.length];
             nodeCounts = new long[engines.length];
             moveTimes = new long[engines.length];
             moveCounts = new int[engines.length];
+            kibitzerScoreDiffs = new int[engines.length];
             this.moveTime = moveTime;
             this.moveCount = moveCount;
-            this.referenceEngine = referenceEngine;
         }
 
         @Override
@@ -92,10 +89,11 @@ public class GameFragmentTest {
             System.out.println();
         }
 
-        private int runTest(final int engineIndex, final Board board) {
+        private void runTest(final int engineIndex, final Board board) {
             final UciRunner engine = engines[engineIndex];
             System.out.print(engine.getName());
             try {
+                final int initialKibitzerScore = getKibitzerScore(board);
                 final List<Integer> moves = new ArrayList<Integer>(moveCount * 2);
                 engine.uciNewGame();
                 referenceEngine.uciNewGame();
@@ -105,10 +103,12 @@ public class GameFragmentTest {
                 if (!whiteToStart) {
                     System.out.printf("\r\n%d. ...", fullMoves);
                 }
-                int score = 0;
                 long testNodeCount = 0;
                 int testDepth = 0;
                 long testMoveTime = 0;
+                long opponentTestNodeCount = 0;
+                int opponentTestDepth = 0;
+                long opponentTestMoveTime = 0;
                 int i = 0;
                 for (; i < moveCount; i++) {
                     if (whiteToStart) {
@@ -119,47 +119,71 @@ public class GameFragmentTest {
                     testNodeCount += engine.getNodeCount();
                     testMoveTime += engine.getMoveTime();
                     if (board.isMate()) {
-                        score = Evaluation.VAL_MATE;
                         break;
                     }
                     if (!whiteToStart) {
                         System.out.printf("\r\n%d.", fullMoves + i + 1);
                     }
                     move(referenceEngine, board, moves);
+                    opponentTestDepth += referenceEngine.getDepth();
+                    opponentTestNodeCount += referenceEngine.getNodeCount();
+                    opponentTestMoveTime += referenceEngine.getMoveTime();
                     if (board.isMate()) {
-                        score = Evaluation.VAL_MATE;
                         break;
                     }
-                    score = -referenceEngine.getScore();
                 }
                 depths[engineIndex] += testDepth;
                 nodeCounts[engineIndex] += testNodeCount;
                 moveTimes[engineIndex] += testMoveTime;
-                scores[engineIndex] += score;
                 moveCounts[engineIndex] += i;
-                System.out.printf("\r\ndepth: %.2f (%.2f), nodes: %d (%.1f), time: %dms (%.1f), nps: %.1f (%.1f), cp: %d (%.1f)\r\n",
+                final int finalKibitzerScore =
+                    (1 - 2 * Math.abs((state & Utils.WHITE_TO_MOVE) - (board.getState() & Utils.WHITE_TO_MOVE))) *
+                        getKibitzerScore(board);
+                final int kibitzerScoreDiff = finalKibitzerScore - initialKibitzerScore;
+                kibitzerScoreDiffs[engineIndex] += kibitzerScoreDiff;
+                System.out.printf("\r\ndepth: %.2f (%.2f), nodes: %d (%.1f), time: %dms (%.1f), nps: %.1f (%.1f), k.cp diff: %d (%d -> %d, avg: %.1f)\r\n",
                     ((double) testDepth) / i, ((double) depths[engineIndex]) / moveCounts[engineIndex],
                     testNodeCount, ((double) nodeCounts[engineIndex]) / moveCounts[engineIndex],
                     testMoveTime, ((double) moveTimes[engineIndex]) / moveCounts[engineIndex],
                     ((double) testNodeCount * 1000) / testMoveTime, ((double) nodeCounts[engineIndex] * 1000) / moveTimes[engineIndex],
-                    score, ((double) scores[engineIndex]) / testCount);
-                return score;
+                    kibitzerScoreDiff, initialKibitzerScore, finalKibitzerScore, ((double) kibitzerScoreDiffs[engineIndex]) / testCount);
+                System.out.printf("depth: %.2f, nodes: %d, time: %dms, nps: %.1f\r\n",
+                    ((double) opponentTestDepth) / i, opponentTestNodeCount, opponentTestMoveTime,
+                    ((double) opponentTestNodeCount * 1000) / testMoveTime);
             } catch (IOException e) {
                 throw new UndeclaredThrowableException(e, String.format("Engine '%s' failed on test FEN '%s'",
                     engine.getName(), StringUtils.toFen(board)));
             }
         }
 
+        private int getKibitzerScore(final Board board) throws IOException {
+            final int kibitzerScore;
+            if (kibitzer != null) {
+                System.out.printf("\r\nKibitzer (%s) move: ", kibitzer);
+                kibitzer.uciNewGame();
+                move(kibitzer, board, moveTime * 2);
+                kibitzerScore = kibitzer.getScore();
+            } else {
+                kibitzerScore = 0;
+            }
+            return kibitzerScore;
+        }
+
         private long move(final UciRunner engine, final Board board, final List<Integer> moves) throws IOException {
+            final int move = move(engine, board, moveTime);
+            moves.add(move);
+            return board.move(move);
+        }
+
+        private int move(final UciRunner engine, final Board board, final int moveTime) throws IOException {
             engine.position(board);
             engine.go(0, moveTime);
             final String moveStr = engine.getBestMove();
-            int move = StringUtils.fromLong(board, moveStr);
-            moves.add(move);
+            final int move = StringUtils.fromLong(board, moveStr);
             System.out.printf(" %s (d:%d, n:%d, t:%dms, nps: %.1f, cp: %d)", StringUtils.toShort(board, move),
                 engine.getDepth(), engine.getNodeCount(), engine.getMoveTime(),
                 ((double) engine.getNodeCount() * 1000) / engine.getMoveTime(), engine.getScore());
-            return board.move(move);
+            return move;
         }
 
         @Override

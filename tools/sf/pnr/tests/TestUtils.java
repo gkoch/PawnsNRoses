@@ -163,13 +163,16 @@ public class TestUtils {
                 reader.close();
             }
             for (String name: defaultOverwrites.stringPropertyNames()) {
-                defaults.put(name, defaultOverwrites.getProperty(name));
+                defaults.put(UCI.toUciOption(Configuration.getKey(name)), defaultOverwrites.getProperty(name));
             }
         }
         return defaults;
     }
 
     public static Map<String, String> getConfigs(final File file, final Map<String, String> defaults) throws IOException {
+        if (!file.exists()) {
+            return defaults;
+        }
         final Properties properties = new Properties();
         final FileReader reader = new FileReader(file);
         try {

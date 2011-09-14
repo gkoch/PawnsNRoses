@@ -37,13 +37,9 @@ public class GamePlayTest {
         }
 
         final GameManager manager = new GameManager(event, initialTime, increment, rounds, restartBeforeMoves);
-
-        final String kibitzerPath = System.getProperty("searchTask.kibitzer");
-        if (kibitzerPath != null) {
-            final UciRunner kibitzer =
-                new UciRunner(new File(kibitzerPath).getName(), new ExternalUciProcess(kibitzerPath));
+        final UciRunner kibitzer = TestUtils.getKibitzer();
+        if (kibitzer != null) {
             manager.setKibitzer(kibitzer);
-            System.out.println("Kibitzer: " + kibitzer.getName());
         }
         Configuration.getInstance().loadFromSystemProperties();
         manager.setGamesBetweenRefEngines(gamesBetweenRefEngines);

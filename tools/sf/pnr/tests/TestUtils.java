@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +59,22 @@ public class TestUtils {
         final UciRunner[] engines = getEngines(refEnginePattern);
         System.out.println("Reference engines found: " + Arrays.toString(engines));
         return engines;
+    }
+
+    public static UciRunner getKibitzer() throws IOException {
+        final String enginePattern = System.getProperty("searchTask.kibitzer");
+        final UciRunner[] engines = getEngines(enginePattern);
+        final UciRunner kibitzer;
+        if (engines.length == 0) {
+            kibitzer = null;
+        } else if (engines.length == 1) {
+            kibitzer = engines[0];
+            System.out.println("Kibitzer engine: " + kibitzer);
+        } else {
+            kibitzer = null;
+            System.out.println("More than one kibitzer engine was found: " + Arrays.toString(engines));
+        }
+        return kibitzer;
     }
 
     public static UciRunner[] getEngines(final String patternStr) throws IOException {

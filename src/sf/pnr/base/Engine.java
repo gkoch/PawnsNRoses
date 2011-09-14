@@ -3,6 +3,7 @@ package sf.pnr.base;
 import sf.pnr.alg.TranspositionTable;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Random;
 
 import static sf.pnr.alg.TranspositionTable.*;
@@ -71,7 +72,9 @@ public final class Engine {
     }
 
     private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
-    private static final SearchStage[] searchStages = SearchStage.values();
+    private static final SearchStage[] SEARCH_STAGES = SearchStage.values();
+    private static final SearchStage[] SEARCH_STAGES_QUIESCENCE =
+        EnumSet.of(SearchStage.CAPTURES_WINNING, SearchStage.PROMOTION, SearchStage.NORMAL, SearchStage.CAPTURES_LOOSING).toArray(new SearchStage[4]);
 
     private final MoveGenerator moveGenerator = new MoveGenerator();
     private final Evaluation evaluation = new Evaluation();
@@ -224,7 +227,7 @@ public final class Engine {
         int bestMove = 0;
         int legalMoveCount = 0;
         int quietMoveCount = 0;
-        for (SearchStage searchStage: searchStages) {
+        for (SearchStage searchStage: SEARCH_STAGES) {
             final boolean highPriorityStage =
                 searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
             final int[] moves = getMoves(searchStage, board, ttMove, searchedPly);
@@ -521,7 +524,7 @@ public final class Engine {
         int bestScore = VAL_MIN;
         int legalMoveCount = 0;
         int quietMoveCount = 0;
-        for (SearchStage searchStage: searchStages) {
+        for (SearchStage searchStage: SEARCH_STAGES) {
             final boolean highPriorityStage =
                 searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
             final int[] moves = getMoves(searchStage, board, ttMove, searchedPly);
@@ -800,7 +803,7 @@ public final class Engine {
         int b = beta;
         int bestMove = 0;
         int bestScore = VAL_MIN;
-        for (SearchStage searchStage: searchStages) {
+        for (SearchStage searchStage: SEARCH_STAGES_QUIESCENCE) {
             final int[] moves = getMoves(searchStage, board, 0, MAX_SEARCH_DEPTH - 1);
 
             final boolean allowToRecurseDown = (searchStage == SearchStage.CAPTURES_WINNING ||

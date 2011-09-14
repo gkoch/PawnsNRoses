@@ -83,6 +83,7 @@ public class TestUtils {
             matches.addAll(allFiles);
         }
         Map<String, String> defaults = null;
+        final String jarRunner = getJarRunner();
         final List<UciRunner> engines = new ArrayList<UciRunner>(matches.size());
         for (final File file: matches) {
             final String name = getPlayerName(file);
@@ -92,6 +93,15 @@ public class TestUtils {
                         defaults = getDefaultConfigs();
                     }
                     engines.add(new UciRunner(name, getConfigs(file, defaults), new PipedUciProcess()));
+                } catch (Throwable e) {
+                    // skip the file
+                }
+            } else if (file.getName().endsWith(".jar")) {
+                try {
+                    final File configFile = new File(file.getParentFile(), file.getName() + ".ini");
+                    engines.add(new UciRunner(name, getConfigs(configFile, Collections.<String, String>emptyMap()),
+                        new ExternalUciProcess(new String[] {"\"" + jarRunner + "\"", "\"" + file.getAbsolutePath() + "\""},
+                            file.getParentFile())));
                 } catch (Throwable e) {
                     // skip the file
                 }
@@ -131,6 +141,15 @@ public class TestUtils {
             return null;
         } else {
             return getRootDir(pattern);
+        }
+    }
+
+    public static String getJarRunner() {
+        final String jarRunner = System.getProperty("searchTask.jarRunner");
+        if (jarRunner == null || jarRunner.length() == 0) {
+            return null;
+        } else {
+            return jarRunner;
         }
     }
 

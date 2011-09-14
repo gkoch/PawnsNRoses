@@ -36,6 +36,9 @@ public class PawnsNRoses {
         board.restart();
         final File book = polyglot.getBook();
         useBook = book != null && book.exists();
+        if (engine != null) {
+            engine.clear();
+        }
     }
 
     private void ensureEngineIsAvailable() {
@@ -58,7 +61,7 @@ public class PawnsNRoses {
 
     public void setBoard(final String fen) {
         board = StringUtils.fromFen(fen);
-        ensureEngineIsAvailable();
+        //ensureEngineIsAvailable();
     }
 
     public int getDepth() {

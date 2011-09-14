@@ -758,4 +758,13 @@ public class StringUtils {
         }
         return moves;
     }
+
+    public static String trimTailing(final String str) {
+        for (int i = str.length() - 1; i >= 0; i--) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return str.substring(0, i + 1);
+            }
+        }
+        return "";
+    }
 }

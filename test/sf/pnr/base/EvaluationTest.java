@@ -345,19 +345,35 @@ public class EvaluationTest extends TestCase {
         assertEquals(8 + 1, BONUS_MOBILITY_KING.length);
     }
 
-    public void testMobilityPawnEnPassant() {
-        final Board board = StringUtils.fromFen("4k3/8/8/5Pp1/8/8/8/4K3 w - g6 0 1");
-        final int scoreWhite = Evaluation.computeMobilityBonusPawn(board, WHITE);
-        assertEquals(BONUS_ATTACK + BONUS_MOBILITY, scoreWhite);
-        final int scoreBlack = Evaluation.computeMobilityBonusPawn(board, BLACK);
-        assertEquals(BONUS_MOBILITY, scoreBlack);
-    }
-
     public void testMobilityKnight() {
         final Board board = StringUtils.fromFen("8/p3pk2/2N5/8/1P6/1K6/8/8 w - - 0 1");
         final int[] distance = new int[1];
         final int score = Evaluation.computeMobilityBonusKnight(board, WHITE, distance);
         assertEquals(5 * BONUS_MOBILITY + BONUS_DEFENSE + 2 * BONUS_ATTACK, score);
         assertEquals(BONUS_DISTANCE_KNIGHT[2], distance[0]);
+    }
+
+    public void testMobilityPawn() {
+        final Board board = StringUtils.fromFen("8/p3p3/2N1kB2/1P6/8/1K6/8/8 w - - 1 1");
+        final int score = Evaluation.computeMobilityBonusPawnAsWhite(board);
+        assertEquals((BONUS_MOBILITY + BONUS_DEFENSE) - (2 * BONUS_MOBILITY + BONUS_ATTACK) - BONUS_HUNG_PIECE, score);
+    }
+
+    public void testMobilityPawn2() {
+        final Board board = StringUtils.fromFen("4k3/8/8/3R1r2/2P1P1P1/8/8/4K3 w - - 1 1");
+        final int score = Evaluation.computeMobilityBonusPawnAsWhite(board);
+        assertEquals(3 * BONUS_MOBILITY + 2 * BONUS_DEFENSE + 2 * BONUS_ATTACK + BONUS_HUNG_PIECE, score);
+    }
+
+    public void testMobilityPawnBlockedDoubleWhite() {
+        final Board board = StringUtils.fromFen("4k3/8/8/5Pp1/3P4/2P5/1PPP4/4K3 w - - 1 1");
+        final int score = Evaluation.computeMobilityBonusPawnAsWhite(board);
+        assertEquals(6 * BONUS_MOBILITY + 3 * BONUS_DEFENSE - BONUS_MOBILITY, score);
+    }
+
+    public void testMobilityPawnBlockedDoubleBlack() {
+        final Board board = StringUtils.fromFen("4k3/1ppp4/2p5/3p1Pp1/8/8/8/4K3 b - - 1 1");
+        final int score = Evaluation.computeMobilityBonusPawnAsWhite(board);
+        assertEquals(BONUS_MOBILITY - (6 * BONUS_MOBILITY + 3 * BONUS_DEFENSE), score);
     }
 }

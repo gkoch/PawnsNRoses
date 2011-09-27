@@ -780,7 +780,7 @@ public final class Evaluation {
                     if (promotionDistance == 6) {
                         realDist--;
                     }
-                    if (whiteKingFile == i) {
+                    if (whiteKingFile == i && promotionDistance > 7 - whiteKingRank) {
                         realDist++;
                     }
                     final int blackKingDist = Math.max(Math.abs(blackKingFile - i), 7 - blackKingRank);
@@ -808,7 +808,7 @@ public final class Evaluation {
                     if (promotionDistance == 6) {
                         realDist--;
                     }
-                    if (blackKingFile == i) {
+                    if (blackKingFile == i && promotionDistance > blackKingRank) {
                         realDist++;
                     }
                     final int whiteKingDist = Math.max(Math.abs(whiteKingFile - i), whiteKingRank);

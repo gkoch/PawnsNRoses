@@ -20,17 +20,17 @@ public final class TranspositionTable {
     public static final long TT_DEPTH = 0x0000000000FF0000L;
     public static final int TT_SHIFT_VALUE = 0;
     public static final int TT_SHIFT_DEPTH = 16;
-    public static final int TT_SHIFT_MOVE  = 32;
+    public static final int TT_SHIFT_MOVE  = 24;
     public static final long TT_MOVE  = ((long) BASE_INFO) << TT_SHIFT_MOVE;
-    public static final int TT_SHIFT_TYPE  = TT_SHIFT_MOVE + Integer.bitCount(BASE_INFO); // 32 + 17
+    public static final int TT_SHIFT_TYPE  = TT_SHIFT_MOVE + Integer.bitCount(BASE_INFO); // 24 + 17
     public static final long TT_TYPE = 0x03L << TT_SHIFT_TYPE;
     public static final long TT_TYPE_EXACT = 0x00L << TT_SHIFT_TYPE;
     public static final long TT_TYPE_ALPHA_CUT = 0x01L << TT_SHIFT_TYPE;
     public static final long TT_TYPE_BETA_CUT = 0x02L << TT_SHIFT_TYPE;
-    public static final int TT_SHIFT_AGE = 2 + TT_SHIFT_TYPE; // 2 + 49
-    public static final long TT_AGE = 0x0FFFL << TT_SHIFT_AGE;
+    public static final int TT_SHIFT_AGE = 2 + TT_SHIFT_TYPE; // 2 + 41
+    public static final long TT_AGE = 0x03FFL << TT_SHIFT_AGE; // 43 + 11 = 54 bits
 
-    private static final int MAX_CHECK_COUNT = 40;
+    private static final int MAX_CHECK_COUNT = 32;
     private static final int MAX_CHECK_INDEX = 2 * MAX_CHECK_COUNT;
 
     @Configurable(Configurable.Key.TRANSP_TABLE_SIZE)
@@ -97,7 +97,8 @@ public final class TranspositionTable {
                 array[minAgeIndex + 1] = ttValue;
                 return;
             } else {
-                final int ttAge = (int) ((array[i + 1] & TT_AGE) >>> TT_SHIFT_AGE);
+                final int mult = (array[i + 1] & TT_TYPE) > 0? 2: 3;
+                final int ttAge = (int) ((array[i + 1] & TT_AGE) >>> TT_SHIFT_AGE) * mult;
                 if (ttAge < minAge) {
                     minAge = ttAge;
                     minAgeIndex = i;
@@ -118,7 +119,8 @@ public final class TranspositionTable {
                 array[minAgeIndex + 1] = ttValue;
                 return;
             } else {
-                final int ttAge = (int) ((array[i + 1] & TT_AGE) >>> TT_SHIFT_AGE);
+                final int mult = (array[i + 1] & TT_TYPE) > 0? 2: 3;
+                final int ttAge = (int) ((array[i + 1] & TT_AGE) >>> TT_SHIFT_AGE) * mult;
                 if (ttAge < minAge) {
                     minAge = ttAge;
                     minAgeIndex = i;

@@ -115,6 +115,17 @@ public final class Engine {
         for (int[] array: killerMoves) {
             Arrays.fill(array, 0);
         }
+        for (int[][] historyOneSide : history) {
+            for (int[] historyFrom : historyOneSide) {
+                for (int i = 0; i < historyFrom.length; i++) {
+                    historyFrom[i] >>>= 2;
+                }
+            }
+        }
+        historyMax >>>=2;
+        historyMaxGlobal >>>=2;
+        historyShift = Math.max(0, historyShift - 2);
+        historyShiftGlobal = Math.max(0, historyShiftGlobal - 2);
         int value = Evaluation.VAL_DRAW;
         long searchResult = getSearchResult(0, value);
         for (int depth = 1; depth <= maxDepth; depth++) {

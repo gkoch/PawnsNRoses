@@ -21,8 +21,27 @@ public class BitBoardBuilder {
 //        generatePawnAttack();
 //        generatePawnShields();
 //        generateFileBitmaps();
-        //generateKnightMoves();
-        generatePawnMovesAndAttacks();
+//        generateKnightMoves();
+//        generatePawnMovesAndAttacks();
+        generateEnPassantAttacks();
+    }
+
+    private static void generateEnPassantAttacks() {
+        final long[] enPassantAttacksBlack = new long[8];
+        final long[] enPassantAttacksWhite = new long[8];
+        long bitboard = 1L << (3 * 8 + 1);
+        enPassantAttacksBlack[0] = bitboard;
+        enPassantAttacksWhite[0] = enPassantAttacksBlack[0] << 8;
+        enPassantAttacksBlack[7] = bitboard << 5;
+        enPassantAttacksWhite[7] = enPassantAttacksBlack[7] << 8;
+        bitboard = (bitboard << 1) | (bitboard >> 1);
+        for (int i = 1; i < 7; i++) {
+            enPassantAttacksBlack[i] = bitboard;
+            enPassantAttacksWhite[i] = enPassantAttacksBlack[i] << 8;
+            bitboard <<= 1;
+        }
+        print("EN_PASSANT_ATTACKS_BLACK", enPassantAttacksBlack);
+        print("EN_PASSANT_ATTACKS_WHITE", enPassantAttacksWhite);
     }
 
     private static void generateFileBitmaps() {

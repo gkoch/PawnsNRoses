@@ -1,7 +1,6 @@
-package sf.pnr.base.alg;
+package sf.pnr.alg;
 
 import junit.framework.TestCase;
-import sf.pnr.alg.RepetitionTable;
 import sf.pnr.base.Board;
 import sf.pnr.base.StringUtils;
 

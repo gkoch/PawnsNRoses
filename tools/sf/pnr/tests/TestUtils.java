@@ -8,14 +8,12 @@ import sf.pnr.io.UCI;
 import sf.pnr.io.UncloseableOutputStream;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +33,7 @@ public class TestUtils {
             final Map<String, String> options = new HashMap<String, String>();
             options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE), "128");
             options.put(UCI.toUciOption(Configurable.Key.EVAL_TABLE_SIZE), "8");
-            options.putAll(getDefaultConfigs());
+            options.putAll(getDefaultConfigs(true));
             final Map<Configurable.Key, String> systemProps = Configuration.preprocess(System.getProperties(), true);
             for (Map.Entry<Configurable.Key, String> entry: systemProps.entrySet()) {
                 options.put(UCI.toUciOption(entry.getKey()), entry.getValue());
@@ -107,19 +105,24 @@ public class TestUtils {
             if (file.getName().endsWith(".ini")) {
                 try {
                     if (defaults == null) {
-                        defaults = getDefaultConfigs();
+                        defaults = getDefaultConfigs(true);
                     }
                     engines.add(new UciRunner(name, getConfigs(file, defaults), new PipedUciProcess()));
                 } catch (Throwable e) {
                     // skip the file
                 }
             } else if (file.getName().endsWith(".jar")) {
+                if (jarRunner == null) {
+                    System.out.printf("No JAR runner for '%s'\r\n", name);
+                    continue;
+                }
                 try {
                     final File configFile = new File(file.getParentFile(), file.getName() + ".ini");
-                    engines.add(new UciRunner(name, getConfigs(configFile, Collections.<String, String>emptyMap()),
+                    engines.add(new UciRunner(name, getConfigs(configFile, getDefaultConfigs(false)),
                         new ExternalUciProcess(new String[] {"\"" + jarRunner + "\"", "\"" + file.getAbsolutePath() + "\""},
                             file.getParentFile())));
                 } catch (Throwable e) {
+                    System.out.println(e.getMessage());
                     // skip the file
                 }
             } else {
@@ -182,11 +185,15 @@ public class TestUtils {
         return name;
     }
 
-    public static Map<String, String> getDefaultConfigs() throws IOException {
+    public static Map<String, String> getDefaultConfigs(final boolean addCurrentDefaults) throws IOException {
         final Map<String, String> defaults = new HashMap<String, String>();
-        for (Configurable.Key key: Configurable.Key.values()) {
-            final String value = Configuration.getInstance().getString(key);
-            defaults.put(UCI.toUciOption(key), value);
+        if (addCurrentDefaults) {
+            for (Configurable.Key key: Configurable.Key.values()) {
+                final String value = Configuration.getInstance().getString(key);
+                defaults.put(UCI.toUciOption(key), value);
+            }
+        } else {
+            Configuration.getInstance();
         }
         final String defaultConfigFile = System.getProperty("searchTask.defaultConfigs");
         if (defaultConfigFile != null) {

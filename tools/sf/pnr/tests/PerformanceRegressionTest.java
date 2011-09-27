@@ -23,7 +23,7 @@ public class PerformanceRegressionTest {
         testFiles.add("qtest_easy.epd");
         final UciRunner[] engines = TestUtils.getEngines();
         try {
-            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(engines, 6, 0, 100));
+            new EpdProcessor().process(testFiles, new MultiEngineSearchTask(engines, 10, 0, 10));
         } finally {
             for (UciRunner engine: engines) {
                 engine.close();

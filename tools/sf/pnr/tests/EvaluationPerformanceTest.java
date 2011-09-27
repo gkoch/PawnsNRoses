@@ -19,7 +19,7 @@ public class EvaluationPerformanceTest {
         final Map<String, String> options = new HashMap<String, String>();
         options.put(UCI.toUciOption(Configurable.Key.TRANSP_TABLE_SIZE), "128");
         options.put(UCI.toUciOption(Configurable.Key.EVAL_TABLE_SIZE), "8");
-        options.putAll(TestUtils.getDefaultConfigs());
+        options.putAll(TestUtils.getDefaultConfigs(true));
         final Map<Configurable.Key, String> systemProps = Configuration.preprocess(System.getProperties(), true);
         for (Map.Entry<Configurable.Key, String> entry: systemProps.entrySet()) {
             options.put(UCI.toUciOption(entry.getKey()), entry.getValue());

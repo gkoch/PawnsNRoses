@@ -5,6 +5,8 @@ import sf.pnr.base.StringUtils;
 import sf.pnr.base.Utils;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -71,7 +73,7 @@ public class EpdProcessor {
                 final List<Fen> fens = entry.getValue();
                 if (fens.size() > index) {
                     fileName = entry.getKey();
-                    fen = fens.remove(fens.size() - 1 - index);
+                    fen = fens.remove(index);
                     break;
                 }
                 index -= fens.size();
@@ -126,7 +128,13 @@ public class EpdProcessor {
         final Set<String> fens = new HashSet<String>(5000);
         final Map<String, List<Fen>> fensToProcess = new LinkedHashMap<String, List<Fen>>();
         for (String fileName: testFiles) {
-            final InputStream is = resourceBaseClass.getResourceAsStream("res/" + fileName);
+            final File file = new File(fileName);
+            final InputStream is;
+            if (file.isAbsolute()) {
+                is = new FileInputStream(file);
+            } else {
+                is = resourceBaseClass.getResourceAsStream("res/" + fileName);
+            }
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             try {
                 for (String line = reader.readLine(); line != null; line = reader.readLine()) {

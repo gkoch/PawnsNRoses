@@ -377,7 +377,7 @@ public final class Engine {
                     alpha = a;
                     quietMoveCount = 0;
                     addMoveToHistoryTable(board, move);
-                    addMoveToKillers(searchedPly, searchStage, move);
+                    //addMoveToKillers(searchedPly, searchStage, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }
@@ -674,7 +674,7 @@ public final class Engine {
                     alpha = a;
                     quietMoveCount = 0;
                     addMoveToHistoryTable(board, move);
-                    addMoveToKillers(searchedPly, searchStage, move);
+                    //addMoveToKillers(searchedPly, searchStage, move);
                     if (alpha > VAL_MATE_THRESHOLD) {
                         break;
                     }

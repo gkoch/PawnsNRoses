@@ -30,7 +30,7 @@ public final class TranspositionTable {
     public static final int TT_SHIFT_AGE = 2 + TT_SHIFT_TYPE; // 2 + 41
     public static final long TT_AGE = 0x03FFL << TT_SHIFT_AGE; // 43 + 11 = 54 bits
 
-    private static final int MAX_CHECK_COUNT = 32;
+    private static final int MAX_CHECK_COUNT = 16;
     private static final int MAX_CHECK_INDEX = 2 * MAX_CHECK_COUNT;
 
     @Configurable(Configurable.Key.TRANSP_TABLE_SIZE)

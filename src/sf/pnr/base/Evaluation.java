@@ -574,17 +574,17 @@ public final class Evaluation {
         final int castlingWhite = state & CASTLING_WHITE;
         if (castlingWhite == CASTLING_WHITE) {
             castlingPenalty += PENALTY_CASTLING_PENDING_BOTH;
-        } else if ((castlingWhite & CASTLING_WHITE) != 0) {
+        } else if (castlingWhite != 0) {
             castlingPenalty += PENALTY_CASTLING_PENDING;
-        } else if (castlingWhite == 0 && (state2 & CASTLED_WHITE) == 0) {
+        } else if ((state2 & CASTLED_WHITE) == 0) {
             castlingPenalty += PENALTY_CASTLING_MISSED;
         }
         final int castlingBlack = state & CASTLING_BLACK;
         if (castlingBlack == CASTLING_BLACK) {
             castlingPenalty -= PENALTY_CASTLING_PENDING_BOTH;
-        } else if ((castlingBlack & CASTLING_BLACK) != 0) {
+        } else if (castlingBlack != 0) {
             castlingPenalty -= PENALTY_CASTLING_PENDING;
-        } else if (castlingBlack == 0 && (state2 & CASTLED_BLACK) == 0) {
+        } else if ((state2 & CASTLED_BLACK) == 0) {
             castlingPenalty -= PENALTY_CASTLING_MISSED;
         }
         return castlingPenalty;

@@ -512,12 +512,34 @@ public class EvaluationTest extends TestCase {
         return (openingBonus + endgameBonus) / STAGE_MAX;
     }
 
-    public void testCastlingPenalty() {
+    public void testCastlingPenaltyCastling() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/8/8/8/4K2R w K - 1 1");
         assertEquals(PENALTY_CASTLING_PENDING - PENALTY_CASTLING_MISSED,
             getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
         board.move(StringUtils.fromSimple("e1g1") | MT_CASTLING_KINGSIDE);
         assertEquals(-PENALTY_CASTLING_MISSED,
+            getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
+    }
+
+    public void testCastlingPenaltyRookMoves() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1");
+        assertEquals(PENALTY_CASTLING_PENDING_BOTH - PENALTY_CASTLING_MISSED,
+            getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
+        board.move(StringUtils.fromSimple("a1a2"));
+        assertEquals(PENALTY_CASTLING_PENDING - PENALTY_CASTLING_MISSED,
+            getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
+        board.move(StringUtils.fromSimple("e8e7"));
+        board.move(StringUtils.fromSimple("h1h2"));
+        assertEquals(PENALTY_CASTLING_MISSED - PENALTY_CASTLING_MISSED,
+            getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
+    }
+
+    public void testCastlingPenaltyKingMove() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/8/8/8/4K2R w K - 1 1");
+        assertEquals(PENALTY_CASTLING_PENDING - PENALTY_CASTLING_MISSED,
+            getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
+        board.move(StringUtils.fromSimple("e1e2"));
+        assertEquals(PENALTY_CASTLING_MISSED-PENALTY_CASTLING_MISSED,
             getCastlingPenaltyAsWhite(board.getState(), board.getState2()));
     }
 

@@ -330,15 +330,15 @@ public final class Board {
     }
 
     public int getMaterialValueAsWhite() {
-        return materialValue[WHITE_TO_MOVE] - materialValue[BLACK_TO_MOVE];
+        return materialValue[WHITE] - materialValue[BLACK];
     }
 
     public int getMaterialValueWhite() {
-        return materialValue[WHITE_TO_MOVE];
+        return materialValue[WHITE];
     }
 
     public int getMaterialValueBlack() {
-        return materialValue[BLACK_TO_MOVE];
+        return materialValue[BLACK];
     }
 
     public int getStage() {

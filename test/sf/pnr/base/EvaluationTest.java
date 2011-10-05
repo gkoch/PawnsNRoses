@@ -24,13 +24,88 @@ public class EvaluationTest extends TestCase {
         super.tearDown();
     }
 
-    public void testDrawByInsufficientMaterialKnights() {
-        final Board board = StringUtils.fromFen("4k3/3nn3/4N3/1N6/3K4/8/8/8 w - - 0 1");
+    public void testDrawByInsufficientMaterialKK() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKNK() {
+        final Board board = StringUtils.fromFen("4k3/8/8/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKBK() {
+        final Board board = StringUtils.fromFen("4k3/8/8/1B6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKNKB() {
+        final Board board = StringUtils.fromFen("4k3/8/4b3/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKNKN() {
+        final Board board = StringUtils.fromFen("4k3/8/4n3/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKBKB() {
+        final Board board = StringUtils.fromFen("4k3/8/4b3/8/3K4/8/2B5/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKNNK() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKNNKN() {
+        final Board board = StringUtils.fromFen("4k3/4n3/4N3/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKNNKB() {
+        final Board board = StringUtils.fromFen("4k3/4b3/4N3/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKBNKN() {
+        final Board board = StringUtils.fromFen("4k3/4n3/4B3/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKBNKB() {
+        final Board board = StringUtils.fromFen("4k3/4b3/4B3/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKBBKN() {
+            final Board board = StringUtils.fromFen("7k/5n2/7K/8/4B2B/8/8/8 w - - 0 1");
         assertFalse(Evaluation.drawByInsufficientMaterial(board));
     }
 
-    public void testDrawByInsufficientMaterialBishopsOfOppositeColors() {
-        final Board board = StringUtils.fromFen("7k/7B/7K/8/7B/8/8/8 w - - 0 1");
+    public void testDrawByInsufficientMaterialKBBKB() {
+            final Board board = StringUtils.fromFen("7k/2b5/7K/1B6/7B/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKNNKNN() {
+        final Board board = StringUtils.fromFen("4k3/3nn3/4N3/1N6/3K4/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialKNNBK() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/4B3/1N1K4/8/8/8 w - - 0 1");
+        assertFalse(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialBishopsOnSameColors() {
+            final Board board = StringUtils.fromFen("7k/7B/7K/7B/8/8/8/8 w - - 0 1");
+        assertTrue(Evaluation.drawByInsufficientMaterial(board));
+    }
+
+    public void testDrawByInsufficientMaterialBishopsOnOppositeColors() {
+            final Board board = StringUtils.fromFen("7k/7B/7K/8/7B/8/8/8 w - - 0 1");
         assertFalse(Evaluation.drawByInsufficientMaterial(board));
     }
 

@@ -599,25 +599,40 @@ public final class Evaluation {
     }
 
     public static boolean drawByInsufficientMaterial(final Board board) {
-        if (board.getPieces(WHITE_TO_MOVE, PAWN)[0] > 0 ||  board.getPieces(BLACK_TO_MOVE, PAWN)[0] > 0 ||
-            board.getPieces(WHITE_TO_MOVE, ROOK)[0] > 0 ||  board.getPieces(BLACK_TO_MOVE, ROOK)[0] > 0 ||
-            board.getPieces(WHITE_TO_MOVE, QUEEN)[0] > 0 ||  board.getPieces(BLACK_TO_MOVE, QUEEN)[0] > 0) {
+        if (board.getPieces(WHITE_TO_MOVE, PAWN)[0] > 0 || board.getPieces(BLACK_TO_MOVE, PAWN)[0] > 0 ||
+            board.getPieces(WHITE_TO_MOVE, ROOK)[0] > 0 || board.getPieces(BLACK_TO_MOVE, ROOK)[0] > 0 ||
+            board.getPieces(WHITE_TO_MOVE, QUEEN)[0] > 0 || board.getPieces(BLACK_TO_MOVE, QUEEN)[0] > 0) {
             return false;
         }
+
+        // FIDE
+        // KK
+        // KBK
+        // KNK
+        // KNNK
+        // KBKB (bishops are on the same colour
+
+        // likely draw
+        // - both sides have a king and a minor piece each
+        // - the weaker side has a minor piece against two knights
+        // - two bishops draw against a bishop
+        // - two minor pieces against one draw, except when the stronger side has a bishop pair
+
         final int whiteKnightCount = board.getPieces(WHITE_TO_MOVE, KNIGHT)[0];
         final int blackKnightCount = board.getPieces(BLACK_TO_MOVE, KNIGHT)[0];
-        if (whiteKnightCount + blackKnightCount > 1) {
-            return false;
-        }
         final int[] whiteBishops = board.getPieces(WHITE_TO_MOVE, BISHOP);
         final int whiteBishopCount = whiteBishops[0];
         final int[] blackBishops = board.getPieces(BLACK_TO_MOVE, BISHOP);
         final int blackBishopCount = blackBishops[0];
-        if (whiteKnightCount + blackKnightCount == 1 && whiteBishopCount + blackBishopCount == 0) {
+        if (whiteKnightCount + whiteBishopCount <= 2 && whiteBishopCount < 2 &&
+            blackKnightCount + blackBishopCount <= 2 && blackBishopCount < 2) {
             return true;
         }
-        if (whiteKnightCount + blackKnightCount == 1) {
+        if (whiteKnightCount + blackKnightCount > 0) {
             return false;
+        }
+        if ((whiteBishopCount ^ blackBishopCount) == 3) {
+            return true;
         }
         boolean bishopOnWhite = false;
         boolean bishopOnBlack = false;

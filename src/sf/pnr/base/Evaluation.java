@@ -117,6 +117,7 @@ public final class Evaluation {
     public static int BONUS_ROOKS_ON_SAME_FILE = 12;
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMERANK)
     public static int BONUS_ROOKS_ON_SAME_RANK = 12;
+    public static final double DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE = 0.2;
 
     public static final int INITIAL_MATERIAL_VALUE;
 
@@ -328,26 +329,30 @@ public final class Evaluation {
         if (drawByInsufficientMaterial(board)) {
             return VAL_DRAW;
         }
-        int score = board.getMaterialValueAsWhite();
-        score += computePositionalBonusNoPawnAsWhite(board);
-        score += computeMobilityBonusAsWhite(board);
+        int scoreAsWhite = board.getMaterialValueAsWhite();
+        scoreAsWhite += computePositionalBonusNoPawnAsWhite(board);
+        scoreAsWhite += computeMobilityBonusAsWhite(board);
         final int pawnHashValue = pawnEval(board);
-        score += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
+        scoreAsWhite += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
         if ((board.getMaterialValueWhite() == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]]) &&
                 (board.getMaterialValueBlack() == VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]])) {
             final int unstoppablePawnDistWhite = PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, toMove);
             final int unstoppablePawnDistBlack = PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, toMove);
             if (unstoppablePawnDistWhite < unstoppablePawnDistBlack) {
-                score += BONUS_UNSTOPPABLE_PAWN;
+                scoreAsWhite += BONUS_UNSTOPPABLE_PAWN;
             } else if (unstoppablePawnDistWhite > unstoppablePawnDistBlack) {
-                score -= BONUS_UNSTOPPABLE_PAWN;
+                scoreAsWhite -= BONUS_UNSTOPPABLE_PAWN;
             } else if (unstoppablePawnDistWhite == unstoppablePawnDistBlack && unstoppablePawnDistWhite != 7) {
-                score += signum * BONUS_UNSTOPPABLE_PAWN;
+                scoreAsWhite += signum * BONUS_UNSTOPPABLE_PAWN;
             }
         }
 
-        evalHashTable.set(zobrist, score - VAL_MIN);
-        return score * signum;
+        evalHashTable.set(zobrist, scoreAsWhite - VAL_MIN);
+        int score = scoreAsWhite * signum;
+        if (score > 0 && board.getMaterialValue() <= VAL_PIECE_COUNTS[BISHOP][2]) {
+            score *= (1.0 - drawProbability(board));
+        }
+        return score;
     }
 
     public static int computeMaterialValueAsWhite(final Board board) {
@@ -649,6 +654,45 @@ public final class Evaluation {
             bishopOnBlack |= color == 0;
         }
         return !(bishopOnWhite && bishopOnBlack);
+    }
+
+    public static double drawProbability(final Board board) {
+        final int toMove = board.getState() & WHITE_TO_MOVE;
+        final double probability;
+        if (board.getPieces(toMove, PAWN)[0] <= 0 && board.getPieces(toMove, ROOK)[0] <= 0 &&
+            board.getPieces(toMove, QUEEN)[0] <= 0) {
+
+            final int knightCount = board.getPieces(WHITE_TO_MOVE, KNIGHT)[0];
+            final int[] bishops = board.getPieces(WHITE_TO_MOVE, BISHOP);
+            final int bishopCount = bishops[0];
+            if (knightCount + bishopCount <= 2 && bishopCount < 2) {
+                return 1.0;
+            }
+            if (knightCount <= 0) {
+                boolean bishopOnWhite = false;
+                boolean bishopOnBlack = false;
+                for (int i = 1; i <= bishopCount; i++) {
+                    final int pos = bishops[i];
+                    final int color = (getRank(pos) + getFile(pos)) & 0x01;
+                    bishopOnWhite |= color == 1;
+                    bishopOnBlack |= color == 0;
+                }
+                if (!(bishopOnWhite && bishopOnBlack)) {
+                    return 1.0;
+                } else {
+                    probability = DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE;
+                }
+            } else {
+                probability = 0.0;
+            }
+        } else {
+            probability = 0.0;
+        }
+        final int halfMoves = (board.getState() & HALF_MOVES) >> SHIFT_HALF_MOVES;
+        if (halfMoves > 80) {
+            return probability + (1 - probability) * ((double) (Math.min(halfMoves, 100) - 80)) / 20;
+        }
+        return probability;
     }
 
     public int pawnEval(final Board board) {

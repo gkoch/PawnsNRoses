@@ -109,9 +109,124 @@ public class EvaluationTest extends TestCase {
         assertFalse(Evaluation.drawByInsufficientMaterial(board));
     }
 
-    public void testDrawByInsufficientMaterialBishopsOfOppositeColors2() {
+    public void testDrawProbabilityKK() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKNK() {
+        final Board board = StringUtils.fromFen("4k3/8/8/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKBK() {
+        final Board board = StringUtils.fromFen("4k3/8/8/1B6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKNKB() {
+        final Board board = StringUtils.fromFen("4k3/8/4b3/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKNKN() {
+        final Board board = StringUtils.fromFen("4k3/8/4n3/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKBKB() {
+        final Board board = StringUtils.fromFen("4k3/8/4b3/8/3K4/8/2B5/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKNNK() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKNNKN() {
+        final Board board = StringUtils.fromFen("4k3/4n3/4N3/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKNNKB() {
+        final Board board = StringUtils.fromFen("4k3/4b3/4N3/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKBNKN() {
+        final Board board = StringUtils.fromFen("4k3/4n3/4B3/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKBNKB() {
+        final Board board = StringUtils.fromFen("4k3/4b3/4B3/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKBBKN() {
+            final Board board = StringUtils.fromFen("7k/5n2/7K/8/4B2B/8/8/8 w - - 0 1");
+        assertEquals(DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKBBKB() {
+            final Board board = StringUtils.fromFen("7k/2b5/7K/1B6/7B/8/8/8 w - - 0 1");
+        assertEquals(DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKNNKNN() {
+        final Board board = StringUtils.fromFen("4k3/3nn3/4N3/1N6/3K4/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityKNNBK() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/4B3/1N1K4/8/8/8 w - - 0 1");
+        assertEquals(0.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityBishopsOnSameColors() {
+            final Board board = StringUtils.fromFen("7k/7B/7K/7B/8/8/8/8 w - - 0 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityBishopsOnOppositeColors() {
+            final Board board = StringUtils.fromFen("7k/7B/7K/8/7B/8/8/8 w - - 0 1");
+        assertEquals(DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityBishopsOnOppositeColors2() {
         final Board board = StringUtils.fromFen("4bb2/4k3/4B3/3K4/8/8/8/4B3 w - - 0 2");
-        assertFalse(Evaluation.drawByInsufficientMaterial(board));
+        assertEquals(DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityFiftyMoves85() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/4B3/1N1K4/8/8/8 w - - 85 1");
+        assertEquals(0.25, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityFiftyMoves90() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/4B3/1N1K4/8/8/8 w - - 90 1");
+        assertEquals(0.50, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityFiftyMoves95() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/4B3/1N1K4/8/8/8 w - - 95 1");
+        assertEquals(0.75, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityFiftyMoves100() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/4B3/1N1K4/8/8/8 w - - 100 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityFiftyMoves105() {
+        final Board board = StringUtils.fromFen("4k3/8/4N3/4B3/1N1K4/8/8/8 w - - 105 1");
+        assertEquals(1.0, Evaluation.drawProbability(board));
+    }
+
+    public void testDrawProbabilityFiftyMoves95OppositeBishops() {
+        final Board board = StringUtils.fromFen("4k3/8/8/8/1B1KB3/8/8/8 w - - 95 1");
+        assertEquals(0.80, Evaluation.drawProbability(board));
     }
 
     public void testUnstoppablePawn() {

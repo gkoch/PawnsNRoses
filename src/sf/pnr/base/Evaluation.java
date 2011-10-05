@@ -788,10 +788,8 @@ public final class Evaluation {
         score += pawnStormBonus * stage / STAGE_MAX;
         score += (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
 
-        final long attackedWhitePawns = pawnMask[WHITE] & pawnAttackMask[BLACK];
-        final long attackedBlackPawns = pawnMask[BLACK] & pawnAttackMask[WHITE];
-        score += (Long.bitCount((attackedWhitePawns ^ pawnAttackMask[WHITE]) & attackedWhitePawns) -
-            Long.bitCount((attackedBlackPawns ^ pawnAttackMask[BLACK]) & attackedBlackPawns)) * PENALTY_WEAK_PAWN;
+        score += (Long.bitCount(pawnMask[WHITE] & pawnAttackMask[BLACK] & ~pawnAttackMask[WHITE]) -
+            Long.bitCount(pawnMask[BLACK] & pawnAttackMask[WHITE] & ~pawnAttackMask[BLACK])) * PENALTY_WEAK_PAWN;
 
         int unstoppablePawnWhite = 7; // TODO: handle case where the opponent king is between two passed pawns
         int unstoppablePawnIfNextWhite = 7;

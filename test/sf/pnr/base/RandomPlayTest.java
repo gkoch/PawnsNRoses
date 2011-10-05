@@ -4,12 +4,11 @@ import junit.framework.TestCase;
 
 import java.util.Random;
 
-import static sf.pnr.base.Utils.EMPTY;
-import static sf.pnr.base.Utils.PAWN;
+import static sf.pnr.base.Utils.*;
 
 public class RandomPlayTest extends TestCase {
     private static final Random RND = new Random(System.currentTimeMillis());
-    private static final int TEST_COUNT = 1000;
+    private static final int TEST_COUNT = 2000;
 
     private enum Result {MATE, FIFTY_MOVES, INSUFFICIENT_MATERIAL, THREEFOLD_REPETITION, STALE_MATE}
 
@@ -49,7 +48,6 @@ public class RandomPlayTest extends TestCase {
         final Board board = new Board();
         board.restart();
         Result result = null;
-        int fiftyMovesCounter = 0;
         while (result == null) {
             final int[] moves = getValidMoves(board);
             boolean keepSearching = true;
@@ -60,18 +58,6 @@ public class RandomPlayTest extends TestCase {
                 } else {
                     final int moveIdx = RND.nextInt(moves[0]) + 1;
                     final int move = moves[moveIdx];
-
-                    final int fromPos = Utils.getFromPosition(move);
-                    final int toPos = Utils.getToPosition(move);
-                    final int absPiece = Math.abs(board.getBoard()[fromPos]);
-                    boolean silentMove = false;
-                    if (absPiece != PAWN) {
-                        final int captured = board.getBoard()[toPos];
-                        if (captured == EMPTY) {
-                            silentMove = true;
-                        }
-                    }
-
                     final long undo = board.move(move);
                     final int state = board.getState();
                     final int toMove = state & Utils.WHITE_TO_MOVE;
@@ -91,13 +77,9 @@ public class RandomPlayTest extends TestCase {
                     } else if (Evaluation.drawByInsufficientMaterial(board)) {
                         result = Result.INSUFFICIENT_MATERIAL;
                     } else {
-                        if (silentMove) {
-                            fiftyMovesCounter++;
-                            if (fiftyMovesCounter >= 100) {
-                                result = Result.FIFTY_MOVES;
-                            }
-                        } else {
-                            fiftyMovesCounter = 0;
+                        final int halfMoves = (state & HALF_MOVES) >> SHIFT_HALF_MOVES;
+                        if (halfMoves >= 100) {
+                            result = Result.FIFTY_MOVES;
                         }
                     }
                 }

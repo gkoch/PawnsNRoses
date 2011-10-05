@@ -129,7 +129,6 @@ public class GameManager {
             final int[] depths = new int[2];
             final long[] nodes = new long[2];
             final int[] scoreDiffs = new int[2];
-            int fiftyMovesCounter = 0;
             while (true) {
                 final UciRunner player = players[currentPlayer];
                 if (restartBeforeMoves) {
@@ -218,17 +217,6 @@ public class GameManager {
                     System.out.println();
                 }
 
-                if (absPiece != PAWN) {
-                    final int captured = board.getBoard()[toPos];
-                    if (captured == EMPTY) {
-                        fiftyMovesCounter++;
-                    } else {
-                        fiftyMovesCounter = 0;
-                    }
-                } else {
-                    fiftyMovesCounter = 0;
-                }
-
                 board.move(move);
                 moves.add(move);
                 if (times[currentPlayer] < 0) {
@@ -247,9 +235,9 @@ public class GameManager {
                     result = GameResult.INSUFFICIENT_MATERIAL;
                     break;
                 }
-                if (fiftyMovesCounter >= 100) {
+                final int halfMoves = (board.getState() & HALF_MOVES) >> SHIFT_HALF_MOVES;
+                if (halfMoves >= 100) {
                     result = GameResult.FIFTY_MOVES;
-                    break;
                 }
                 currentPlayer = 1 - currentPlayer;
             }

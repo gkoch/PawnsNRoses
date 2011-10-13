@@ -498,12 +498,12 @@ public class EvaluationTest extends TestCase {
     }
 
     public void testPawnMirrorEvalHalfInitial() {
-        final Board boardWhite = StringUtils.fromFen("5k2/8/8/8/8/8/PPPPPPPP/RNBKQBNR w KQ - 0 1");
+        final Board boardWhite = StringUtils.fromFen("5k2/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQ - 0 1");
         final int pawnHashValueWhite = eval.pawnEval(boardWhite);
         final int pawnValueWhite = PawnHashTable.getValueFromPawnHashValue(pawnHashValueWhite);
         final int valueWhite = eval.evaluate(boardWhite);
 
-        final Board boardBlack = StringUtils.fromFen("rnbqkbnr/pppppppp/8/8/8/8/8/2K5 b kq - 0 1 ");
+        final Board boardBlack = StringUtils.fromFen("rnbqkbnr/pppppppp/8/8/8/8/8/2K5 b kq - 0 1");
         final int pawnHashValueBlack = eval.pawnEval(boardBlack);
         final int pawnValueBlack = PawnHashTable.getValueFromPawnHashValue(pawnHashValueBlack);
         final int valueBlack = eval.evaluate(boardBlack);
@@ -595,5 +595,11 @@ public class EvaluationTest extends TestCase {
         final Board board = StringUtils.fromFen("4k3/1ppp4/2p5/3p1Pp1/8/8/8/4K3 b - - 1 1");
         final int score = Evaluation.computeMobilityBonusPawnAsWhite(board);
         assertEquals(BONUS_MOBILITY - (6 * BONUS_MOBILITY + 3 * BONUS_DEFENSE), score);
+    }
+
+    public void testUnstoppablePawnWithCapture() {
+        final Board board = StringUtils.fromFen("8/8/1p1K4/P7/2k5/8/8/8 w - - 0 1");
+        final int score = eval.evaluate(board);
+        assertTrue(score > 700);
     }
 }

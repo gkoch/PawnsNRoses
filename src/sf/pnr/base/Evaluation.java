@@ -731,7 +731,7 @@ public final class Evaluation {
         final int blackKingRank = getRank(blackKing);
         final int blackKing64 = convert0x88To64(blackKing);
         final long blackKingMask = 1L << blackKing64;
-        final boolean pawnStorm = (whiteKingFile <= FILE_D && blackKingFile >= FILE_E) ||
+        final boolean potentialPawnStorm = (whiteKingFile <= FILE_D && blackKingFile >= FILE_E) ||
             (whiteKingFile >= FILE_E && blackKingFile <= FILE_D);
 
         long[] pawnMask = new long[2];
@@ -751,7 +751,7 @@ public final class Evaluation {
             final long pawnAttack = PAWN_ATTACK[WHITE][pawn64];
             pawnAttackMask[WHITE] |= pawnAttack;
             score += (blackKingMask & pawnAttack) > 0? BONUS_KING_IN_SIGHT_NON_SLIDING: 0;
-            if (pawnStorm) {
+            if (potentialPawnStorm) {
                 final int pawnRank = getRank(pawn);
                 if (pawnRank < blackKingRank) {
                     final int pawnFile = getFile(pawn);
@@ -778,7 +778,7 @@ public final class Evaluation {
             final long pawnAttack = PAWN_ATTACK[BLACK][pawn64];
             pawnAttackMask[BLACK] |= pawnAttack;
             score -= (whiteKingMask & pawnAttack) > 0? BONUS_KING_IN_SIGHT_NON_SLIDING: 0;
-            if (pawnStorm) {
+            if (potentialPawnStorm) {
                 final int pawnRank = getRank(pawn);
                 if (pawnRank > whiteKingRank) {
                     final int pawnFile = getFile(pawn);
@@ -853,7 +853,8 @@ public final class Evaluation {
 
             if (midFileWhite > 0) {
                 final int promotionDistance = Long.numberOfLeadingZeros(midFileWhite) / 8;
-                if ((pawnMask[BLACK] & BITBOARD_FILE_WITH_NEIGHBOURS[i] & BITBOARD_RANKS_ABOVE[7 - promotionDistance]) == 0) {
+                final long blackPawnsOnAdjacentOrSameFile = pawnMask[BLACK] & BITBOARD_FILE_WITH_NEIGHBOURS[i];
+                if ((blackPawnsOnAdjacentOrSameFile & BITBOARD_RANKS_ABOVE[7 - promotionDistance + 1]) == 0) {
                     int realDist = promotionDistance;
                     if (promotionDistance == 6) {
                         realDist--;
@@ -862,26 +863,31 @@ public final class Evaluation {
                         realDist++;
                     }
                     final int blackKingDist = Math.max(Math.abs(blackKingFile - i), 7 - blackKingRank);
-                    if (realDist + 1 < blackKingDist) {
-                        if (realDist < unstoppablePawnWhite) {
-                            unstoppablePawnWhite = realDist;
+                    final boolean noBlackPawnsAhead =
+                        (blackPawnsOnAdjacentOrSameFile & BITBOARD_RANK[7 - promotionDistance + 1]) == 0;
+                    if (noBlackPawnsAhead) {
+                        if (realDist + 1 < blackKingDist) {
+                            if (realDist < unstoppablePawnWhite) {
+                                unstoppablePawnWhite = realDist;
+                            }
+                            if (realDist < unstoppablePawnIfNextWhite) {
+                                unstoppablePawnIfNextWhite = realDist;
+                            }
                         }
-                        if (realDist < unstoppablePawnIfNextWhite) {
-                            unstoppablePawnIfNextWhite = realDist;
-                        }
+                        score += BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
                     }
                     if (realDist < blackKingDist) {
                         if (realDist < unstoppablePawnIfNextWhite) {
                             unstoppablePawnIfNextWhite = realDist;
                         }
                     }
-                    score += BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
                 }
             }
 
             if (midFileBlack > 0) {
                 final int promotionDistance = Long.numberOfTrailingZeros(midFileBlack) / 8;
-                if ((pawnMask[WHITE] & BITBOARD_FILE_WITH_NEIGHBOURS[i] & BITBOARD_RANKS_BELOW[promotionDistance]) == 0) {
+                final long whitePawnsOnAdjacentOrSameFile = pawnMask[WHITE] & BITBOARD_FILE_WITH_NEIGHBOURS[i];
+                if ((whitePawnsOnAdjacentOrSameFile & BITBOARD_RANKS_BELOW[promotionDistance - 1]) == 0) {
                     int realDist = promotionDistance;
                     if (promotionDistance == 6) {
                         realDist--;
@@ -890,20 +896,24 @@ public final class Evaluation {
                         realDist++;
                     }
                     final int whiteKingDist = Math.max(Math.abs(whiteKingFile - i), whiteKingRank);
-                    if (realDist + 1 < whiteKingDist) {
-                        if (realDist < unstoppablePawnBlack) {
-                            unstoppablePawnBlack = realDist;
+                    final boolean noWhitePawnsAhead =
+                        (whitePawnsOnAdjacentOrSameFile & BITBOARD_RANK[promotionDistance - 1]) == 0;
+                    if (noWhitePawnsAhead) {
+                        if (realDist + 1 < whiteKingDist) {
+                            if (realDist < unstoppablePawnBlack) {
+                                unstoppablePawnBlack = realDist;
+                            }
+                            if (realDist < unstoppablePawnIfNextBlack) {
+                                unstoppablePawnIfNextBlack = realDist;
+                            }
                         }
-                        if (realDist < unstoppablePawnIfNextBlack) {
-                            unstoppablePawnIfNextBlack = realDist;
-                        }
+                        score -= BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
                     }
                     if (realDist < whiteKingDist) {
                         if (realDist < unstoppablePawnIfNextBlack) {
                             unstoppablePawnIfNextBlack = realDist;
                         }
                     }
-                    score -= BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
                 }
             }
 

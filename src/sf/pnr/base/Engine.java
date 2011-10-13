@@ -17,6 +17,7 @@ public final class Engine {
     public static final int ASPIRATION_WINDOW = 50;
 
     private static final int[] NO_MOVE_ARRAY = new int[] {0};
+    private static final int[] NO_KILLER_ARRAY = new int[] {0, 0};
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_CHECK_BONUS)
     private static int MOVE_ORDER_CHECK_BONUS = 400;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_BLOCKED_CHECK_BONUS)
@@ -491,7 +492,6 @@ public final class Engine {
             }
             if (value >= beta) {
                 board.nullMove(prevState);
-//                transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, 0, depth >> SHIFT_PLY, value - VAL_MIN, age);
                 return beta;
             }
             final int value2 = -negascout(board, depth - r, VAL_MATE_THRESHOLD, VAL_MATE_THRESHOLD + 1, false, false, searchedPly + 1);
@@ -1018,7 +1018,7 @@ public final class Engine {
         }
         if (moves[0] > 0) {
             addMoveValuesAndRemoveTTMove(moves, board, ttMove,
-                searchStage == SearchStage.NORMAL? killerMoves[searchedPly]: NO_MOVE_ARRAY);
+                searchStage == SearchStage.NORMAL? killerMoves[searchedPly]: NO_KILLER_ARRAY);
         }
         return moves;
     }
@@ -1070,12 +1070,7 @@ public final class Engine {
 
     private static boolean isKiller(final int[] killers, final int move) {
         final int fromTo = move & FROM_TO;
-        for (int killer: killers) {
-            if (killer == fromTo) {
-                return true;
-            }
-        }
-        return false;
+        return killers[0] == fromTo | killers[1] == fromTo;
     }
 
     public void setSearchEndTime(final long searchEndTime) {

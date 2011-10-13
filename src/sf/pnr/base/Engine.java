@@ -188,11 +188,14 @@ public final class Engine {
         return searchResult;
     }
 
-    public long negascoutRoot(final Board board, final int depth, int alpha, final int beta, final int searchedPly) {
+    public long negascoutRoot(final Board board, int depth, int alpha, final int beta, final int searchedPly) {
         nodeCount++;
-        if (board.getRepetitionCount() == 3 || Evaluation.drawByInsufficientMaterial(board)) {
+        if (board.getRepetitionCount() == 3) {
             // three-fold repetition
             return getSearchResult(0, VAL_DRAW);
+        }
+        if (depth > (6 << SHIFT_PLY) &&  Evaluation.drawByInsufficientMaterial(board)) {
+            depth = 6 << SHIFT_PLY;
         }
         
         final long zobristKey = board.getZobristKey();
@@ -421,10 +424,10 @@ public final class Engine {
         return result;
     }
 
-    public int negascout(final Board board, final int depth, int alpha, int beta, final boolean quiescence,
+    public int negascout(final Board board, int depth, int alpha, int beta, final boolean quiescence,
                          final boolean allowNull, final int searchedPly) {
         nodeCount++;
-        if (board.getRepetitionCount() == 3 || Evaluation.drawByInsufficientMaterial(board)) {
+        if (board.getRepetitionCount() == 3) {
             // three-fold repetition
             return VAL_DRAW;
         }
@@ -436,6 +439,9 @@ public final class Engine {
                 eval = quiescence(board, alpha, beta);
             }
             return eval;
+        }
+        if (depth > (6 << SHIFT_PLY) &&  Evaluation.drawByInsufficientMaterial(board)) {
+            depth = 6 << SHIFT_PLY;
         }
 
         // check the time

@@ -10,14 +10,14 @@ public class Utils {
 
     // pieces
 	public static final int EMPTY = 0;
-	public static final int KING = 1;
-	public static final int QUEEN = 2;
-	public static final int ROOK = 3;
-	public static final int BISHOP = 4;
-	public static final int KNIGHT = 5;
-	public static final int PAWN = 6;
+    public static final int PAWN = 1;
+    public static final int KNIGHT = 2;
+    public static final int BISHOP = 3;
+    public static final int ROOK = 4;
+    public static final int QUEEN = 5;
+    public static final int KING = 6;
     public static final int[] TYPES = new int[] {KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN};
-    public static final int[] TYPES_NOPAWN = new int[] {KING, QUEEN, ROOK, BISHOP, KNIGHT};
+    public static final int[] TYPES_NOPAWN_OR_KING = new int[] {QUEEN, ROOK, BISHOP, KNIGHT};
 
 	// state
 	public static final int BLACK_TO_MOVE = 0x00000000;
@@ -116,10 +116,10 @@ public class Utils {
     public static final int ATTACK_DISTANCE_ROOK = 0x07 << SHIFT_ATTACK_DISTANCE_ROOK;
     public static final int SHIFT_ATTACK_DISTANCE_QUEEN = 24;
     public static final int ATTACK_DISTANCE_QUEEN = 0x07 << SHIFT_ATTACK_DISTANCE_QUEEN;
-    public static final int[] ATTACK_DISTANCE_MASKS = new int[]{EMPTY, ATTACK_DISTANCE_KING, ATTACK_DISTANCE_QUEEN,
-        ATTACK_DISTANCE_ROOK, ATTACK_DISTANCE_BISHOP, ATTACK_DISTANCE_KNIGHT};
-    public static final int[] SHIFT_ATTACK_DISTANCES = new int[]{EMPTY, SHIFT_ATTACK_DISTANCE_KING,
-        SHIFT_ATTACK_DISTANCE_QUEEN, SHIFT_ATTACK_DISTANCE_ROOK, SHIFT_ATTACK_DISTANCE_BISHOP, SHIFT_ATTACK_DISTANCE_KNIGHT};
+    public static final int[] ATTACK_DISTANCE_MASKS = new int[]{EMPTY, EMPTY, ATTACK_DISTANCE_KNIGHT,
+        ATTACK_DISTANCE_BISHOP, ATTACK_DISTANCE_ROOK, ATTACK_DISTANCE_QUEEN, ATTACK_DISTANCE_KING};
+    public static final int[] SHIFT_ATTACK_DISTANCES = new int[]{EMPTY, EMPTY, SHIFT_ATTACK_DISTANCE_KNIGHT,
+        SHIFT_ATTACK_DISTANCE_BISHOP, SHIFT_ATTACK_DISTANCE_ROOK, SHIFT_ATTACK_DISTANCE_QUEEN, SHIFT_ATTACK_DISTANCE_KING};
     public static final int[] ATTACK_BITS;
 
     public static final int[] A = new int[8];
@@ -338,12 +338,18 @@ public class Utils {
     }
 
     private static long computeZobrist(final Board board, final int toMove, final int piece) {
-        final int[] pieces = board.getPieces(toMove, piece);
         long zobrist = 0;
-        for (int i = pieces[0]; i > 0; i--) {
-            final int pos0x88 = pieces[i];
+        if (piece == KING) {
+            final int pos0x88 = board.getKing(toMove);
             final int pos64 = convert0x88To64(pos0x88);
             zobrist ^= ZOBRIST_PIECES[piece][toMove][pos64];
+        } else {
+            final int[] pieces = board.getPieces(toMove, piece);
+            for (int i = pieces[0]; i > 0; i--) {
+                final int pos0x88 = pieces[i];
+                final int pos64 = convert0x88To64(pos0x88);
+                zobrist ^= ZOBRIST_PIECES[piece][toMove][pos64];
+            }
         }
         return zobrist;
     }
@@ -353,7 +359,7 @@ public class Utils {
     }
 
     public static int side(final int piece) {
-        return 1 - (piece >>> 31);
+        return 1 ^ (piece >>> 31);
     }
 
     public static boolean isCastling(final int move) {

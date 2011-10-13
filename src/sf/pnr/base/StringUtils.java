@@ -143,16 +143,21 @@ public class StringUtils {
                 final int side;
                 final int absPiece;
                 if (squares[idx] > 0) {
-                    side = WHITE_TO_MOVE;
+                    side = WHITE;
                     absPiece = squares[idx];
                 } else {
-                    side = BLACK_TO_MOVE;
+                    side = BLACK;
                     absPiece = -squares[idx];
                 }
-                final int[] pieces = board.getPieces(side, absPiece);
-                pieces[0]++;
-                pieces[pieces[0]] = idx;
-                board.getPieceArrayPositions()[idx] = pieces[0];
+                if (absPiece == KING) {
+                    board.setKing(side, idx);
+                    board.getPieceArrayPositions()[idx] = 1;
+                } else {
+                    final int[] pieces = board.getPieces(side, absPiece);
+                    pieces[0]++;
+                    pieces[pieces[0]] = idx;
+                    board.getPieceArrayPositions()[idx] = pieces[0];
+                }
             }
         }
 
@@ -428,27 +433,29 @@ public class StringUtils {
                 boolean needsExtraInfo = false;
                 boolean needsFromFile = false;
                 boolean needsFromRank = false;
-                final int[] pieces = board.getPieces(toMove, absPiece);
-                if (absPiece == KNIGHT) {
-                    for (int i = pieces[0]; i > 0; i--) {
-                        final int pos = pieces[i];
-                        if (pos != fromPos) {
-                            if ((ATTACK_ARRAY[toPos - pos + 120] & ATTACK_N) == ATTACK_N) {
-                                needsExtraInfo = true;
-                                needsFromRank |= getFile(pos) == fromFile;
-                                needsFromFile |= getRank(pos) == fromRank;
+                if (absPiece != KING) {
+                    final int[] pieces = board.getPieces(toMove, absPiece);
+                    if (absPiece == KNIGHT) {
+                        for (int i = pieces[0]; i > 0; i--) {
+                            final int pos = pieces[i];
+                            if (pos != fromPos) {
+                                if ((ATTACK_ARRAY[toPos - pos + 120] & ATTACK_N) == ATTACK_N) {
+                                    needsExtraInfo = true;
+                                    needsFromRank |= getFile(pos) == fromFile;
+                                    needsFromFile |= getRank(pos) == fromRank;
+                                }
                             }
                         }
-                    }
-                } else if (absPiece != KING) {
-                    final int attackBits = ATTACK_BITS[absPiece];
-                    for (int i = pieces[0]; i > 0; i--) {
-                        final int pos = pieces[i];
-                        if (pos != fromPos) {
-                            if (board.isAttackedBySliding(toPos, attackBits, pos)) {
-                                needsExtraInfo = true;
-                                needsFromRank |= getFile(pos) == fromFile;
-                                needsFromFile |= getRank(pos) == fromRank;
+                    } else {
+                        final int attackBits = ATTACK_BITS[absPiece];
+                        for (int i = pieces[0]; i > 0; i--) {
+                            final int pos = pieces[i];
+                            if (pos != fromPos) {
+                                if (board.isAttackedBySliding(toPos, attackBits, pos)) {
+                                    needsExtraInfo = true;
+                                    needsFromRank |= getFile(pos) == fromFile;
+                                    needsFromFile |= getRank(pos) == fromRank;
+                                }
                             }
                         }
                     }
@@ -534,7 +541,6 @@ public class StringUtils {
         int toRank = -1;
         int pieceType = PAWN;
         int moveType = MT_NORMAL;
-        boolean capture = false;
         for (int i = 0; i < moveStr.length(); i++) {
             final char ch = moveStr.charAt(i);
             if (ch >= 'B' && ch <= 'R') {
@@ -551,7 +557,6 @@ public class StringUtils {
                 }
                 toRank = ch - '1';
             } else if (ch == 'x') {
-                capture = true;
             } else if (ch == '=') {
                 final char promotedTo = moveStr.charAt(++i);
                 moveType |= CODE_TO_PROMOTION_TYPE[promotedTo - 'A'];
@@ -565,65 +570,71 @@ public class StringUtils {
         assert toRank != -1;
 
         final int toPos = getPosition(toFile, toRank);
-        final int[] pieces = board.getPieces(toMove, pieceType);
-        if (pieceType == PAWN) {
-            final int signum = (toMove << 1) - 1;
-            final int[] squares = board.getBoard();
-            for (int i = 1; i <= pieces[0]; i++) {
-                final int piecePos = pieces[i];
-                final int pieceFile = getFile(piecePos);
-                final int pieceRank = getRank(piecePos);
-                if (fromFile >= 0 && pieceFile != fromFile) {
-                    continue;
-                }
-                if (fromRank >= 0 && pieceRank != fromRank) {
-                    continue;
-                }
-                final int delta = signum * UP;
-                final int squareInFront = piecePos + delta;
-                if (toPos == squareInFront ||
-                    (squares[squareInFront] == EMPTY && toPos == squareInFront + delta && (pieceRank == 1 || pieceRank == 6))) {
-                    fromFile = pieceFile;
-                    fromRank = pieceRank;
-                    break;
-                } else if (toPos == squareInFront - 1 || toPos == squareInFront + 1) {
-                    if (squares[toPos] != EMPTY) {
-                        fromFile = pieceFile;
-                        fromRank = pieceRank;
-                        break;
-                    } else if (((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1 == toFile &&
-                            toRank == 2 + toMove * 3) {
-                        fromFile = pieceFile;
-                        fromRank = pieceRank;
-                        moveType = MT_EN_PASSANT;
-                        break;
-                    }
-                }
-            }
+        if (pieceType == KING) {
+            final int king = board.getKing(toMove);
+            fromFile = getFile(king);
+            fromRank = getRank(king);
         } else {
-            for (int i = 1; i <= pieces[0]; i++) {
-                final int piecePos = pieces[i];
-                final int pieceFile = getFile(piecePos);
-                final int pieceRank = getRank(piecePos);
-                if (fromFile >= 0 && pieceFile != fromFile) {
-                    continue;
-                }
-                if (fromRank >= 0 && pieceRank != fromRank) {
-                    continue;
-                }
-                if (SLIDING[pieceType]) {
-                    if (board.isAttackedBySliding(toPos, ATTACK_BITS[pieceType], piecePos) &&
-                            !isPinned(board, toPos << SHIFT_TO | getPosition(pieceFile, pieceRank) | moveType)) {
-                        fromFile = pieceFile;
-                        fromRank = pieceRank;
-                        break;
+            final int[] pieces = board.getPieces(toMove, pieceType);
+            if (pieceType == PAWN) {
+                final int signum = (toMove << 1) - 1;
+                final int[] squares = board.getBoard();
+                for (int i = 1; i <= pieces[0]; i++) {
+                    final int piecePos = pieces[i];
+                    final int pieceFile = getFile(piecePos);
+                    final int pieceRank = getRank(piecePos);
+                    if (fromFile >= 0 && pieceFile != fromFile) {
+                        continue;
                     }
-                } else {
-                    if (board.isAttackedByNonSliding(toPos, ATTACK_BITS[pieceType], piecePos) &&
-                            !isPinned(board, toPos << SHIFT_TO | getPosition(pieceFile, pieceRank) | moveType)) {
+                    if (fromRank >= 0 && pieceRank != fromRank) {
+                        continue;
+                    }
+                    final int delta = signum * UP;
+                    final int squareInFront = piecePos + delta;
+                    if (toPos == squareInFront ||
+                        (squares[squareInFront] == EMPTY && toPos == squareInFront + delta && (pieceRank == 1 || pieceRank == 6))) {
                         fromFile = pieceFile;
                         fromRank = pieceRank;
                         break;
+                    } else if (toPos == squareInFront - 1 || toPos == squareInFront + 1) {
+                        if (squares[toPos] != EMPTY) {
+                            fromFile = pieceFile;
+                            fromRank = pieceRank;
+                            break;
+                        } else if (((state & EN_PASSANT) >> SHIFT_EN_PASSANT) - 1 == toFile &&
+                                toRank == 2 + toMove * 3) {
+                            fromFile = pieceFile;
+                            fromRank = pieceRank;
+                            moveType = MT_EN_PASSANT;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                for (int i = 1; i <= pieces[0]; i++) {
+                    final int piecePos = pieces[i];
+                    final int pieceFile = getFile(piecePos);
+                    final int pieceRank = getRank(piecePos);
+                    if (fromFile >= 0 && pieceFile != fromFile) {
+                        continue;
+                    }
+                    if (fromRank >= 0 && pieceRank != fromRank) {
+                        continue;
+                    }
+                    if (SLIDING[pieceType]) {
+                        if (board.isAttackedBySliding(toPos, ATTACK_BITS[pieceType], piecePos) &&
+                                !isPinned(board, toPos << SHIFT_TO | getPosition(pieceFile, pieceRank) | moveType)) {
+                            fromFile = pieceFile;
+                            fromRank = pieceRank;
+                            break;
+                        }
+                    } else {
+                        if (board.isAttackedByNonSliding(toPos, ATTACK_BITS[pieceType], piecePos) &&
+                                !isPinned(board, toPos << SHIFT_TO | getPosition(pieceFile, pieceRank) | moveType)) {
+                            fromFile = pieceFile;
+                            fromRank = pieceRank;
+                            break;
+                        }
                     }
                 }
             }

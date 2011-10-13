@@ -19,7 +19,8 @@ public final class Board {
     private final int[] board = new int[128];
 	private int state;
 	private int state2;
-	private final int[][][] pieces = new int[7][2][11];
+	private final int[][][] pieces = new int[6][2][11];
+    private final int[] kings = new int[2];
     private final int[] pieceArrayPos = new int[128];
     private final long[] bitboardAllPieces = new long[2];
     private long zobristIncremental = computeZobristIncremental(this);
@@ -54,8 +55,8 @@ public final class Board {
 		pieces[QUEEN][0][0] = 1; pieces[QUEEN][0][1] = D[7];
 		pieces[QUEEN][1][0] = 1; pieces[QUEEN][1][1] = D[0];
 
-        pieces[KING][0][0] = 1; pieces[KING][0][1] = E[7];
-        pieces[KING][1][0] = 1; pieces[KING][1][1] = E[0];
+        kings[0] = E[7];
+        kings[1] = E[0];
 
         zobristIncremental = computeZobristIncremental(this);
         zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
@@ -80,7 +81,7 @@ public final class Board {
 		Arrays.fill(pieces[KNIGHT][0], 0); Arrays.fill(pieces[KNIGHT][1], 0);
 		Arrays.fill(pieces[BISHOP][0], 0); Arrays.fill(pieces[BISHOP][1], 0);
 		Arrays.fill(pieces[QUEEN][0], 0); Arrays.fill(pieces[QUEEN][1], 0);
-		Arrays.fill(pieces[KING][0], 0); Arrays.fill(pieces[KING][1], 0);
+		kings[0] = 0; kings[1] = 0;
         zobristIncremental = computeZobristIncremental(this);
         zobrist = zobristIncremental ^ computeZobristNonIncremental(state);
         zobristPawn = computeZobrist(this, PAWN) ^ computeZobrist(this, KING);
@@ -116,7 +117,7 @@ public final class Board {
 	}
 	
 	public int getKing(final int side) {
-		return pieces[KING][side][1]; // there is always exactly one king
+		return kings[side];
 	}
 	
 	public void setState(final int state) {
@@ -280,7 +281,11 @@ public final class Board {
         final int pos = pieceArrayPos[fromPos];
         pieceArrayPos[toPos] = pos;
         pieceArrayPos[fromPos] = EMPTY;
-        pieces[absPiece][toMove][pos] = toPos;
+        if (absPiece != KING) {
+            pieces[absPiece][toMove][pos] = toPos;
+        } else {
+            kings[toMove] = toPos;
+        }
         bitboardAllPieces[toMove] ^= 1L << fromPos64;
         bitboardAllPieces[toMove] ^= 1L << toPos64;
     }
@@ -315,7 +320,7 @@ public final class Board {
         assert absPiece != PAWN || pieceCount <= 8;
         pieceIndices[pieceCount] = position;
         pieceArrayPos[position] = pieceIndices[0];
-        materialValue[side] += Evaluation.VAL_PIECE_INCREMENTS [absPiece][pieceCount];
+        materialValue[side] += Evaluation.VAL_PIECE_INCREMENTS[absPiece][pieceCount];
         final int position64 = convert0x88To64(position);
         final long zobristKey = ZOBRIST_PIECES[absPiece][side][position64];
         zobristIncremental ^= zobristKey;
@@ -500,7 +505,7 @@ public final class Board {
                 return true;
             }
         }
-        final int kingIdx = pieces[KING][side][1];
+        final int kingIdx = kings[side];
         if ((ATTACK_ARRAY[position - kingIdx + 120] & ATTACK_K) > 0) {
             return true;
         }
@@ -545,7 +550,7 @@ public final class Board {
         getAttackedSliding(position, side, BISHOP, ATTACK_B, attackers);
         getAttackedSliding(position, side, ROOK, ATTACK_R, attackers);
         getAttackedSliding(position, side, QUEEN, ATTACK_Q, attackers);
-        final int kingPos = pieces[KING][side][1];
+        final int kingPos = kings[side];
         if ((ATTACK_ARRAY[position - kingPos + 120] & ATTACK_K) > 0) {
             attackers[++attackers[0]] = kingPos;
         }
@@ -570,7 +575,7 @@ public final class Board {
             while (testPos != targetPos && (testPos & 0x88) == 0 && board[testPos] == EMPTY) {
                 testPos += delta;
             }
-            if (testPos == targetPos) return true;
+            return testPos == targetPos;
         }
         return false;
     }
@@ -587,7 +592,7 @@ public final class Board {
     }
 
     public boolean attacksKing(final int side) {
-        final int kingPos = pieces[KING][1 - side][1];
+        final int kingPos = kings[1 - side];
         return isAttacked(kingPos, side);
     }
 
@@ -602,7 +607,7 @@ public final class Board {
         final int piece = board[fromPos];
         final int absPiece = signum * piece;
         assert absPiece != EMPTY: StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
-        final int kingPos = pieces[KING][1 - toMove][1];
+        final int kingPos = kings[1 - toMove];
         final int toPos = getToPosition(move);
         final int attacked = board[toPos];
         // if it we are moving on the line to the opponent king and it's not castling or capturing
@@ -684,7 +689,7 @@ public final class Board {
 
     public boolean isMate() {
         final int toMove = state & WHITE_TO_MOVE;
-        final int kingPos = pieces[KING][toMove][1];
+        final int kingPos = kings[toMove];
         if (isAttacked(kingPos, 1 - toMove)) {
             final MoveGenerator moveGenerator = new MoveGenerator();
             moveGenerator.pushFrame();
@@ -705,7 +710,7 @@ public final class Board {
         for (int i = moves[0]; i > 0 && !found; i--) {
             final long undo = move(moves[i]);
             final int toMove = state & WHITE_TO_MOVE;
-            final int kingPos = pieces[KING][(1 - toMove)][1];
+            final int kingPos = kings[(1 - toMove)];
             found = !isAttacked(kingPos, toMove);
             takeBack(undo);
         }
@@ -714,5 +719,9 @@ public final class Board {
 
     public RepetitionTable getRepetitionTable() {
         return repetitionTable;
+    }
+
+    public void setKing(final int side, final int position) {
+        kings[side] = position;
     }
 }

@@ -389,19 +389,25 @@ public class BoardTest extends TestCase {
 	}
 
 	private static void checkPieceListConsistency(final Board board, final int piece) {
-		checkPieceListConsistency(board, piece, WHITE_TO_MOVE);
-		checkPieceListConsistency(board, piece, BLACK_TO_MOVE);
+		checkPieceListConsistency(board, piece, WHITE);
+		checkPieceListConsistency(board, piece, BLACK);
 	}
 
-	private static void checkPieceListConsistency(final Board board, final int piece, final int toMove) {
-		final int[] pieces = board.getPieces(toMove, piece);
-		final int[] squares = board.getBoard();
-		final int[] pieceArrayPositions = board.getPieceArrayPositions();
-		final int signum = toMove == WHITE_TO_MOVE? 1: -1;
-		for (int i = 1; i <= pieces[0]; i++) {
-			assertEquals(signum * piece, squares[pieces[i]]);
-			assertEquals(i, pieceArrayPositions[pieces[i]]);
-		}
+	private static void checkPieceListConsistency(final Board board, final int piece, final int side) {
+        final int signum = side == WHITE? 1: -1;
+        final int[] pieceArrayPositions = board.getPieceArrayPositions();
+        final int[] squares = board.getBoard();
+        if (piece == KING) {
+            final int king = board.getKing(side);
+            assertEquals(signum * piece, squares[king]);
+            assertEquals(1, pieceArrayPositions[king]);
+        } else {
+            final int[] pieces = board.getPieces(side, piece);
+            for (int i = 1; i <= pieces[0]; i++) {
+                assertEquals(signum * piece, squares[pieces[i]]);
+                assertEquals(i, pieceArrayPositions[pieces[i]]);
+            }
+        }
 	}
 
     private boolean containsPosition(final int pos, final int[] pieces) {

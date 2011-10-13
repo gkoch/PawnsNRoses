@@ -135,10 +135,15 @@ public class BitBoard {
     public static long computeAllPieces(final Board board, final int side) {
         long bitboard = 0L;
         for (int type: TYPES) {
-            final int[] pieces = board.getPieces(side, type);
-            for (int i = pieces[0]; i > 0; i--) {
-                final int piece64 = convert0x88To64(pieces[i]);
+            if (type == KING) {
+                final int piece64 = convert0x88To64(board.getKing(side));
                 bitboard |= 1L << piece64;
+            } else {
+                final int[] pieces = board.getPieces(side, type);
+                for (int i = pieces[0]; i > 0; i--) {
+                    final int piece64 = convert0x88To64(pieces[i]);
+                    bitboard |= 1L << piece64;
+                }
             }
         }
         return bitboard;

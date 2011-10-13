@@ -378,20 +378,24 @@ public final class Evaluation {
     }
 
     public static int computePositionalBonusNoPawnAsWhite(final Board board) {
-        int typeBonusOpening = 0;
-        int typeBonusEndGame = 0;
-        for (int type: TYPES_NOPAWN) {
+        final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
+        final int shiftBlack = SHIFT_POSITION_BONUS[BLACK];
+        int typeBonusOpening = VAL_POSITION_BONUS_KING[board.getKing(WHITE) + shiftWhite] -
+            VAL_POSITION_BONUS_KING[board.getKing(BLACK) + shiftBlack];
+        int typeBonusEndGame = VAL_POSITION_BONUS_KING_ENDGAME[board.getKing(WHITE) + shiftWhite] -
+            VAL_POSITION_BONUS_KING_ENDGAME[board.getKing(BLACK) + shiftBlack];
+        for (int type: TYPES_NOPAWN_OR_KING) {
             final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[type];
             final int[] positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[type];
             final int[] whites = board.getPieces(WHITE, type);
             for (int i = whites[0]; i > 0; i--) {
-                typeBonusOpening += positionalBonusOpening[whites[i] + SHIFT_POSITION_BONUS[WHITE]];
-                typeBonusEndGame += positionalBonusEndGame[whites[i] + SHIFT_POSITION_BONUS[WHITE]];
+                typeBonusOpening += positionalBonusOpening[whites[i] + shiftWhite];
+                typeBonusEndGame += positionalBonusEndGame[whites[i] + shiftWhite];
             }
             final int[] blacks = board.getPieces(BLACK, type);
             for (int i = blacks[0]; i > 0; i--) {
-                typeBonusOpening -= positionalBonusOpening[blacks[i] + SHIFT_POSITION_BONUS[BLACK]];
-                typeBonusEndGame -= positionalBonusEndGame[blacks[i] + SHIFT_POSITION_BONUS[BLACK]];
+                typeBonusOpening -= positionalBonusOpening[blacks[i] + shiftBlack];
+                typeBonusEndGame -= positionalBonusEndGame[blacks[i] + shiftBlack];
             }
         }
         final int stage = board.getStage();

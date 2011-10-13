@@ -329,13 +329,15 @@ public final class Evaluation {
         if (drawByInsufficientMaterial(board)) {
             return VAL_DRAW;
         }
-        int scoreAsWhite = board.getMaterialValueAsWhite();
+        final int materialValueWhite = board.getMaterialValue(WHITE);
+        final int materialValueBlack = board.getMaterialValue(BLACK);
+        int scoreAsWhite = materialValueWhite - materialValueBlack;
         scoreAsWhite += computePositionalBonusNoPawnAsWhite(board);
         scoreAsWhite += computeMobilityBonusAsWhite(board);
         final int pawnHashValue = pawnEval(board);
         scoreAsWhite += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
-        if ((board.getMaterialValueWhite() == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]]) &&
-                (board.getMaterialValueBlack() == VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]])) {
+        if ((materialValueWhite == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]]) &&
+                (materialValueBlack == VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]])) {
             final int unstoppablePawnDistWhite = PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, toMove);
             final int unstoppablePawnDistBlack = PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, toMove);
             if (unstoppablePawnDistWhite < unstoppablePawnDistBlack) {
@@ -347,12 +349,13 @@ public final class Evaluation {
             }
         }
 
-        evalHashTable.set(zobrist, scoreAsWhite - VAL_MIN);
-        int score = scoreAsWhite * signum;
-        if (score > 0 && board.getMaterialValue() <= VAL_PIECE_COUNTS[BISHOP][2]) {
-            score *= (1.0 - drawProbability(board));
+        if (scoreAsWhite * signum > 0 && board.getMaterialValue(toMove) <= VAL_PIECE_COUNTS[BISHOP][2]) {
+            scoreAsWhite *= (1.0 - drawProbability(board));
         }
-        return score;
+
+        evalHashTable.set(zobrist, scoreAsWhite - VAL_MIN);
+
+        return scoreAsWhite * signum;
     }
 
     public static int computeMaterialValueAsWhite(final Board board) {
@@ -670,9 +673,13 @@ public final class Evaluation {
             final int[] bishops = board.getPieces(WHITE_TO_MOVE, BISHOP);
             final int bishopCount = bishops[0];
             if (knightCount + bishopCount <= 2 && bishopCount < 2) {
-                return 1.0;
+                if (bishopCount == 1 && knightCount == 1) {
+                    return 0.75;
+                } else {
+                    return 1.0;
+                }
             }
-            if (knightCount <= 0) {
+            if (knightCount == 0) {
                 boolean bishopOnWhite = false;
                 boolean bishopOnBlack = false;
                 for (int i = 1; i <= bishopCount; i++) {

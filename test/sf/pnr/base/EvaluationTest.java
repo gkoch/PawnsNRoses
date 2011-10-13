@@ -156,12 +156,12 @@ public class EvaluationTest extends TestCase {
 
     public void testDrawProbabilityKBNKN() {
         final Board board = StringUtils.fromFen("4k3/4n3/4B3/1N6/3K4/8/8/8 w - - 0 1");
-        assertEquals(1.0, Evaluation.drawProbability(board));
+        assertEquals(0.75, Evaluation.drawProbability(board));
     }
 
     public void testDrawProbabilityKBNKB() {
         final Board board = StringUtils.fromFen("4k3/4b3/4B3/1N6/3K4/8/8/8 w - - 0 1");
-        assertEquals(1.0, Evaluation.drawProbability(board));
+        assertEquals(0.75, Evaluation.drawProbability(board));
     }
 
     public void testDrawProbabilityKBBKN() {
@@ -227,6 +227,12 @@ public class EvaluationTest extends TestCase {
     public void testDrawProbabilityFiftyMoves95OppositeBishops() {
         final Board board = StringUtils.fromFen("4k3/8/8/8/1B1KB3/8/8/8 w - - 95 1");
         assertEquals(0.80, Evaluation.drawProbability(board));
+    }
+
+    public void testEvalScoreStoredInHash() {
+        final Board board = StringUtils.fromFen("7k/5n2/7K/8/4B2B/8/8/8 w - - 0 1");
+        final int score = eval.evaluate(board);
+        assertEquals(score, eval.evaluate(board));
     }
 
     public void testUnstoppablePawn() {

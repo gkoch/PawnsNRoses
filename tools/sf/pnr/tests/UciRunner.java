@@ -123,8 +123,18 @@ public class UciRunner {
 
     public void uciNewGame() throws IOException {
         sendCommand("ucinewgame");
+        resetState();
         ensureReady();
         setOptions(uciOptions);
+    }
+
+    private void resetState() {
+        depth = 0;
+        nodeCount = 0L;
+        score = 0;
+        moveTime = 0L;
+        bestMove = null;
+        bestMoveLine = null;
     }
 
     public void position(final Board board) throws IOException {
@@ -150,6 +160,7 @@ public class UciRunner {
             }
         }
         sendCommand(builder.toString());
+        resetFields();
         ensureReady();
     }
 
@@ -187,6 +198,7 @@ public class UciRunner {
         } else {
             future = null;
         }
+        resetFields();
         sendCommand(command);
         final long startTime = System.currentTimeMillis();
         waitBestMove();
@@ -352,6 +364,7 @@ public class UciRunner {
         process.restart();
         reader = null;
         writer = null;
+        resetFields();
         initializeProcess();
     }
 

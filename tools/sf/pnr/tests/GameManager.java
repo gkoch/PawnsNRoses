@@ -111,6 +111,8 @@ public class GameManager {
         final Board board = new Board();
         Exception ex = null;
         board.restart();
+        int adjudicateCount = 0;
+        int adjudicatePlayer = 0;
         try {
             white.restart();
             white.uciNewGame();
@@ -182,6 +184,7 @@ public class GameManager {
                 }
                 depths[currentPlayer] += player.getDepth();
                 nodes[currentPlayer] += player.getNodeCount();
+                final int score = player.getScore();
                 final String kMove;
                 final String kNodes;
                 final String kTime;
@@ -197,7 +200,7 @@ public class GameManager {
                     kTime = Long.toString(kibitzer.getMoveTime());
                     kNodes = Long.toString(kibitzer.getNodeCount());
                     kScore = Integer.toString(kibitzer.getScore());
-                    final int scoreDiff = kibitzer.getScore() - player.getScore();
+                    final int scoreDiff = kibitzer.getScore() - score;
                     scoreDiffs[currentPlayer] += Math.abs(scoreDiff);
                     kScoreDiff = Integer.toString(scoreDiff);
                 } else {
@@ -211,7 +214,7 @@ public class GameManager {
                 System.out.printf("%3d.\t%6s\t%6s\t%6d\t%7d\t%7d\t%7d\t%7d\t%9.1f\t%6.2f\t%3d\t%5d\t%8s\t%6s\t%7s\t%5s\t%6d\t%5s\r\n",
                     fullMoveCount, whiteMove, blackMove, moveTime, times[0], times[1], player.getNodeCount(),
                     nodes[currentPlayer] / fullMoveCount, ((double) player.getNodeCount() * 1000) / player.getMoveTime(),
-                    ((double) depths[currentPlayer]) / fullMoveCount, player.getDepth(), player.getScore(),
+                    ((double) depths[currentPlayer]) / fullMoveCount, player.getDepth(), score,
                     kMove, kTime, kNodes, kScore, scoreDiffs[currentPlayer] / fullMoveCount, kScoreDiff);
                 if (currentPlayer == 1 && fullMoveCount % 5 == 0) {
                     System.out.println();
@@ -238,6 +241,32 @@ public class GameManager {
                 final int halfMoves = (board.getState() & HALF_MOVES) >> SHIFT_HALF_MOVES;
                 if (halfMoves >= 100) {
                     result = GameResult.FIFTY_MOVES;
+                    break;
+                }
+                if (score >= Evaluation.VAL_QUEEN) {
+                    if (adjudicatePlayer != currentPlayer) {
+                        adjudicatePlayer = currentPlayer;
+                        adjudicateCount = 1;
+                    } else {
+                        adjudicateCount++;
+                        if (adjudicateCount > 5) {
+                            result = GameResult.ADJUDICATE_WIN;
+                            break;
+                        }
+                    }
+                } else if (score <= -Evaluation.VAL_QUEEN) {
+                    if (adjudicatePlayer == currentPlayer) {
+                        adjudicatePlayer = 1 - currentPlayer;
+                        adjudicateCount = 1;
+                    } else {
+                        adjudicateCount++;
+                        if (adjudicateCount > 5) {
+                            result = GameResult.ADJUDICATE_LOSE;
+                            break;
+                        }
+                    }
+                } else {
+                    adjudicateCount = 0;
                 }
                 currentPlayer = 1 - currentPlayer;
             }
@@ -289,7 +318,8 @@ public class GameManager {
 
     private static enum GameResult {
         TIME_OUT(0, 'T', 't'), MATE(1, '1', '0'), THREEFOLD_REPETITION(0.5, 'R', 'r'), FIFTY_MOVES(0.5, 'F', 'f'),
-        INSUFFICIENT_MATERIAL(0.5, 'I', 'i'), ERROR(1, 'e', 'E'), ILLEGAL_MOVE(1, 'm', 'M');
+        INSUFFICIENT_MATERIAL(0.5, 'I', 'i'), ERROR(1, 'e', 'E'), ILLEGAL_MOVE(1, 'm', 'M'), ADJUDICATE_WIN(1, 'A', 'a'),
+        ADJUDICATE_LOSE(0, 'a', 'A');
 
         private final double whiteScore;
         private final double blackScore;

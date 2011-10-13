@@ -121,6 +121,12 @@ public final class Evaluation {
 
     public static final int INITIAL_MATERIAL_VALUE;
 
+    private static final int PENALTY_TRAPPED_KNIGHT_A7 = -50;
+    private static final int PENALTY_TRAPPED_KNIGHT_A8 = -50;
+    private static final int PENALTY_TRAPPED_BISHOP_A6 = -50;
+    private static final int PENALTY_TRAPPED_BISHOP_A7 = -150;
+    private static final int PENALTY_TRAPPED_ROOK_BY_KING = -40;
+
     static {
         VAL_PIECES = new int[7];
         VAL_PIECES[PAWN] = VAL_PAWN;
@@ -334,6 +340,7 @@ public final class Evaluation {
         int scoreAsWhite = materialValueWhite - materialValueBlack;
         scoreAsWhite += computePositionalBonusNoPawnAsWhite(board);
         scoreAsWhite += computeMobilityBonusAsWhite(board);
+        scoreAsWhite += getTrappedPiecesPenaltyAsWhite(board);
         final int pawnHashValue = pawnEval(board);
         scoreAsWhite += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
         if ((materialValueWhite == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]]) &&
@@ -595,6 +602,58 @@ public final class Evaluation {
             castlingPenalty -= PENALTY_CASTLING_MISSED;
         }
         return castlingPenalty;
+    }
+
+    public static int getTrappedPiecesPenaltyAsWhite(final Board board) {
+        // http://chessprogramming.wikispaces.com/Trapped+pieces
+
+        final int[] squares = board.getBoard();
+        int score = 0;
+        if (squares[A[6]] == BISHOP && squares[C[6]] == -PAWN && squares[B[5]] == -PAWN ||
+                squares[H[6]] == BISHOP && squares[F[6]] == -PAWN && squares[G[5]] == -PAWN) {
+            score += PENALTY_TRAPPED_BISHOP_A7;
+        }
+        if (squares[A[1]] == -BISHOP && squares[C[1]] == PAWN && squares[B[2]] == PAWN ||
+                squares[H[1]] == -BISHOP && squares[F[1]] == PAWN && squares[G[2]] == PAWN) {
+            score += -PENALTY_TRAPPED_BISHOP_A7;
+        }
+        if (squares[A[7]] == KNIGHT && (squares[C[6]] == -PAWN || squares[A[6]] == -PAWN) ||
+                squares[H[7]] == KNIGHT && (squares[F[6]] == -PAWN || squares[H[6]] == -PAWN)) {
+            score += PENALTY_TRAPPED_KNIGHT_A8;
+        }
+        if (squares[A[0]] == -KNIGHT && (squares[C[1]] == PAWN || squares[A[1]] == PAWN) ||
+                squares[H[0]] == -KNIGHT && (squares[F[1]] == PAWN || squares[H[1]] == PAWN)) {
+            score += -PENALTY_TRAPPED_KNIGHT_A8;
+        }
+        if (squares[A[5]] == BISHOP && squares[C[5]] == -PAWN && squares[B[4]] == -PAWN ||
+                squares[H[5]] == BISHOP && squares[F[5]] == -PAWN && squares[G[4]] == -PAWN) {
+            score += PENALTY_TRAPPED_BISHOP_A6;
+        }
+        if (squares[A[2]] == -BISHOP && squares[C[2]] == PAWN && squares[B[3]] == PAWN ||
+                squares[H[2]] == -BISHOP && squares[F[2]] == PAWN && squares[G[3]] == PAWN) {
+            score += -PENALTY_TRAPPED_BISHOP_A6;
+        }
+        if (squares[A[6]] == KNIGHT && squares[B[6]] == -PAWN && squares[A[5]] == -PAWN ||
+                squares[H[6]] == KNIGHT && squares[G[6]] == -PAWN && squares[H[5]] == -PAWN) {
+            score += PENALTY_TRAPPED_KNIGHT_A7;
+        }
+        if (squares[A[1]] == -KNIGHT && squares[B[1]] == PAWN && squares[A[2]] == PAWN ||
+                squares[H[1]] == -KNIGHT && squares[G[1]] == PAWN && squares[H[2]] == PAWN) {
+            score += PENALTY_TRAPPED_KNIGHT_A7;
+        }
+        if ((squares[A[0]] == ROOK || squares[B[0]] == ROOK || squares[A[1]] == ROOK || squares[B[1]] == ROOK) &&
+                (squares[B[0]] == KING || squares[C[0]] == KING || squares[D[0]] == KING) ||
+            (squares[G[0]] == ROOK || squares[H[0]] == ROOK || squares[G[1]] == ROOK || squares[H[1]] == ROOK) &&
+                (squares[F[0]] == KING || squares[G[0]] == KING)) {
+            score += PENALTY_TRAPPED_ROOK_BY_KING;
+        }
+        if ((squares[A[7]] == ROOK || squares[B[7]] == ROOK || squares[A[6]] == ROOK || squares[B[6]] == ROOK) &&
+                (squares[B[7]] == KING || squares[C[7]] == KING || squares[D[7]] == KING) ||
+            (squares[G[7]] == ROOK || squares[H[7]] == ROOK || squares[G[6]] == ROOK || squares[H[6]] == ROOK) &&
+                (squares[F[7]] == KING || squares[G[7]] == KING)) {
+            score += PENALTY_TRAPPED_ROOK_BY_KING;
+        }
+        return score;
     }
 
     public static int computeRookBonus(final Board board, final int side) {

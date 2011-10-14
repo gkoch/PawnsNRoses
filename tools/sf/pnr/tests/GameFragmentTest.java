@@ -92,11 +92,15 @@ public class GameFragmentTest {
         private void runTest(final int engineIndex, final Board board) {
             final UciRunner engine = engines[engineIndex];
             System.out.print(engine.getName());
+            runTest(engineIndex, board, engine, referenceEngine);
+        }
+
+        private void runTest(final int engineIndex, final Board board, final UciRunner engine, final UciRunner opponent) {
             try {
                 final int initialKibitzerScore = getKibitzerScore(board);
                 final List<Integer> moves = new ArrayList<Integer>(moveCount * 2);
                 engine.uciNewGame();
-                referenceEngine.uciNewGame();
+                opponent.uciNewGame();
                 final int state = board.getState();
                 int fullMoves = (state & Utils.FULL_MOVES) >> Utils.SHIFT_FULL_MOVES;
                 final boolean whiteToStart = (state & Utils.WHITE_TO_MOVE) == Utils.WHITE_TO_MOVE;
@@ -124,10 +128,10 @@ public class GameFragmentTest {
                     if (!whiteToStart) {
                         System.out.printf("\r\n%d.", fullMoves + i + 1);
                     }
-                    move(referenceEngine, board, moves);
-                    opponentTestDepth += referenceEngine.getDepth();
-                    opponentTestNodeCount += referenceEngine.getNodeCount();
-                    opponentTestMoveTime += referenceEngine.getMoveTime();
+                    move(opponent, board, moves);
+                    opponentTestDepth += opponent.getDepth();
+                    opponentTestNodeCount += opponent.getNodeCount();
+                    opponentTestMoveTime += opponent.getMoveTime();
                     if (board.isMate()) {
                         break;
                     }

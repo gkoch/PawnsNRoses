@@ -2,6 +2,7 @@ package sf.pnr.base;
 
 import junit.framework.TestCase;
 import sf.pnr.alg.TranspositionTable;
+import sf.pnr.io.UCI;
 
 import static sf.pnr.base.Engine.*;
 import static sf.pnr.base.Evaluation.*;
@@ -586,5 +587,13 @@ public class EngineTest extends TestCase {
         final Board board = StringUtils.fromFen("8/2b5/5p2/1k6/8/p4K2/8/7q w - - 0 73");
         final long result = engine.search(board, 7, 0);
         assertFalse(StringUtils.toSimple(Engine.getMoveFromSearchResult(result)).equals("f3g2"));
+    }
+
+    public void testPawnSacMate2() {
+        final Board board = StringUtils.fromFen("4n1bk/8/6PK/8/7N/8/8/8 w - - 0 1");
+        engine.setBestMoveListener(new UCI.UciBestMoveListener(System.out, true));
+        final long result = engine.search(board, 4, 0);
+        assertTrue(StringUtils.toSimple(Engine.getMoveFromSearchResult(result)).equals("g6g7"));
+        assertTrue("Value: " + Engine.getValueFromSearchResult(result), Engine.getValueFromSearchResult(result) > VAL_MATE_THRESHOLD);
     }
 }

@@ -517,8 +517,8 @@ public final class Engine {
         assert (Utils.getToPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
         if (depth > 3 * PLY && ttMove == 0) {
             // internal iterative deepening
-            final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, searchedPly);
-            ttMove = getMoveFromSearchResult(searchResult);
+            negascout(board, depth / 2, alpha, beta, false, allowNull, searchedPly);
+            ttMove = (int) ((transpositionTable.read(zobristKey) & TT_MOVE) >> TT_SHIFT_MOVE);
             assert (Utils.getFromPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
             assert (Utils.getToPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
         }

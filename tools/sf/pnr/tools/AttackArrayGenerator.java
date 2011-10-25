@@ -34,24 +34,24 @@ public class AttackArrayGenerator {
 
     private static void generateAttacks(final long[] attackArray) {
         for (int delta: DELTA_KNIGHT) {
-            attackArray[delta + 120] |= ((delta + 64) << SHIFT_ATTACK_DELTA) | ATTACK_N;
+            attackArray[delta + 120] |= (delta + 64) | ATTACK_N;
         }
         for (int delta: DELTA_KING) {
             attackArray[delta + 120] |= ATTACK_K;
         }
         for (int delta: DELTA_BISHOP) {
             for (int i = 1; i < 8; i++) {
-                attackArray[delta * i + 120] |= ((delta + 64) << SHIFT_ATTACK_DELTA) | ATTACK_B;
+                attackArray[delta * i + 120] |= (delta + 64) | ATTACK_B;
             }
         }
         for (int delta: DELTA_ROOK) {
             for (int i = 1; i < 8; i++) {
-                attackArray[delta * i + 120] |= ((delta + 64) << SHIFT_ATTACK_DELTA) | ATTACK_R;
+                attackArray[delta * i + 120] |= (delta + 64) | ATTACK_R;
             }
         }
         for (int i = 0; i < attackArray.length; i++) {
             if (attackArray[i] == 0) {
-                attackArray[i] = 64 << SHIFT_ATTACK_DELTA;
+                attackArray[i] = 64;
             }
         }
         // add distance

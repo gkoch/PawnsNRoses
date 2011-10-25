@@ -13,7 +13,7 @@ public class UtilsTest extends TestCase {
 
     public void testDelta() {
         assertEquals(ATTACK_R, ATTACK_ARRAY[A[7] - A[3] + 120] & ATTACK_Q);
-        assertEquals(UP, ((ATTACK_ARRAY[A[7] - A[3] + 120] & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64);
+        assertEquals(UP, (ATTACK_ARRAY[A[7] - A[3] + 120] & ATTACK_DELTA) - 64);
     }
 
     public void testPolyglotZobrist() {

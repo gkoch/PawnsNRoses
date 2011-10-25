@@ -439,7 +439,7 @@ public final class MoveGenerator {
             // from toPos to currentPos
             final int attackValue = ATTACK_ARRAY[currentPos - toPos + 120];
             assert currentAbsPiece == PAWN || (attackValue & ATTACK_BITS[currentAbsPiece]) > 0;
-            final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
+            final int delta = (attackValue & ATTACK_DELTA) - 64;
             int foundPos = currentPos + delta;
             while ((foundPos & 0x88) == 0 && squares[foundPos] == EMPTY) {
                 foundPos += delta;

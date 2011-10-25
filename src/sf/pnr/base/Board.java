@@ -567,9 +567,9 @@ public final class Board {
     public boolean isAttackedBySliding(final int targetPos, final int attackBits, final int piecePos) {
         final int attackValue = ATTACK_ARRAY[(targetPos - piecePos + 120)];
         if ((attackValue & attackBits) > 0) {
-            final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
+            final int delta = (attackValue & ATTACK_DELTA) - 64;
             int testPos = piecePos + delta;
-            while (testPos != targetPos && (testPos & 0x88) == 0 && board[testPos] == EMPTY) {
+            while (board[testPos] == EMPTY && testPos != targetPos) {
                 testPos += delta;
             }
             return testPos == targetPos;
@@ -669,7 +669,7 @@ public final class Board {
             final int attackValue = ATTACK_ARRAY[fromPos - kingPos + 120];
             final int attackBits = attackValue & ATTACK_Q;
             assert attackBits != 0;
-            final int delta = ((attackValue & ATTACK_DELTA) >> SHIFT_ATTACK_DELTA) - 64;
+            final int delta = (attackValue & ATTACK_DELTA) - 64;
             int testPos = fromPos + delta;
             while ((testPos & 0x88) == 0 && board[testPos] == EMPTY) {
                 testPos += delta;

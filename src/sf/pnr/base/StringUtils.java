@@ -547,7 +547,7 @@ public class StringUtils {
             moveGenerator.pushFrame();
             moveGenerator.generatePseudoLegalMoves(board);
             boolean hasLegalMove = board.hasLegalMove(moveGenerator.getWinningCaptures()) ||
-                board.hasLegalMove(moveGenerator.getLoosingCaptures());
+                board.hasLegalMove(moveGenerator.getLosingCaptures());
             if (!hasLegalMove) {
                 moveGenerator.generatePseudoLegalMovesNonAttacking(board);
                 hasLegalMove = board.hasLegalMove(moveGenerator.getMoves()) ||

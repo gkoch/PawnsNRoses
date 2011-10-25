@@ -131,7 +131,7 @@ public class PerftTest extends TestCase {
         moveGenerator.generatePseudoLegalMoves(board);
         moveGenerator.generatePseudoLegalMovesNonAttacking(board);
         moveCount += playMoves(board, depth, moveGenerator, moveGenerator.getWinningCaptures(), checkConsistency, printFen);
-        moveCount += playMoves(board, depth, moveGenerator, moveGenerator.getLoosingCaptures(), checkConsistency, printFen);
+        moveCount += playMoves(board, depth, moveGenerator, moveGenerator.getLosingCaptures(), checkConsistency, printFen);
         moveCount += playMoves(board, depth, moveGenerator, moveGenerator.getPromotions(), checkConsistency, printFen);
         moveCount += playMoves(board, depth, moveGenerator, moveGenerator.getMoves(), checkConsistency, printFen);
         moveGenerator.popFrame();

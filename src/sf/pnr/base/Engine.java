@@ -74,10 +74,10 @@ public final class Engine {
         }
     }
 
-    private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOOSING}
+    private enum SearchStage {TRANS_TABLE, CAPTURES_WINNING, PROMOTION, KILLERS, NORMAL, CAPTURES_LOSING}
     private static final SearchStage[] SEARCH_STAGES = SearchStage.values();
     private static final SearchStage[] SEARCH_STAGES_QUIESCENCE =
-        EnumSet.of(SearchStage.CAPTURES_WINNING, SearchStage.PROMOTION, SearchStage.NORMAL, SearchStage.CAPTURES_LOOSING).toArray(new SearchStage[4]);
+        EnumSet.of(SearchStage.CAPTURES_WINNING, SearchStage.PROMOTION, SearchStage.NORMAL, SearchStage.CAPTURES_LOSING).toArray(new SearchStage[4]);
 
     private final MoveGenerator moveGenerator = new MoveGenerator();
     private final Evaluation evaluation = new Evaluation();
@@ -246,10 +246,10 @@ public final class Engine {
         int quietMoveCount = 0;
         for (SearchStage searchStage: SEARCH_STAGES) {
             final boolean highPriorityStage =
-                searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
+                searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOSING;
             final int[] moves = getMoves(searchStage, board, ttMove, searchedPly);
             final boolean allowQuiescence = (searchStage == SearchStage.CAPTURES_WINNING ||
-                searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING ||
+                searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOSING ||
                 searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
                     (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
             for (int i = moves[0]; i > 0; i--) {
@@ -545,10 +545,10 @@ public final class Engine {
         int quietMoveCount = 0;
         for (SearchStage searchStage: SEARCH_STAGES) {
             final boolean highPriorityStage =
-                searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOOSING;
+                searchStage != SearchStage.NORMAL && searchStage != SearchStage.CAPTURES_LOSING;
             final int[] moves = getMoves(searchStage, board, ttMove, searchedPly);
             final boolean allowQuiescence = (searchStage == SearchStage.CAPTURES_WINNING ||
-                searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOOSING ||
+                searchStage == SearchStage.PROMOTION || searchStage == SearchStage.CAPTURES_LOSING ||
                 searchStage == SearchStage.TRANS_TABLE && moves[0] == 1 &&
                     (MoveGenerator.isCapture(board, moves[1]) || MoveGenerator.isPromotion(board, moves[1])));
             final boolean allowToRecurseDown = !futility ||
@@ -1018,8 +1018,8 @@ public final class Engine {
             case NORMAL:
                 moves = moveGenerator.getMoves();
                 break;
-            case CAPTURES_LOOSING:
-                moves = moveGenerator.getLoosingCaptures();
+            case CAPTURES_LOSING:
+                moves = moveGenerator.getLosingCaptures();
                 break;
             default:
                 throw new IllegalStateException("Unknow move generation stage: " + searchStage.name());

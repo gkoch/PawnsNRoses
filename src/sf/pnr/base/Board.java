@@ -692,7 +692,7 @@ public final class Board {
             moveGenerator.pushFrame();
             moveGenerator.generatePseudoLegalMoves(this);
             boolean hasLegalMove = hasLegalMove(moveGenerator.getWinningCaptures()) ||
-                hasLegalMove(moveGenerator.getLoosingCaptures());
+                hasLegalMove(moveGenerator.getLosingCaptures());
             if (!hasLegalMove) {
                 moveGenerator.generatePseudoLegalMovesNonAttacking(this);
                 hasLegalMove = hasLegalMove(moveGenerator.getMoves()) || hasLegalMove(moveGenerator.getPromotions());

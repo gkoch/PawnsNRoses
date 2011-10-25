@@ -32,10 +32,10 @@ public final class MoveGenerator {
         final Frame frame = frames.peek();
         final int[] winningCaptures = frame.getWinningCaptures();
         final int[] moves = frame.getMoves();
-        final int[] loosingCaptures = frame.getLoosingCaptures();
+        final int[] losingCaptures = frame.getLosingCaptures();
         winningCaptures[0] = 0;
         moves[0] = 0;
-        loosingCaptures[0] = 0;
+        losingCaptures[0] = 0;
 
         final int toMove = board.getState() & WHITE_TO_MOVE;
         generatePseudoLegalMovesSliding(board, QUEEN, frame, toMove);
@@ -113,10 +113,10 @@ public final class MoveGenerator {
     public void generatePseudoLegalMovesSliding(final Board board, final int absPiece, final Frame frame, final int toMove) {
         final int[] winningCaptures = frame.getWinningCaptures();
         final int[] moves = frame.getMoves();
-        final int[] loosingCaptures = frame.getLoosingCaptures();
+        final int[] losingCaptures = frame.getLosingCaptures();
         int winningCapturesIdx = winningCaptures[0];
         int idx = moves[0];
-        int loosingCapturesIdx = loosingCaptures[0];
+        int losingCapturesIdx = losingCaptures[0];
         final int[] pieces = board.getPieces(toMove, absPiece);
         final int[] squares = board.getBoard();
         final int[] deltas = DELTA[absPiece];
@@ -136,7 +136,7 @@ public final class MoveGenerator {
                             winningCaptures[++winningCapturesIdx] = move;
                         } else {
                             final int move = (pos << SHIFT_TO) | piece | ((2000 + value) << SHIFT_MOVE_VALUE);
-                            loosingCaptures[++loosingCapturesIdx] = move;
+                            losingCaptures[++losingCapturesIdx] = move;
                         }
                         break;
                     } else {
@@ -147,7 +147,7 @@ public final class MoveGenerator {
         }
         winningCaptures[0] = winningCapturesIdx;
         moves[0] = idx;
-        loosingCaptures[0] = loosingCapturesIdx;
+        losingCaptures[0] = losingCapturesIdx;
     }
 
     public void generatePseudoLegalMovesKnight(final Board board, final Frame frame, final int toMove) {
@@ -156,10 +156,10 @@ public final class MoveGenerator {
         final int[] deltas = DELTA[KNIGHT];
         final int[] winningCaptures = frame.getWinningCaptures();
         final int[] moves = frame.getMoves();
-        final int[] loosingCaptures = frame.getLoosingCaptures();
+        final int[] losingCaptures = frame.getLosingCaptures();
         int winningCaptureIdx = winningCaptures[0];
         int idx = moves[0];
-        int loosingCaptureIdx = loosingCaptures[0];
+        int losingCaptureIdx = losingCaptures[0];
         final int count = pieces[0];
         for (int i = 1; i <= count; i++) {
             final int piece = pieces[i];
@@ -177,7 +177,7 @@ public final class MoveGenerator {
                                 winningCaptures[++winningCaptureIdx] = move;
                             } else {
                                 final int move = (pos << SHIFT_TO) | piece | ((2000 + value) << SHIFT_MOVE_VALUE);
-                                loosingCaptures[++loosingCaptureIdx] = move;
+                                losingCaptures[++losingCaptureIdx] = move;
                             }
                         }
                     }
@@ -186,7 +186,7 @@ public final class MoveGenerator {
         }
         moves[0] = idx;
         winningCaptures[0] = winningCaptureIdx;
-        loosingCaptures[0] = loosingCaptureIdx;
+        losingCaptures[0] = losingCaptureIdx;
     }
 
     public void generatePseudoLegalMovesPawnCapture(final Board board, final int[] captures) {
@@ -317,9 +317,9 @@ public final class MoveGenerator {
         return frame.getWinningCaptures();
 	}
 
-    public int[] getLoosingCaptures() {
+    public int[] getLosingCaptures() {
         final Frame frame = frames.peek();
-        return frame.getLoosingCaptures();
+        return frame.getLosingCaptures();
 	}
 
     public int[] getPromotions() {
@@ -501,13 +501,13 @@ public final class MoveGenerator {
     public static final class Frame implements Reinitialiseable {
         private final int[] moves;
         private final int[] winningCaptures;
-        private final int[] loosingCaptures;
+        private final int[] losingCaptures;
         private final int[] promotions;
 
         public Frame() {
             moves = new int[MAX_MOVE_COUNT];
             winningCaptures = new int[MAX_CAPTURE_COUNT];
-            loosingCaptures = new int[MAX_CAPTURE_COUNT];
+            losingCaptures = new int[MAX_CAPTURE_COUNT];
             promotions = new int[MAX_PROMOTION_COUNT];
         }
 
@@ -519,8 +519,8 @@ public final class MoveGenerator {
             return winningCaptures;
         }
 
-        public int[] getLoosingCaptures() {
-            return loosingCaptures;
+        public int[] getLosingCaptures() {
+            return losingCaptures;
         }
 
         public int[] getPromotions() {
@@ -531,7 +531,7 @@ public final class MoveGenerator {
         public void reinitialise() {
             moves[0] = 0;
             winningCaptures[0] = 0;
-            loosingCaptures[0] = 0;
+            losingCaptures[0] = 0;
         }
     }
 }

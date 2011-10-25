@@ -86,7 +86,10 @@ public final class TranspositionTable {
         int minAgeIndex = startIndex;
         for (int i = startIndex; i < ARRAY_LENGHT; i += 2) {
             if (array[i] == zobrist) {
-                array[i + 1] = ttValue;
+                final int ttDepth = (int) ((array[i + 1] & TT_DEPTH) >>> TT_SHIFT_DEPTH);
+                if (ttDepth < depth || ttDepth < depth + 2 && (array[i + 1] & TT_TYPE) != TT_TYPE_EXACT && type == TT_TYPE_EXACT) {
+                    array[i + 1] = ttValue;
+                }
                 return;
             } else if (array[i] == 0) {
                 array[i] = zobrist;
@@ -108,7 +111,10 @@ public final class TranspositionTable {
         final int toCheck = MAX_CHECK_INDEX - (ARRAY_LENGHT - startIndex);
         for (int i = 0; i < startIndex; i += 2) {
             if (array[i] == zobrist) {
-                array[i + 1] = ttValue;
+                final int ttDepth = (int) ((array[i + 1] & TT_DEPTH) >>> TT_SHIFT_DEPTH);
+                if (ttDepth < depth || ttDepth < depth + 2 && (array[i + 1] & TT_TYPE) != TT_TYPE_EXACT && type == TT_TYPE_EXACT) {
+                    array[i + 1] = ttValue;
+                }
                 return;
             } else if (array[i] == 0) {
                 array[i] = zobrist;

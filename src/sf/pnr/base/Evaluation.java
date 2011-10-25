@@ -981,14 +981,14 @@ public final class Evaluation {
         }
 
         int pawnShield = 0;
-        if ((PAWN_SHIELD_KING_SIDE_KING[WHITE] & whiteKingMask) > 0) {
+        if ((PAWN_SHIELD_KING_SIDE_KING[WHITE] & whiteKingMask) != 0) {
             for (long shieldMask : PAWN_SHIELD_KING_SIDE[WHITE]) {
                 if ((pawnMask[WHITE] & shieldMask) == shieldMask) {
                     pawnShield = BONUS_PAWN_SHIELD;
                     break;
                 }
             }
-        } else if ((PAWN_SHIELD_QUEEN_SIDE_KING[WHITE] & whiteKingMask) > 0) {
+        } else if ((PAWN_SHIELD_QUEEN_SIDE_KING[WHITE] & whiteKingMask) != 0) {
             for (long shieldMask : PAWN_SHIELD_QUEEN_SIDE[WHITE]) {
                 if ((pawnMask[WHITE] & shieldMask) == shieldMask) {
                     pawnShield = BONUS_PAWN_SHIELD;
@@ -996,14 +996,14 @@ public final class Evaluation {
                 }
             }
         }
-        if ((PAWN_SHIELD_KING_SIDE_KING[BLACK] & blackKingMask) > 0) {
+        if ((PAWN_SHIELD_KING_SIDE_KING[BLACK] & blackKingMask) != 0) {
             for (long shieldMask: PAWN_SHIELD_KING_SIDE[BLACK]) {
                 if ((pawnMask[BLACK] & shieldMask) == shieldMask) {
                     pawnShield -= BONUS_PAWN_SHIELD;
                     break;
                 }
             }
-        } else if ((PAWN_SHIELD_QUEEN_SIDE_KING[BLACK] & blackKingMask) > 0) {
+        } else if ((PAWN_SHIELD_QUEEN_SIDE_KING[BLACK] & blackKingMask) != 0) {
             for (long shieldMask: PAWN_SHIELD_QUEEN_SIDE[BLACK]) {
                 if ((pawnMask[BLACK] & shieldMask) == shieldMask) {
                     pawnShield -= BONUS_PAWN_SHIELD;

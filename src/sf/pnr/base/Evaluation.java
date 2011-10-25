@@ -1024,4 +1024,9 @@ public final class Evaluation {
     public PawnHashTable getPawnHashTable() {
         return pawnHashTable;
     }
+
+    public void clear() {
+        evalHashTable.clear();
+        pawnHashTable.clear();
+    }
 }

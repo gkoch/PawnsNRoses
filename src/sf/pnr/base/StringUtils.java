@@ -200,6 +200,51 @@ public class StringUtils {
         return board;
     }
 
+    public static String mirrorFen(final String fen) {
+        final String[] parts = fen.split(" ");
+        final StringBuilder mirrored = new StringBuilder(fen.length());
+        // position
+        final String position = parts[0];
+        final String[] ranks = position.split("/");
+        for (int i = ranks.length - 1; i >= 0; i--) {
+            addCaseSwapped(mirrored, ranks[i]);
+            if (i > 0) {
+                mirrored.append("/");
+            }
+        }
+        mirrored.append(' ');
+        // who is next
+        final String next = parts[1];
+        if (next.equals("w")) {
+            mirrored.append('b');
+        } else {
+            assert next.equals("b");
+            mirrored.append('w');
+        }
+        mirrored.append(' ');
+        addCaseSwapped(mirrored, parts[2]);
+        for (int i = 3; i < parts.length; i++) {
+            mirrored.append(' ');
+            mirrored.append(parts[i]);
+        }
+        return mirrored.toString();
+    }
+
+    private static void addCaseSwapped(final StringBuilder builder, final String str) {
+        for (int j = 0; j < str.length(); j++) {
+            final char ch = str.charAt(j);
+            final char transformed;
+            if (Character.isUpperCase(ch)) {
+                transformed = Character.toLowerCase(ch);
+            } else if (Character.isLowerCase(ch)) {
+                transformed = Character.toUpperCase(ch);
+            } else {
+                transformed = ch;
+            }
+            builder.append(transformed);
+        }
+    }
+
     public static String toString(final Board board) {
         final int[] pieces = board.getBoard();
         final int state = board.getState();

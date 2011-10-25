@@ -24,6 +24,8 @@ public final class Engine {
     private static int MOVE_ORDER_BLOCKED_CHECK_BONUS = 150;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_7TH_RANK_PAWN_BONUS)
     private static int MOVE_ORDER_7TH_RANK_PAWN_BONUS = 300;
+    @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_CASTLING_BONUS)
+    private static int MOVE_ORDER_CASTLING_BONUS = 100;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_POSITIONAL_GAIN_SHIFT)
     private static int MOVE_ORDER_POSITIONAL_GAIN_SHIFT = 1;
     @Configurable(Configurable.Key.ENGINE_MOVE_ORDER_HISTORY_MAX_BITS)
@@ -1063,8 +1065,9 @@ public final class Engine {
                 } else {
                     pawnBonus = 0;
                 }
-                final int moveValue = RND_ARRAY[(RND_INDEX++) & 0xFF] +
-                    ((move & MOVE_VALUE) >> SHIFT_MOVE_VALUE) + historyValue + historyValueGlobal + checkBonus + valPositional + pawnBonus;
+                final int castlingBonus = ((move & MT_CASTLING) > 0)? MOVE_ORDER_CASTLING_BONUS: 0;
+                final int moveValue = RND_ARRAY[(RND_INDEX++) & 0xFF] + ((move & MOVE_VALUE) >> SHIFT_MOVE_VALUE) +
+                    historyValue + historyValueGlobal + checkBonus + valPositional + pawnBonus + castlingBonus;
                 moves[i] = (move & ~MOVE_VALUE) | (moveValue << SHIFT_MOVE_VALUE);
                 assert (moves[i] & (1 << 31)) == 0: Integer.toHexString(moves[i]); 
             } else {

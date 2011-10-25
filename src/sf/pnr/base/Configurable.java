@@ -56,6 +56,7 @@ public @interface Configurable {
         ENGINE_MOVE_ORDER_CHECK_BONUS("engine.moveOrder.checkBonus"),
         ENGINE_MOVE_ORDER_BLOCKED_CHECK_BONUS("engine.moveOrder.blockedCheckBonus"),
         ENGINE_MOVE_ORDER_7TH_RANK_PAWN_BONUS("engine.moveOrder.7thRankPawnBonus"),
+        ENGINE_MOVE_ORDER_CASTLING_BONUS("engine.moveOrder.castlingBonus"),
         ENGINE_MOVE_ORDER_POSITIONAL_GAIN_SHIFT("engine.moveOrder.positionalGainShift"),
         ENGINE_MOVE_ORDER_HISTORY_MAX_BITS("engine.moveOrder.historyMaxBits"),
         ENGINE_MOVE_ORDER_RND_MAX("engine.moveOrder.rndMax");

@@ -501,29 +501,30 @@ public final class Board {
                 return true;
             }
         }
-        final int kingIdx = kings[side];
-        if ((ATTACK_ARRAY[position - kingIdx + 120] & ATTACK_K) > 0) {
-            return true;
+        final int[] rooks = pieces[ROOK][side];
+        for (int i = rooks[0]; i > 0; i--) {
+            if (isAttackedBySliding(position, ATTACK_R, rooks[i])) return true;
         }
-        if (isAttackedSliding(position, side, ROOK, ATTACK_R)) return true;
-        if (isAttackedSliding(position, side, BISHOP, ATTACK_B)) return true;
-        if (isAttackedSliding(position, side, QUEEN, ATTACK_Q)) return true;
+        final int[] bishops = pieces[BISHOP][side];
+        for (int i = bishops[0]; i > 0; i--) {
+            if (isAttackedBySliding(position, ATTACK_B, bishops[i])) return true;
+        }
+        final int[] queens = pieces[QUEEN][side];
+        for (int i = queens[0]; i > 0; i--) {
+            if (isAttackedBySliding(position, ATTACK_Q, queens[i])) return true;
+        }
         if (side == WHITE_TO_MOVE) {
-            if (((position + DL) & 0x88) == 0 && board[position + DL] == PAWN) return true;
-            if (((position + DR) & 0x88) == 0 && board[position + DR] == PAWN) return true;
+            final int left = position + DL;
+            if ((left & 0x88) == 0 && board[left] == PAWN) return true;
+            final int right = position + DR;
+            if ((right & 0x88) == 0 && board[right] == PAWN) return true;
         } else {
-            if (((position + UL) & 0x88) == 0 && board[position + UL] == -PAWN) return true;
-            if (((position + UR) & 0x88) == 0 && board[position + UR] == -PAWN) return true;
+            final int left = position + UL;
+            if ((left & 0x88) == 0 && board[left] == -PAWN) return true;
+            final int right = position + UR;
+            if ((right & 0x88) == 0 && board[right] == -PAWN) return true;
         }
-        return false;
-    }
-
-    private boolean isAttackedSliding(final int position, final int side, final int absPiece, final int attackBits) {
-        final int[] pieceIndices = pieces[absPiece][side];
-        for (int i = pieceIndices[0]; i > 0; i--) {
-            if (isAttackedBySliding(position, attackBits, pieceIndices[i])) return true;
-        }
-        return false;
+        return (ATTACK_ARRAY[position - kings[side] + 120] & ATTACK_K) > 0;
     }
 
     public void getAttackers(final int position, final int side, final int[] attackers) {

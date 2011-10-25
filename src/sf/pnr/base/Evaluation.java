@@ -639,7 +639,7 @@ public final class Evaluation {
         }
         if (squares[A[1]] == -KNIGHT && squares[B[1]] == PAWN && squares[A[2]] == PAWN ||
                 squares[H[1]] == -KNIGHT && squares[G[1]] == PAWN && squares[H[2]] == PAWN) {
-            score += PENALTY_TRAPPED_KNIGHT_A7;
+            score += -PENALTY_TRAPPED_KNIGHT_A7;
         }
         if ((squares[A[0]] == ROOK || squares[B[0]] == ROOK || squares[A[1]] == ROOK || squares[B[1]] == ROOK) &&
                 (squares[B[0]] == KING || squares[C[0]] == KING || squares[D[0]] == KING) ||
@@ -647,11 +647,11 @@ public final class Evaluation {
                 (squares[F[0]] == KING || squares[G[0]] == KING)) {
             score += PENALTY_TRAPPED_ROOK_BY_KING;
         }
-        if ((squares[A[7]] == ROOK || squares[B[7]] == ROOK || squares[A[6]] == ROOK || squares[B[6]] == ROOK) &&
-                (squares[B[7]] == KING || squares[C[7]] == KING || squares[D[7]] == KING) ||
-            (squares[G[7]] == ROOK || squares[H[7]] == ROOK || squares[G[6]] == ROOK || squares[H[6]] == ROOK) &&
-                (squares[F[7]] == KING || squares[G[7]] == KING)) {
-            score += PENALTY_TRAPPED_ROOK_BY_KING;
+        if ((squares[A[7]] == -ROOK || squares[B[7]] == -ROOK || squares[A[6]] == -ROOK || squares[B[6]] == -ROOK) &&
+                (squares[B[7]] == -KING || squares[C[7]] == -KING || squares[D[7]] == -KING) ||
+            (squares[G[7]] == -ROOK || squares[H[7]] == -ROOK || squares[G[6]] == -ROOK || squares[H[6]] == -ROOK) &&
+                (squares[F[7]] == -KING || squares[G[7]] == -KING)) {
+            score += -PENALTY_TRAPPED_ROOK_BY_KING;
         }
         return score;
     }

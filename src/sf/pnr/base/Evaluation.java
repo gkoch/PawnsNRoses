@@ -728,8 +728,8 @@ public final class Evaluation {
         if (board.getPieces(toMove, PAWN)[0] <= 0 && board.getPieces(toMove, ROOK)[0] <= 0 &&
             board.getPieces(toMove, QUEEN)[0] <= 0) {
 
-            final int knightCount = board.getPieces(WHITE_TO_MOVE, KNIGHT)[0];
-            final int[] bishops = board.getPieces(WHITE_TO_MOVE, BISHOP);
+            final int knightCount = board.getPieces(toMove, KNIGHT)[0];
+            final int[] bishops = board.getPieces(toMove, BISHOP);
             final int bishopCount = bishops[0];
             if (knightCount + bishopCount <= 2 && bishopCount < 2) {
                 if (bishopCount == 1 && knightCount == 1) {

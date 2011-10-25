@@ -304,7 +304,7 @@ public final class Engine {
 
                 // razoring
                 if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && legalMoveCount > 1 && beta < VAL_MATE_THRESHOLD) {
-                    final int value = -board.getMaterialValue();
+                    final int value = -evaluation.evaluate(board);
                     if (value < beta - VAL_RAZORING_THRESHOLD) {
 //                        final int qscore = -quiescence(board, -b, -alpha);
                         final int qscore = board.getRepetitionCount() < 3? -quiescence(board, -b, -alpha): 0;
@@ -611,7 +611,7 @@ public final class Engine {
 
                 // razoring
                 if (depthExt == 0 && depth <= (3 << SHIFT_PLY) && legalMoveCount > 1 && beta < VAL_MATE_THRESHOLD) {
-                    final int value = -board.getMaterialValue();
+                    final int value = -evaluation.evaluate(board);
                     if (value < beta - VAL_RAZORING_THRESHOLD) {
 //                        final int qscore = -quiescence(board, -b, -alpha);
                         final int qscore = board.getRepetitionCount() < 3? -quiescence(board, -b, -alpha): 0;

@@ -82,7 +82,7 @@ public final class Engine {
     private final MoveGenerator moveGenerator = new MoveGenerator();
     private final Evaluation evaluation = new Evaluation();
     private final TranspositionTable transpositionTable = new TranspositionTable();
-    private final int[][][] history = new int[14][64][64];
+    private final int[][][] history = new int[13][64][64];
     private final int[][] killerMoves = new int[MAX_SEARCH_DEPTH << 2][2]; 
     private long searchStartTime;
     private long searchEndTime;
@@ -926,12 +926,12 @@ public final class Engine {
     private void addMoveToHistoryTable(final Board board, final int move) {
         final int fromPos = getFromPosition(move);
         final int toPos = getToPosition(move);
-        final int pieceHistoryIdx = board.getBoard()[fromPos] + 7;
+        final int pieceHistoryIdx = board.getBoard()[fromPos] + 6;
         final int fromPos64 = convert0x88To64(fromPos);
         final int toPos64 = convert0x88To64(toPos);
-        history[7][fromPos64][toPos64]++;
-        if (history[7][fromPos64][toPos64] > historyMaxGlobal) {
-            historyMaxGlobal = history[7][fromPos64][toPos64];
+        history[6][fromPos64][toPos64]++;
+        if (history[6][fromPos64][toPos64] > historyMaxGlobal) {
+            historyMaxGlobal = history[6][fromPos64][toPos64];
             historyShiftGlobal = 0;
             final int leadingZerosGlobal = Integer.numberOfLeadingZeros(historyMaxGlobal);
             if (leadingZerosGlobal < 34 - MOVE_ORDER_HISTORY_MAX_BITS) {
@@ -1046,8 +1046,8 @@ public final class Engine {
                 final int fromPos64 = convert0x88To64(fromPos);
                 final int toPos64 = convert0x88To64(toPos);
                 final int piece = squares[fromPos];
-                final int historyValue = history[piece + 7][fromPos64][toPos64] >>> historyShift;
-                final int historyValueGlobal = history[7][fromPos64][toPos64] >>> historyShiftGlobal;
+                final int historyValue = history[piece + 6][fromPos64][toPos64] >>> historyShift;
+                final int historyValueGlobal = history[6][fromPos64][toPos64] >>> historyShiftGlobal;
                 final int absPiece = piece * signum;
                 final int positionalGain =
                     Evaluation.computePositionalGain(absPiece, fromPos, toPos, stage, shiftPositionBonus);

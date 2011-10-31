@@ -229,8 +229,8 @@ public final class Engine {
 
         if (depth > 3 * PLY && (ttMove == 0 || ttDepth < depth / 2)) {
             // internal iterative deepening
-            final long searchResult = negascoutRoot(board, depth / 2, alpha, beta, searchedPly);
-            ttMove = getMoveFromSearchResult(searchResult);
+            negascout(board, depth / 2, alpha, beta, false, true, searchedPly);
+            ttMove = (int) ((transpositionTable.read(zobristKey) & TT_MOVE) >> TT_SHIFT_MOVE);
         }
 
         final int state = board.getState();
@@ -989,7 +989,7 @@ public final class Engine {
         final int[] moves;
         switch (searchStage) {
             case TRANS_TABLE:
-                if ((ttMove & BASE_INFO) > 0) {
+                if (ttMove != 0) {
                     moves = new int[2];
                     moves[0] = 1;
                     moves[1] = ttMove;
@@ -999,24 +999,37 @@ public final class Engine {
                 return moves;
             case CAPTURES_WINNING:
                 moveGenerator.generatePseudoLegalMoves(board);
-                moves = moveGenerator.getWinningCaptures();
+                moves = moveGenerator.getCaptures();
+                removeTTMove(moves, ttMove);
+                addSeeMoveValues(board);
+                addMoveValuesAndRemoveTTMoveNormal(moves, board,   0, NO_KILLER_ARRAY);
                 break;
             case PROMOTION:
                 moveGenerator.generatePseudoLegalMovesNonAttacking(board);
                 moves = moveGenerator.getPromotions();
+                removeTTMove(moves, ttMove);
                 break;
             case KILLERS:
                 moves = new int[3];
                 int killerCount = 0;
                 for (int move: killerMoves[searchedPly]) {
-                    if (isValidKillerMove(board, getFromPosition(move), getToPosition(move))) {
+                    if (isValidKillerMove(board, getFromPosition(move), getToPosition(move)) &&
+                            (move & BASE_INFO) != ttMove) {
                         moves[++killerCount] = move;
                     }
                 }
                 moves[0] = killerCount;
+                if (killerCount == 2) {
+                    addMoveValuesAndRemoveTTMoveNormal(moves, board, 0, NO_KILLER_ARRAY);
+                }
                 break;
             case NORMAL:
                 moves = moveGenerator.getMoves();
+                if (moves[0] > 1) {
+                    addMoveValuesAndRemoveTTMoveNormal(moves, board, ttMove, killerMoves[searchedPly]);
+                } else if ((moves[1] & BASE_INFO) == ttMove) {
+                    moves[0] = 0;
+                }
                 break;
             case CAPTURES_LOSING:
                 moves = moveGenerator.getLosingCaptures();
@@ -1024,14 +1037,46 @@ public final class Engine {
             default:
                 throw new IllegalStateException("Unknow move generation stage: " + searchStage.name());
         }
-        if (moves[0] > 0) {
-            addMoveValuesAndRemoveTTMove(moves, board, ttMove,
-                searchStage == SearchStage.NORMAL? killerMoves[searchedPly]: NO_KILLER_ARRAY);
-        }
         return moves;
     }
 
-    private void addMoveValuesAndRemoveTTMove(final int[] moves, final Board board, final int ttMove, final int[] killers) {
+    private void addSeeMoveValues(final Board board) {
+        final int[] moves = moveGenerator.getCaptures();
+        final int[] losingCaptures = moveGenerator.getLosingCaptures();
+        int winningCapturesCount = 0;
+        int losingCapturesCount = 0;
+        int moveCount = moves[0];
+        for (int i = 1; i <= moveCount; i++) {
+            final int move = moves[i];
+            if (((move & MOVE_VALUE) >>> SHIFT_MOVE_VALUE) == 0) {
+                final int fromPos = getFromPosition(move);
+                final int toPos = getToPosition(move);
+                final int value = moveGenerator.staticExchangeEvaluation(board, fromPos, toPos);
+                if (value >= 0) {
+                    moves[++winningCapturesCount] = move | (value << SHIFT_MOVE_VALUE);
+                } else {
+                    losingCaptures[++losingCapturesCount] = move | ((value + 2000) << SHIFT_MOVE_VALUE);
+                }
+            } else {
+                moves[++winningCapturesCount] = move;
+            }
+        }
+        moves[0] = winningCapturesCount;
+        losingCaptures[0] = losingCapturesCount;
+    }
+
+    private void removeTTMove(final int[] moves, final int ttMove) {
+        for (int i = moves[0]; i > 0; i--) {
+            final int move = moves[i];
+            if ((move & BASE_INFO) == ttMove) {
+                moves[i] = moves[moves[0]];
+                moves[0]--;
+                break;
+            }
+        }
+    }
+
+    private void addMoveValuesAndRemoveTTMoveNormal(final int[] moves, final Board board, final int ttMove, final int[] killers) {
         final int toMove = board.getState() & WHITE_TO_MOVE;
         final int shiftPositionBonus = SHIFT_POSITION_BONUS[toMove];
         final int kingPos = board.getKing(1 - toMove);
@@ -1069,7 +1114,7 @@ public final class Engine {
                 final int moveValue = RND_ARRAY[(RND_INDEX++) & 0xFF] + ((move & MOVE_VALUE) >> SHIFT_MOVE_VALUE) +
                     historyValue + historyValueGlobal + checkBonus + valPositional + pawnBonus + castlingBonus;
                 moves[i] = (move & ~MOVE_VALUE) | (moveValue << SHIFT_MOVE_VALUE);
-                assert (moves[i] & (1 << 31)) == 0: Integer.toHexString(moves[i]); 
+                assert (moves[i] & (1 << 31)) == 0: Integer.toHexString(moves[i]);
             } else {
                 moves[i] = moves[moves[0]];
                 moves[0]--;

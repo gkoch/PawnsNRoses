@@ -92,15 +92,12 @@ public class RandomPlayTest extends TestCase {
         moveGenerator.pushFrame();
         moveGenerator.generatePseudoLegalMoves(board);
         moveGenerator.generatePseudoLegalMovesNonAttacking(board);
-        final int[] winningCaptures = moveGenerator.getWinningCaptures();
-        final int[] losingCaptures = moveGenerator.getLosingCaptures();
+        final int[] captures = moveGenerator.getCaptures();
         final int[] promotions = moveGenerator.getPromotions();
         final int[] normalMoves = moveGenerator.getMoves();
         moveGenerator.popFrame();
-        final int[] moves =
-            new int[winningCaptures.length + losingCaptures.length + promotions.length + normalMoves.length - 4 + 1];
-        addMoves(moves, winningCaptures);
-        addMoves(moves, losingCaptures);
+        final int[] moves = new int[captures.length + promotions.length + normalMoves.length - 3 + 1];
+        addMoves(moves, captures);
         addMoves(moves, promotions);
         addMoves(moves, normalMoves);
         //for (int i = moves[0]; i > 0; i--) {

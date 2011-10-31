@@ -80,7 +80,7 @@ public class MoveGeneratorTest extends TestCase {
         board.move(fromSimple("a4d7"));
 
         moveGenerator.generatePseudoLegalMoves(board);
-        int captures[] = moveGenerator.getWinningCaptures();
+        int captures[] = moveGenerator.getCaptures();
         assertFalse(containsMove(captures, fromSimple("d1d1")));
     }
 
@@ -91,7 +91,7 @@ public class MoveGeneratorTest extends TestCase {
         board.move(fromSimple("f1e1"));
 
         moveGenerator.generatePseudoLegalMoves(board);
-        int captures[] = moveGenerator.getWinningCaptures();
+        int captures[] = moveGenerator.getCaptures();
         assertFalse(containsMove(captures, fromSimple("a1h1")));
     }
 
@@ -105,7 +105,7 @@ public class MoveGeneratorTest extends TestCase {
         board.move(fromSimple("g3h2"));
 
         moveGenerator.generatePseudoLegalMoves(board);
-        int captures[] = moveGenerator.getWinningCaptures();
+        int captures[] = moveGenerator.getCaptures();
         assertFalse(containsMove(captures, fromSimple("h1h1")));
     }
 
@@ -179,7 +179,7 @@ public class MoveGeneratorTest extends TestCase {
     public void testNoCapturesAtTheBeginning() {
         final Board board = fromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
         moveGenerator.generatePseudoLegalMoves(board);
-        final int[] moves = moveGenerator.getWinningCaptures();
+        final int[] moves = moveGenerator.getCaptures();
         assertEquals(0, moves[0]);
     }
 

@@ -487,7 +487,8 @@ public class Utils {
         }
         if (moveType == MT_NORMAL) {
             if (SLIDING[absPiece]) {
-                if (!board.isAttackedBySliding(toPos, ATTACK_BITS[absPiece], fromPos)) {
+                final int attackValue = ATTACK_ARRAY[toPos - fromPos + 120];
+                if (!((attackValue & ATTACK_BITS[absPiece]) > 0 && board.isAttackedBySlidingInSight(toPos, fromPos, attackValue))) {
                     problems.add(String.format("The %s on %s is trying to move to %s which is not possible",
                         StringUtils.PIECES[absPiece], StringUtils.toString0x88(fromPos), StringUtils.toString0x88(toPos)));
                 }

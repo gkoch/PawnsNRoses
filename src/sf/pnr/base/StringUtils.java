@@ -496,7 +496,7 @@ public class StringUtils {
                         for (int i = pieces[0]; i > 0; i--) {
                             final int pos = pieces[i];
                             if (pos != fromPos) {
-                                if (board.isAttackedBySliding(toPos, attackBits, pos)) {
+                                if (isAttackedBySliding(board, toPos, attackBits, pos)) {
                                     needsExtraInfo = true;
                                     needsFromRank |= getFile(pos) == fromFile;
                                     needsFromFile |= getRank(pos) == fromRank;
@@ -667,7 +667,7 @@ public class StringUtils {
                         continue;
                     }
                     if (SLIDING[pieceType]) {
-                        if (board.isAttackedBySliding(toPos, ATTACK_BITS[pieceType], piecePos) &&
+                        if (isAttackedBySliding(board, toPos, ATTACK_BITS[pieceType], piecePos) &&
                                 !isPinned(board, toPos << SHIFT_TO | getPosition(pieceFile, pieceRank) | moveType)) {
                             fromFile = pieceFile;
                             fromRank = pieceRank;
@@ -822,5 +822,10 @@ public class StringUtils {
             }
         }
         return "";
+    }
+
+    public static boolean isAttackedBySliding(final Board board, final int targetPos, final int attackBits, final int piecePos) {
+        final int attackValue = ATTACK_ARRAY[(targetPos - piecePos + 120)];
+        return (attackValue & attackBits) > 0 && board.isAttackedBySlidingInSight(targetPos, piecePos, attackValue);
     }
 }

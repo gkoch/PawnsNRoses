@@ -503,15 +503,27 @@ public final class Board {
         }
         final int[] rooks = pieces[ROOK][side];
         for (int i = rooks[0]; i > 0; i--) {
-            if (isAttackedBySliding(position, ATTACK_R, rooks[i])) return true;
+            final int rook = rooks[i];
+            final int attackValue = ATTACK_ARRAY[(position - rook + 120)];
+            if ((attackValue & ATTACK_R) > 0 && isAttackedBySlidingInSight(position, rook, attackValue)) {
+                return true;
+            }
         }
         final int[] bishops = pieces[BISHOP][side];
         for (int i = bishops[0]; i > 0; i--) {
-            if (isAttackedBySliding(position, ATTACK_B, bishops[i])) return true;
+            final int bishop = bishops[i];
+            final int attackValue = ATTACK_ARRAY[(position - bishop + 120)];
+            if ((attackValue & ATTACK_B) > 0 && isAttackedBySlidingInSight(position, bishop, attackValue)) {
+                return true;
+            }
         }
         final int[] queens = pieces[QUEEN][side];
         for (int i = queens[0]; i > 0; i--) {
-            if (isAttackedBySliding(position, ATTACK_Q, queens[i])) return true;
+            final int queen = queens[i];
+            final int attackValue = ATTACK_ARRAY[(position - queen + 120)];
+            if ((attackValue & ATTACK_Q) > 0 && isAttackedBySlidingInSight(position, queen, attackValue)) {
+                return true;
+            }
         }
         if (side == WHITE_TO_MOVE) {
             final int left = position + DL;
@@ -558,23 +570,20 @@ public final class Board {
         final int[] positions = pieces[absPiece][side];
         for (int i = positions[0]; i > 0; i--) {
             final int pos = positions[i];
-            if (isAttackedBySliding(targetPos, attackBits, pos)) {
+            final int attackValue = ATTACK_ARRAY[(targetPos - pos + 120)];
+            if ((attackValue & attackBits) > 0 && isAttackedBySlidingInSight(targetPos, pos, attackValue)) {
                 attackers[++attackers[0]] = pos;
             }
         }
     }
 
-    public boolean isAttackedBySliding(final int targetPos, final int attackBits, final int piecePos) {
-        final int attackValue = ATTACK_ARRAY[(targetPos - piecePos + 120)];
-        if ((attackValue & attackBits) > 0) {
-            final int delta = (attackValue & ATTACK_DELTA) - 64;
-            int testPos = piecePos + delta;
-            while (board[testPos] == EMPTY && testPos != targetPos) {
-                testPos += delta;
-            }
-            return testPos == targetPos;
+    public boolean isAttackedBySlidingInSight(final int targetPos, final int piecePos, final int attackValue) {
+        final int delta = (attackValue & ATTACK_DELTA) - 64;
+        int testPos = piecePos + delta;
+        while (board[testPos] == EMPTY && testPos != targetPos) {
+            testPos += delta;
         }
-        return false;
+        return testPos == targetPos;
     }
 
     public boolean isAttackedByNonSliding(final int targetPos, final int attackBits, final int piecePos) {
@@ -637,10 +646,12 @@ public final class Board {
                     final int promotedTo = PROMOTION_TO_PIECE[(move & MOVE_TYPE) >> SHIFT_MOVE_TYPE];
                     assert promotedTo == KNIGHT || promotedTo == BISHOP || promotedTo == ROOK || promotedTo == QUEEN:
                         StringUtils.toFen(this) + ", move: " + StringUtils.toSimple(move);
+                    final int attackValue = ATTACK_ARRAY[kingPos - toPos + 120];
                     if (promotedTo == KNIGHT) {
-                        return ((ATTACK_ARRAY[kingPos - toPos + 120] & ATTACK_N) == ATTACK_N);
+                        return ((attackValue & ATTACK_N) == ATTACK_N);
                     } else {
-                        return isAttackedBySliding(kingPos, ATTACK_BITS[promotedTo], toPos);
+                        return (attackValue & ATTACK_BITS[promotedTo]) > 0 &&
+                            isAttackedBySlidingInSight(kingPos, toPos, attackValue);
                     }
                 }
                 return false;
@@ -649,13 +660,18 @@ public final class Board {
             case BISHOP:
             case ROOK:
             case QUEEN:
-                return isAttackedBySliding(kingPos, ATTACK_BITS[absPiece], toPos);
+                final int attackValue = ATTACK_ARRAY[(kingPos - toPos + 120)];
+                return (attackValue & ATTACK_Q) > 0 && isAttackedBySlidingInSight(kingPos, toPos, attackValue);
             case KING:
                 if (Utils.isCastling(move)) {
                     if ((move & MT_CASTLING_QUEENSIDE) > 0) {
-                        return isAttackedBySliding(kingPos, ATTACK_R, toPos + 1);
+                        final int attackValueL = ATTACK_ARRAY[(kingPos - (toPos + 1) + 120)];
+                        return (attackValueL & ATTACK_R) > 0 &&
+                            isAttackedBySlidingInSight(kingPos, toPos + 1, attackValueL);
                     } else {
-                        return isAttackedBySliding(kingPos, ATTACK_R, toPos - 1);
+                        final int attackValueR = ATTACK_ARRAY[(kingPos - (toPos - 1) + 120)];
+                        return (attackValueR & ATTACK_R) > 0 &&
+                            isAttackedBySlidingInSight(kingPos, toPos - 1, attackValueR);
                     }
                 }
                 return false;
@@ -664,10 +680,10 @@ public final class Board {
     }
 
     public boolean isDiscoveredCheck(final int kingPos, final int fromPos, final int signum) {
-        if (isAttackedBySliding(kingPos, ATTACK_Q, fromPos)) {
+        final int attackValue = ATTACK_ARRAY[fromPos - kingPos + 120];
+        final int attackBits = attackValue & ATTACK_Q;
+        if ((attackValue & ATTACK_Q) > 0 && isAttackedBySlidingInSight(fromPos, kingPos, attackValue)) {
             // search for discovered check
-            final int attackValue = ATTACK_ARRAY[fromPos - kingPos + 120];
-            final int attackBits = attackValue & ATTACK_Q;
             assert attackBits != 0;
             final int delta = (attackValue & ATTACK_DELTA) - 64;
             int testPos = fromPos + delta;
@@ -691,8 +707,7 @@ public final class Board {
             final MoveGenerator moveGenerator = new MoveGenerator();
             moveGenerator.pushFrame();
             moveGenerator.generatePseudoLegalMoves(this);
-            boolean hasLegalMove = hasLegalMove(moveGenerator.getWinningCaptures()) ||
-                hasLegalMove(moveGenerator.getLosingCaptures());
+            boolean hasLegalMove = hasLegalMove(moveGenerator.getCaptures());
             if (!hasLegalMove) {
                 moveGenerator.generatePseudoLegalMovesNonAttacking(this);
                 hasLegalMove = hasLegalMove(moveGenerator.getMoves()) || hasLegalMove(moveGenerator.getPromotions());

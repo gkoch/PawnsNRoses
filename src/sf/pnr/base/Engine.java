@@ -1204,7 +1204,9 @@ public final class Engine {
         }
         final int absPiece = signum * piece;
         if (SLIDING[absPiece]) {
-            return board.isAttackedBySliding(toPos, ATTACK_BITS[absPiece], fromPos);
+            final int attackValue = ATTACK_ARRAY[toPos - fromPos + 120];
+            return (attackValue & ATTACK_BITS[absPiece]) > 0 &&
+                board.isAttackedBySlidingInSight(toPos, fromPos, attackValue);
         } else if (absPiece == PAWN) {
             final int squareInFront = fromPos + signum * UP;
             final int fromRank = getRank(fromPos);

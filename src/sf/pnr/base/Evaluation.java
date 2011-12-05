@@ -647,10 +647,8 @@ public final class Evaluation {
     public static int computePositionalBonusNoPawnAsWhite(final Board board) {
         final int shiftWhite = SHIFT_POSITION_BONUS[WHITE];
         final int shiftBlack = SHIFT_POSITION_BONUS[BLACK];
-        int typeBonusOpening = VAL_POSITION_BONUS_KING[board.getKing(WHITE) + shiftWhite] -
-            VAL_POSITION_BONUS_KING[board.getKing(BLACK) + shiftBlack];
-        int typeBonusEndGame = VAL_POSITION_BONUS_KING_ENDGAME[board.getKing(WHITE) + shiftWhite] -
-            VAL_POSITION_BONUS_KING_ENDGAME[board.getKing(BLACK) + shiftBlack];
+        int typeBonusOpening = 0;
+        int typeBonusEndGame = 0;
         for (int type: TYPES_NOPAWN_OR_KING) {
             final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[type];
             final int[] positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[type];
@@ -1050,15 +1048,18 @@ public final class Evaluation {
         final boolean potentialPawnStorm = (whiteKingFile <= FILE_D && blackKingFile >= FILE_E) ||
             (whiteKingFile >= FILE_E && blackKingFile <= FILE_D);
 
-        long[] pawnMask = new long[2];
-        long[] pawnAttackMask = new long[2];
-        int typeBonusOpening = 0;
-        int typeBonusEndGame = 0;
+        final int shiftPositionBonusWhite = SHIFT_POSITION_BONUS[WHITE];
+        final int shiftPositionBonusBlack = SHIFT_POSITION_BONUS[BLACK];
+        int typeBonusOpening = VAL_POSITION_BONUS_KING[board.getKing(WHITE) + shiftPositionBonusWhite] -
+            VAL_POSITION_BONUS_KING[board.getKing(BLACK) + shiftPositionBonusBlack];
+        int typeBonusEndGame = VAL_POSITION_BONUS_KING_ENDGAME[board.getKing(WHITE) + shiftPositionBonusWhite] -
+            VAL_POSITION_BONUS_KING_ENDGAME[board.getKing(BLACK) + shiftPositionBonusBlack];
         final int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[PAWN];
         final int[] positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[PAWN];
 
+        long[] pawnMask = new long[2];
+        long[] pawnAttackMask = new long[2];
         final int[] pawnsWhite = board.getPieces(WHITE, PAWN);
-        final int shiftPositionBonusWhite = SHIFT_POSITION_BONUS[WHITE];
         int pawnStormBonus = 0;
         for (int i = pawnsWhite[0]; i > 0; i--) {
             final int pawn = pawnsWhite[i];
@@ -1086,7 +1087,6 @@ public final class Evaluation {
             typeBonusEndGame += positionalBonusEndGame[pawn + shiftPositionBonusWhite];
         }
         final int[] pawnsBlack = board.getPieces(BLACK, PAWN);
-        final int shiftPositionBonusBlack = SHIFT_POSITION_BONUS[BLACK];
         for (int i = pawnsBlack[0]; i > 0; i--) {
             final int pawn = pawnsBlack[i];
             final int pawn64 = convert0x88To64(pawn);
@@ -1112,8 +1112,7 @@ public final class Evaluation {
             typeBonusOpening -= positionalBonusOpening[pawn + shiftPositionBonusBlack];
             typeBonusEndGame -= positionalBonusEndGame[pawn + shiftPositionBonusBlack];
         }
-        score += pawnStormBonus * stage / STAGE_MAX;
-        score += (typeBonusOpening * (STAGE_MAX - stage) + typeBonusEndGame * stage) / STAGE_MAX;
+        score += (typeBonusOpening * (STAGE_MAX - stage) + (typeBonusEndGame + pawnStormBonus) * stage) / STAGE_MAX;
 
         score += (Long.bitCount(pawnMask[WHITE] & pawnAttackMask[BLACK] & ~pawnAttackMask[WHITE]) -
             Long.bitCount(pawnMask[BLACK] & pawnAttackMask[WHITE] & ~pawnAttackMask[BLACK])) * PENALTY_WEAK_PAWN;

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -291,6 +292,17 @@ public class TestUtils {
             }
         }
         return maxNameLen;
+    }
+
+    public static int getMaxLen(final Collection<String> strings) {
+        int maxLen = 0;
+        for (String str: strings) {
+            final int len = str.length();
+            if (len > maxLen) {
+                maxLen = len;
+            }
+        }
+        return maxLen;
     }
 
     public static String getFileNameWithoutExtension(final File file) {

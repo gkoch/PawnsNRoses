@@ -74,7 +74,8 @@ public final class Evaluation {
     public static int BONUS_PAWN_STORM_DEDUCTION_MAIN_FILE = 6;
     @Configurable(Configurable.Key.EVAL_PENALTY_PAWN_STORM_MAX_SIDE)
     public static int BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE = 5;
-    public static final int BONUS_PASSED_PAWN_PER_SQUARE = 5;
+    public static final int[] BONUS_PASSED_PAWN_BONUS_OPENING = new int[]{150, 100, 75, 50, 25, 15, 10};
+    public static final int[] BONUS_PASSED_PAWN_BONUS_ENDGAME = new int[]{400, 250, 150, 100, 50, 25, 10};
     @Configurable(Configurable.Key.EVAL_BONUS_DEFENSE)
     public static int BONUS_DEFENSE = 2;
     @Configurable(Configurable.Key.EVAL_BONUS_ATTACK)
@@ -1057,6 +1058,8 @@ public final class Evaluation {
         int unstoppablePawnIfNextBlack = 7;
         long prevFileWhite = 0L;
         long prevFileBlack = 0L;
+        int passedPawnOpening = 0;
+        int passedPawnEndgame = 0;
         for (int i = 0; i < 8; i++) {
             final long fileMask = BITBOARD_FILE[i];
             final long midFileWhite = pawnMask[WHITE] & fileMask;
@@ -1123,7 +1126,8 @@ public final class Evaluation {
                                 unstoppablePawnIfNextWhite = realDist;
                             }
                         }
-                        score += BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
+                        passedPawnOpening += BONUS_PASSED_PAWN_BONUS_OPENING[promotionDistance];
+                        passedPawnEndgame += BONUS_PASSED_PAWN_BONUS_ENDGAME[promotionDistance];
                     }
                     if (realDist < blackKingDist) {
                         if (realDist < unstoppablePawnIfNextWhite) {
@@ -1156,7 +1160,8 @@ public final class Evaluation {
                                 unstoppablePawnIfNextBlack = realDist;
                             }
                         }
-                        score -= BONUS_PASSED_PAWN_PER_SQUARE * (6 - promotionDistance);
+                        passedPawnOpening -= BONUS_PASSED_PAWN_BONUS_OPENING[promotionDistance];
+                        passedPawnEndgame -= BONUS_PASSED_PAWN_BONUS_ENDGAME[promotionDistance];
                     }
                     if (realDist < whiteKingDist) {
                         if (realDist < unstoppablePawnIfNextBlack) {
@@ -1201,7 +1206,7 @@ public final class Evaluation {
                 }
             }
         }
-        score += pawnShield * (STAGE_MAX - stage) / STAGE_MAX;
+        score += ((passedPawnOpening + pawnShield) * (STAGE_MAX - stage) + passedPawnEndgame * stage) / STAGE_MAX;
         score += VAL_PIECE_COUNTS[PAWN][whitePawnCount] - VAL_PIECE_COUNTS[PAWN][blackPawnCount];
 
         return PawnHashTable.getPawnHashValue(score, stage, unstoppablePawnWhite, unstoppablePawnIfNextWhite,

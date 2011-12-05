@@ -26,9 +26,11 @@ public final class TranspositionTable {
     public static final long TT_TYPE = 0x03L << TT_SHIFT_TYPE;
     public static final long TT_TYPE_EXACT = 0x00L << TT_SHIFT_TYPE;
     public static final long TT_TYPE_ALPHA_CUT = 0x01L << TT_SHIFT_TYPE;
-    public static final long TT_TYPE_BETA_CUT = 0x02L << TT_SHIFT_TYPE;
-    public static final int TT_SHIFT_AGE = 2 + TT_SHIFT_TYPE; // 2 + 41
-    public static final long TT_AGE = 0x03FFL << TT_SHIFT_AGE; // 43 + 11 = 54 bits
+    public static final long TT_TYPE_BETA_CUT = 0x02L << TT_SHIFT_TYPE; // 41 + 2 = 43 bits
+
+    public static final int TT_SHIFT_AGE = 6;
+    public static final long TT_AGE = 0x03FFL << TT_SHIFT_AGE;
+    public static final long TT_ZOBRIST_MASK = ~TT_AGE;
 
     private static final int MAX_CHECK_COUNT = 16;
     private static final int MAX_CHECK_INDEX = 2 * MAX_CHECK_COUNT;
@@ -49,9 +51,10 @@ public final class TranspositionTable {
         final int hashed = hash(zobrist);
         final int startIndex = hashed << 1;
         final long[] array = getArraySegment(zobrist);
+        final long maskedZobrist = zobrist & TT_ZOBRIST_MASK;
 
         for (int i = startIndex; i < ARRAY_LENGHT; i += 2) {
-            if (array[i] == zobrist) {
+            if ((array[i] & TT_ZOBRIST_MASK) == maskedZobrist) {
                 return array[i + 1];
             } else if (array[i] == 0) {
                 return 0;
@@ -61,7 +64,7 @@ public final class TranspositionTable {
         }
         final int toCheck = MAX_CHECK_INDEX - (ARRAY_LENGHT - startIndex);
         for (int i = 0; i < startIndex; i += 2) {
-            if (array[i] == zobrist) {
+            if ((array[i] & TT_ZOBRIST_MASK) == maskedZobrist) {
                 return array[i + 1];
             } else if (array[i] == 0) {
                 return 0;
@@ -81,27 +84,28 @@ public final class TranspositionTable {
         final int startIndex = hashed << 1;
         final long[] array = getArraySegment(zobrist);
         final long ttValue = type | (((long) (move & BASE_INFO)) << TT_SHIFT_MOVE) | (depth << TT_SHIFT_DEPTH) |
-            (value << TT_SHIFT_VALUE) | (age << TT_SHIFT_AGE);
+            (value << TT_SHIFT_VALUE);
         int minAge = Integer.MAX_VALUE;
         int minAgeIndex = startIndex;
+        final long maskedZobrist = zobrist & TT_ZOBRIST_MASK;
         for (int i = startIndex; i < ARRAY_LENGHT; i += 2) {
-            if (array[i] == zobrist) {
+            if ((array[i] & TT_ZOBRIST_MASK) == maskedZobrist) {
                 final int ttDepth = (int) ((array[i + 1] & TT_DEPTH) >>> TT_SHIFT_DEPTH);
                 if (ttDepth < depth || ttDepth < depth + 2 && (array[i + 1] & TT_TYPE) != TT_TYPE_EXACT && type == TT_TYPE_EXACT) {
                     array[i + 1] = ttValue;
                 }
                 return;
             } else if (array[i] == 0) {
-                array[i] = zobrist;
+                array[i] = maskedZobrist | age << TT_SHIFT_AGE;
                 array[i + 1] = ttValue;
                 return;
             } else if (i > startIndex + MAX_CHECK_INDEX) {
-                array[minAgeIndex] = zobrist;
+                array[minAgeIndex] = maskedZobrist | age << TT_SHIFT_AGE;
                 array[minAgeIndex + 1] = ttValue;
                 return;
             } else {
                 final int mult = (array[i + 1] & TT_TYPE) > 0? 2: 3;
-                final int ttAge = (int) ((array[i + 1] & TT_AGE) >>> TT_SHIFT_AGE) * mult;
+                final int ttAge = (int) ((array[i] & TT_AGE) >>> TT_SHIFT_AGE) * mult;
                 if (ttAge < minAge) {
                     minAge = ttAge;
                     minAgeIndex = i;
@@ -110,23 +114,23 @@ public final class TranspositionTable {
         }
         final int toCheck = MAX_CHECK_INDEX - (ARRAY_LENGHT - startIndex);
         for (int i = 0; i < startIndex; i += 2) {
-            if (array[i] == zobrist) {
+            if ((array[i] & TT_ZOBRIST_MASK) == maskedZobrist) {
                 final int ttDepth = (int) ((array[i + 1] & TT_DEPTH) >>> TT_SHIFT_DEPTH);
                 if (ttDepth < depth || ttDepth < depth + 2 && (array[i + 1] & TT_TYPE) != TT_TYPE_EXACT && type == TT_TYPE_EXACT) {
                     array[i + 1] = ttValue;
                 }
                 return;
             } else if (array[i] == 0) {
-                array[i] = zobrist;
+                array[i] = maskedZobrist | age << TT_SHIFT_AGE;
                 array[i + 1] = ttValue;
                 return;
             } else if (i > toCheck) {
-                array[minAgeIndex] = zobrist;
+                array[minAgeIndex] = maskedZobrist | age << TT_SHIFT_AGE;
                 array[minAgeIndex + 1] = ttValue;
                 return;
             } else {
                 final int mult = (array[i + 1] & TT_TYPE) > 0? 2: 3;
-                final int ttAge = (int) ((array[i + 1] & TT_AGE) >>> TT_SHIFT_AGE) * mult;
+                final int ttAge = (int) ((array[i] & TT_AGE) >>> TT_SHIFT_AGE) * mult;
                 if (ttAge < minAge) {
                     minAge = ttAge;
                     minAgeIndex = i;

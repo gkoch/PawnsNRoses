@@ -448,6 +448,7 @@ public final class Evaluation {
             final int knight = blackKnights[i];
             final int knight64 = convert0x88To64(knight);
             final long knightMask = KNIGHT_MOVES[knight64];
+            blackAttacks64 |= knightMask;
             final long defended64 = knightMask & piecesMaskBlack;
             scoreDefense -= Long.bitCount(defended64) * BONUS_DEFENSE;
             final long attacked64 = knightMask & piecesMaskWhite;
@@ -668,6 +669,22 @@ public final class Evaluation {
                 scorePawn += signum * BONUS_UNSTOPPABLE_PAWN;
             }
         }
+
+        //System.out.printf("Attack:              %4d\r\n", scoreAttack);
+        //System.out.printf("Defense:             %4d\r\n", scoreDefense);
+        //System.out.printf("Mobility:            %4d\r\n", scoreMobility);
+        //System.out.printf("Hung Piece:          %4d\r\n", scoreHungPiece);
+        //System.out.printf("Material Value:      %4d\r\n", scoreMaterialValue);
+        //System.out.printf("Pawn:                %4d\r\n", scorePawn);
+        //System.out.printf("Rook Bonus:          %4d\r\n", scoreRookBonus);
+        //System.out.printf("Trapped Pieces:      %4d\r\n", scoreTrappedPieces);
+        //System.out.printf("Attacks Around King: %4d (%d / %d)\r\n", scoreAttacksAroundKingPenalty,
+        //    Long.bitCount(whiteKingAttacks64 & blackAttacks64 & ~whites64),
+        //    Long.bitCount(blackKingAttacks64 & whiteAttacks64 & ~blacks64));
+        //System.out.printf("Positional Opening:  %4d\r\n", scorePositionalOpening);
+        //System.out.printf("Positional Endgame:  %4d\r\n", scorePositionalEndgame);
+        //System.out.printf("Castling Penalty:    %4d\r\n", scoreCastlingPenalty);
+        //System.out.printf("Distance:            %4d\r\n", scoreDistance);
 
         int score = scoreAttack + scoreDefense + scoreMobility + scoreHungPiece + scoreMaterialValue +
             scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty;

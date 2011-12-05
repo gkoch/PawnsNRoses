@@ -18,12 +18,13 @@ public class BitBoardBuilder {
 
     public static void main(final String[] args) {
 //        generateInitialBoard();
-//        generatePawnAttack();
+        generatePawnAttack();
 //        generatePawnShields();
 //        generateFileBitmaps();
 //        generateKnightMoves();
 //        generatePawnMovesAndAttacks();
-        generateEnPassantAttacks();
+//        generateEnPassantAttacks();
+        generateKingMoves();
     }
 
     private static void generateEnPassantAttacks() {
@@ -152,6 +153,25 @@ public class BitBoardBuilder {
             }
         }
         print("KNIGHT_MOVES", moveBitBoards);
+    }
+
+    private static void generateKingMoves() {
+        final long[] moveBitBoards = new long[64];
+        for (int i = 0; i < 120; i++) {
+            if ((i & 0x88) == 0) {
+                final int i64 = convert0x88To64(i);
+                long bitboard = 0L;
+                for (int delta : DELTA_KING) {
+                    final int pos = i + delta;
+                    if ((pos & 0x88) == 0) {
+                        final int pos64 = convert0x88To64(pos);
+                        bitboard |= 1L << pos64;
+                    }
+                }
+                moveBitBoards[i64] = bitboard;
+            }
+        }
+        print("KING_MOVES", moveBitBoards);
     }
 
     private static void generatePawnMovesAndAttacks() {

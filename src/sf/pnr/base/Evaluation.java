@@ -338,17 +338,17 @@ public final class Evaluation {
 
         final int state2 = board.getState2();
         final int stage = board.getStage();
-        final long whiteBitBoard = board.getBitboard(WHITE);
-        final long blackBitBoard = board.getBitboard(BLACK);
-        final long allPieces = whiteBitBoard | blackBitBoard;
+        final long whites64 = board.getBitboard(WHITE);
+        final long blacks64 = board.getBitboard(BLACK);
+        final long allPieces64 = whites64 | blacks64;
         final int shiftPositionBonusWhite = SHIFT_POSITION_BONUS[WHITE];
         final int shiftPositionBonusBlack = SHIFT_POSITION_BONUS[BLACK];
         int scorePositionalOpening = 0;
         int scorePositionalEndgame = 0;
-        long whitePawnsBitBoard = 0L;
-        long blackPawnsBitBoard = 0L;
-        long whitePawnAttackBitboard = 0L;
-        long blackPawnsAttacks = 0L;
+        long whitePawns64 = 0L;
+        long blackPawns64 = 0L;
+        long whitePawnAttacks64 = 0L;
+        long blackPawnAttacks64 = 0L;
         int attackCount = 0;
         int defenseCount = 0;
         int mobilityCount = 0;
@@ -359,18 +359,18 @@ public final class Evaluation {
         for (int i = whitePawns[0]; i > 0; i--) {
             final int pawn = whitePawns[i];
             final int pawn64 = convert0x88To64(pawn);
-            whitePawnsBitBoard |= 1L << pawn64;
+            whitePawns64 |= 1L << pawn64;
 
-            final long pawnAttack = whitePawnAttacks[pawn64];
-            final long attack = pawnAttack & blackBitBoard;
-            whitePawnAttackBitboard |= attack;
-            attackCount += Long.bitCount(attack);
-            final long defense = pawnAttack & whiteBitBoard;
-            defenseCount += Long.bitCount(defense);
-            final long pawnMoves = whitePawnMoves[pawn64];
-            final long doubleBlocker = pawnMoves & (pawnMoves >> 8) & allPieces;
-            final long mobility = pawnMoves & (~allPieces);
-            mobilityCount += Long.bitCount(mobility & ~(doubleBlocker << 8));
+            final long pawnAttack64 = whitePawnAttacks[pawn64];
+            final long attacked64 = pawnAttack64 & blacks64;
+            whitePawnAttacks64 |= attacked64;
+            attackCount += Long.bitCount(attacked64);
+            final long defended64 = pawnAttack64 & whites64;
+            defenseCount += Long.bitCount(defended64);
+            final long pawnMoves64 = whitePawnMoves[pawn64];
+            final long doubleBlocker64 = pawnMoves64 & (pawnMoves64 >> 8) & allPieces64;
+            final long mobility64 = pawnMoves64 & (~allPieces64);
+            mobilityCount += Long.bitCount(mobility64 & ~(doubleBlocker64 << 8));
         }
 
         final int[] blackPawns = board.getPieces(BLACK, PAWN);
@@ -379,31 +379,31 @@ public final class Evaluation {
         for (int i = blackPawns[0]; i > 0; i--) {
             final int pawn = blackPawns[i];
             final int pawn64 = convert0x88To64(pawn);
-            blackPawnsBitBoard |= 1L << pawn64;
+            blackPawns64 |= 1L << pawn64;
 
-            final long pawnAttack = blackPawnAttacks[pawn64];
-            final long attack = pawnAttack & whiteBitBoard;
-            blackPawnsAttacks |= attack;
-            attackCount -= Long.bitCount(attack);
-            final long defense = pawnAttack & blackBitBoard;
-            defenseCount -= Long.bitCount(defense);
-            final long pawnMoves = blackPawnMoves[pawn64];
-            final long doubleBlocker = pawnMoves & (pawnMoves << 8) & allPieces;
-            final long mobility = pawnMoves & (~allPieces);
-            mobilityCount -= Long.bitCount(mobility & ~(doubleBlocker >> 8));
+            final long pawnAttack64 = blackPawnAttacks[pawn64];
+            final long attacked64 = pawnAttack64 & whites64;
+            blackPawnAttacks64 |= attacked64;
+            attackCount -= Long.bitCount(attacked64);
+            final long defended64 = pawnAttack64 & blacks64;
+            defenseCount -= Long.bitCount(defended64);
+            final long pawnMoves64 = blackPawnMoves[pawn64];
+            final long doubleBlocker64 = pawnMoves64 & (pawnMoves64 << 8) & allPieces64;
+            final long mobility64 = pawnMoves64 & (~allPieces64);
+            mobilityCount -= Long.bitCount(mobility64 & ~(doubleBlocker64 >> 8));
         }
 
-        final int hungPieceCount = Long.bitCount(whitePawnAttackBitboard & ~blackPawnsBitBoard) -
-            Long.bitCount(blackPawnsAttacks & ~whitePawnsBitBoard);
+        final int hungPieceCount = Long.bitCount(whitePawnAttacks64 & ~blackPawns64) -
+            Long.bitCount(blackPawnAttacks64 & ~whitePawns64);
 
         // en passant
         final int enPassant = (state & EN_PASSANT) >> SHIFT_EN_PASSANT;
         if (enPassant != 0) {
             final long enPassantBitBoard = BitBoard.EN_PASSANT_SQUARES[toMove][enPassant - 1];
             if (toMove == WHITE_TO_MOVE) {
-                attackCount += Long.bitCount(whitePawnsBitBoard & enPassantBitBoard);
+                attackCount += Long.bitCount(whitePawns64 & enPassantBitBoard);
             } else {
-                attackCount -= Long.bitCount(blackPawnsBitBoard & enPassantBitBoard);
+                attackCount -= Long.bitCount(blackPawns64 & enPassantBitBoard);
             }
         }
         int scoreAttack = attackCount * BONUS_ATTACK;
@@ -422,15 +422,17 @@ public final class Evaluation {
         int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[KNIGHT];
         int[] positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[KNIGHT];
         materialValueNoPawnWhite += VAL_PIECE_COUNTS[KNIGHT][whiteKnights[0]];
+        long whiteAttacks64 = whitePawnAttacks64;
         for (int i = whiteKnights[0]; i > 0; i--) {
             final int knight = whiteKnights[i];
             final int knight64 = convert0x88To64(knight);
             final long knightMask = KNIGHT_MOVES[knight64];
-            final long defended = knightMask & piecesMaskWhite;
-            scoreDefense += Long.bitCount(defended) * BONUS_DEFENSE;
-            final long attacked = knightMask & piecesMaskBlack;
-            scoreAttack += Long.bitCount(attacked) * BONUS_ATTACK;
-            scoreMobility += BONUS_MOBILITY_KNIGHT[Long.bitCount(knightMask ^ defended ^ attacked)];
+            whiteAttacks64 |= knightMask;
+            final long defended64 = knightMask & piecesMaskWhite;
+            scoreDefense += Long.bitCount(defended64) * BONUS_DEFENSE;
+            final long attacked64 = knightMask & piecesMaskBlack;
+            scoreAttack += Long.bitCount(attacked64) * BONUS_ATTACK;
+            scoreMobility += BONUS_MOBILITY_KNIGHT[Long.bitCount(knightMask ^ defended64 ^ attacked64)];
             scoreDistance += BONUS_DISTANCE_KNIGHT[
                 distance(knight, blackKing, ATTACK_DISTANCE_KNIGHT, SHIFT_ATTACK_DISTANCE_KNIGHT)];
             scorePositionalOpening += positionalBonusOpening[knight + shiftPositionBonusWhite];
@@ -439,15 +441,16 @@ public final class Evaluation {
         final int whiteKing = board.getKing(WHITE);
         final int[] blackKnights = board.getPieces(BLACK, KNIGHT);
         materialValueNoPawnBlack += VAL_PIECE_COUNTS[KNIGHT][blackKnights[0]];
+        long blackAttacks64 = blackPawnAttacks64;
         for (int i = blackKnights[0]; i > 0; i--) {
             final int knight = blackKnights[i];
             final int knight64 = convert0x88To64(knight);
             final long knightMask = KNIGHT_MOVES[knight64];
-            final long defended = knightMask & piecesMaskBlack;
-            scoreDefense -= Long.bitCount(defended) * BONUS_DEFENSE;
-            final long attacked = knightMask & piecesMaskWhite;
-            scoreAttack -= Long.bitCount(attacked) * BONUS_ATTACK;
-            scoreMobility -= BONUS_MOBILITY_KNIGHT[Long.bitCount(knightMask ^ defended ^ attacked)];
+            final long defended64 = knightMask & piecesMaskBlack;
+            scoreDefense -= Long.bitCount(defended64) * BONUS_DEFENSE;
+            final long attacked64 = knightMask & piecesMaskWhite;
+            scoreAttack -= Long.bitCount(attacked64) * BONUS_ATTACK;
+            scoreMobility -= BONUS_MOBILITY_KNIGHT[Long.bitCount(knightMask ^ defended64 ^ attacked64)];
             scoreDistance -= BONUS_DISTANCE_KNIGHT[
                 distance(knight, whiteKing, ATTACK_DISTANCE_KNIGHT, SHIFT_ATTACK_DISTANCE_KNIGHT)];
             scorePositionalOpening -= positionalBonusOpening[knight + shiftPositionBonusBlack];
@@ -465,6 +468,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[BISHOP]) {
                 for (int pos = bishop + delta; (pos & 0x88) == 0; pos += delta) {
+                    whiteAttacks64 |= convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (WHITE == side(squares[pos])) {
@@ -489,6 +493,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[BISHOP]) {
                 for (int pos = bishop + delta; (pos & 0x88) == 0; pos += delta) {
+                    blackAttacks64 |= convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (BLACK == side(squares[pos])) {
@@ -511,12 +516,16 @@ public final class Evaluation {
         final int[] whiteRooks = board.getPieces(WHITE, ROOK);
         positionalBonusOpening = VAL_POSITION_BONUS_OPENING[ROOK];
         positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[ROOK];
-        materialValueNoPawnWhite += VAL_PIECE_COUNTS[ROOK][whiteRooks[0]];
-        for (int i = whiteRooks[0]; i > 0; i--) {
+        final int whiteRookCount = whiteRooks[0];
+        materialValueNoPawnWhite += VAL_PIECE_COUNTS[ROOK][whiteRookCount];
+        int whiteRookFiles = 0;
+        int whiteRookRanks = 0;
+        for (int i = whiteRookCount; i > 0; i--) {
             final int rook = whiteRooks[i];
             int mobility = 0;
             for (int delta: DELTA[ROOK]) {
                 for (int pos = rook + delta; (pos & 0x88) == 0; pos += delta) {
+                    whiteAttacks64 |= convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (WHITE == side(squares[pos])) {
@@ -528,6 +537,8 @@ public final class Evaluation {
                     }
                 }
             }
+            whiteRookFiles |= FILE_RANK_BITS[getFile(rook)];
+            whiteRookRanks |= FILE_RANK_BITS[getRank(rook)];
             scoreMobility += BONUS_MOBILITY_ROOK[mobility];
             scoreDistance += BONUS_DISTANCE_ROOK[distance(rook, blackKing, ATTACK_DISTANCE_MASKS[ROOK],
                 SHIFT_ATTACK_DISTANCES[ROOK])];
@@ -535,12 +546,16 @@ public final class Evaluation {
             scorePositionalEndgame += positionalBonusEndGame[rook + shiftPositionBonusWhite];
         }
         final int[] blackRooks = board.getPieces(BLACK, ROOK);
-        materialValueNoPawnBlack += VAL_PIECE_COUNTS[ROOK][blackRooks[0]];
-        for (int i = blackRooks[0]; i > 0; i--) {
+        final int blackRookCount = blackRooks[0];
+        materialValueNoPawnBlack += VAL_PIECE_COUNTS[ROOK][blackRookCount];
+        int blackRookFiles = 0;
+        int blackRookRanks = 0;
+        for (int i = blackRookCount; i > 0; i--) {
             final int rook = blackRooks[i];
             int mobility = 0;
             for (int delta: DELTA[ROOK]) {
                 for (int pos = rook + delta; (pos & 0x88) == 0; pos += delta) {
+                    blackAttacks64 |= convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (BLACK == side(squares[pos])) {
@@ -552,6 +567,8 @@ public final class Evaluation {
                     }
                 }
             }
+            blackRookFiles |= FILE_RANK_BITS[getFile(rook)];
+            blackRookRanks |= FILE_RANK_BITS[getRank(rook)];
             scoreMobility -= BONUS_MOBILITY_ROOK[mobility];
             scoreDistance -= BONUS_DISTANCE_ROOK[distance(rook, whiteKing, ATTACK_DISTANCE_MASKS[ROOK],
                 SHIFT_ATTACK_DISTANCES[ROOK])];
@@ -569,6 +586,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[QUEEN]) {
                 for (int pos = queen + delta; (pos & 0x88) == 0; pos += delta) {
+                    whiteAttacks64 |= convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (WHITE == side(squares[pos])) {
@@ -593,6 +611,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[QUEEN]) {
                 for (int pos = queen + delta; (pos & 0x88) == 0; pos += delta) {
+                    blackAttacks64 |= convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (BLACK == side(squares[pos])) {
@@ -612,37 +631,22 @@ public final class Evaluation {
         }
 
         // kings
-        int whiteKingMobility = 0;
-        for (int delta: DELTA_KING) {
-            int pos = whiteKing + delta;
-            if ((pos & 0x88) == 0) {
-                if (squares[pos] == EMPTY) {
-                    whiteKingMobility++;
-                } else if (WHITE == side(squares[pos])) {
-                    scoreDefense += BONUS_DEFENSE;
-                } else {
-                    scoreAttack += BONUS_ATTACK;
-                }
-            }
-        }
-        scoreMobility += BONUS_MOBILITY_KING[whiteKingMobility];
-        int blackKingMobility = 0;
-        for (int delta: DELTA_KING) {
-            int pos = blackKing + delta;
-            if ((pos & 0x88) == 0) {
-                if (squares[pos] == EMPTY) {
-                    blackKingMobility++;
-                } else if (BLACK == side(squares[pos])) {
-                    scoreDefense -= BONUS_DEFENSE;
-                } else {
-                    scoreAttack -= BONUS_ATTACK;
-                }
-            }
-        }
-        scoreMobility -= BONUS_MOBILITY_KING[blackKingMobility];
+        final int whiteKing64 = convert0x88To64(whiteKing);
+        final long whiteKingAttacks64 = KING_MOVES[whiteKing64];
+        scoreDefense += Long.bitCount(whiteKingAttacks64 & whites64) * BONUS_DEFENSE;
+        scoreAttack += Long.bitCount(whiteKingAttacks64 & blacks64) * BONUS_ATTACK;
+        scoreMobility += BONUS_MOBILITY_KING[Long.bitCount(whiteKingAttacks64 & ~whites64 & ~blacks64)];
+        final int blackKing64 = convert0x88To64(blackKing);
+        final long blackKingAttacks64 = KING_MOVES[blackKing64];
+        scoreDefense -= Long.bitCount(blackKingAttacks64 & blacks64) * BONUS_DEFENSE;
+        scoreAttack -= Long.bitCount(blackKingAttacks64 & whites64) * BONUS_ATTACK;
+        scoreMobility -= BONUS_MOBILITY_KING[Long.bitCount(blackKingAttacks64 & ~whites64 & ~blacks64)];
 
         final int scoreCastlingPenalty = getCastlingPenaltyAsWhite(state, state2);
-        final int scoreRookBonus = computeRookBonus(board, WHITE) - computeRookBonus(board, BLACK);
+        final int scoreRookBonus = BONUS_ROOKS_ON_SAME_FILE * (whiteRookCount - Integer.bitCount(whiteRookFiles)) +
+            BONUS_ROOKS_ON_SAME_RANK * (whiteRookCount - Integer.bitCount(whiteRookRanks)) -
+            BONUS_ROOKS_ON_SAME_FILE * (blackRookCount - Integer.bitCount(blackRookFiles)) -
+            BONUS_ROOKS_ON_SAME_RANK * (blackRookCount - Integer.bitCount(blackRookRanks));
 
         final int scoreMaterialValue = materialValueNoPawnWhite - materialValueNoPawnBlack;
         final int scoreTrappedPieces = getTrappedPiecesPenaltyAsWhite(board);
@@ -767,19 +771,6 @@ public final class Evaluation {
             score += -PENALTY_TRAPPED_ROOK_BY_KING;
         }
         return score;
-    }
-
-    public static int computeRookBonus(final Board board, final int side) {
-        final int[] rooks = board.getPieces(side, ROOK);
-        int file = 0;
-        int rank = 0;
-        final int rookCount = rooks[0];
-        for (int i = rookCount; i > 0; i--) {
-            final int rook = rooks[i];
-            file |= FILE_RANK_BITS[getFile(rook)];
-            rank |= FILE_RANK_BITS[getRank(rook)];
-        }
-        return BONUS_ROOKS_ON_SAME_FILE * (rookCount - Integer.bitCount(file)) + BONUS_ROOKS_ON_SAME_RANK * (rookCount - Integer.bitCount(rank));
     }
 
     public static boolean drawByInsufficientMaterial(final Board board) {

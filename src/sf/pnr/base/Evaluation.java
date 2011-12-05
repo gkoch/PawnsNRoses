@@ -695,6 +695,8 @@ public final class Evaluation {
 
         final int scoreAttacksAroundKingPenalty = PENALTY_ATTACKS_AROUND_KING[Long.bitCount(whiteKingAttacks64 & blackAttacks64 & ~whites64)] -
             PENALTY_ATTACKS_AROUND_KING[Long.bitCount(blackKingAttacks64 & whiteAttacks64 & ~blacks64)];
+        final int scoreKingEscape = (Long.bitCount(whiteKingAttacks64 & ~blackAttacks64 & ~allPieces64) -
+            Long.bitCount(blackKingAttacks64 & ~whiteAttacks64 & ~allPieces64)) * 5;
 
         final int scoreCastlingPenalty = getCastlingPenaltyAsWhite(state, state2);
         final int scoreRookBonus = BONUS_ROOKS_ON_SAME_FILE * (whiteRookCount - Integer.bitCount(whiteRookFiles)) +
@@ -719,7 +721,7 @@ public final class Evaluation {
         }
 
         int score = scoreAttack + scoreDefense + scoreMobility + scoreHungPiece + scoreMaterialValue +
-            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty  +
+            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty + scoreKingEscape +
             scoreRooksOnOpenFiles;
         score += ((scorePositionalOpening + scoreCastlingPenalty) * (STAGE_MAX - stage) +
             (scorePositionalEndgame + scoreDistance) * stage) / STAGE_MAX;
@@ -735,6 +737,7 @@ public final class Evaluation {
         //System.out.printf("Attacks Around King: %4d (%d / %d)\r\n", scoreAttacksAroundKingPenalty,
         //    Long.bitCount(whiteKingAttacks64 & blackAttacks64 & ~whites64),
         //    Long.bitCount(blackKingAttacks64 & whiteAttacks64 & ~blacks64));
+        //System.out.printf("King escape:         %4d\r\n", scoreKingEscape);
         //System.out.printf("Positional Opening:  %4d\r\n", scorePositionalOpening);
         //System.out.printf("Positional Endgame:  %4d\r\n", scorePositionalEndgame);
         //System.out.printf("Castling Penalty:    %4d\r\n", scoreCastlingPenalty);

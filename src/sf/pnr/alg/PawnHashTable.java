@@ -15,8 +15,8 @@ public class PawnHashTable {
     public static final int UNSTOPPABLE_PAWN_IF_NEXT_SHIFT = 3;
     public static final int UNSTOPPABLE_PAWN_BLACK_SHIFT = 24;
     public static final int VALUE_OFFSET = (int) (VALUE_MASK >> 1);
-    private static final int STAGE_IN_FRONT_OF_LIMIT = 10;
-    private static final int STAGE_BEHIND_LIMIT = 10;
+    private static final int STAGE_IN_FRONT_OF_LIMIT = 5;
+    private static final int STAGE_BEHIND_LIMIT = 5;
 
     @Configurable(Configurable.Key.EVAL_PAWNTABLE_SIZE)
     private static int TABLE_SIZE = 1;

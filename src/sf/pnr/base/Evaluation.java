@@ -122,7 +122,7 @@ public final class Evaluation {
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_OPENFILE)
     public static int BONUS_ROOKS_ON_OPEN_FILE = 10;
     @Configurable(Configurable.Key.EVAL_PENALTY_ATTACKS_AROUND_KING)
-    public static int[] PENALTY_ATTACKS_AROUND_KING = new int[]{0, -3, -6, -10, -20, -35, -50, -100, -200};
+    public static int[] PENALTY_ATTACKS_AROUND_KING = new int[]{0, -3, -6, -10, -20, -35, -90, -160, -350};
     public static final double DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE = 0.2;
 
     public static final int INITIAL_MATERIAL_VALUE;

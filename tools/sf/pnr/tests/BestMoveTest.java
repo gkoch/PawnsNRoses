@@ -64,6 +64,7 @@ public class BestMoveTest {
         private final long[] moveTimes;
         private final int[] depths;
         private final int[][] allScores;
+        private final int[] worstScore;
         private final int depth;
         private final int time;
         private final int printInterval;
@@ -85,6 +86,8 @@ public class BestMoveTest {
             moveTimes = new long[this.engines.length];
             depths = new int[this.engines.length];
             allScores = new int[this.engines.length][1000];
+            worstScore = new int[this.engines.length];
+            Arrays.fill(worstScore, -200);
             this.depth = depth;
             this.time = time;
             this.printInterval = printInterval;
@@ -139,6 +142,10 @@ public class BestMoveTest {
 
             for (int i = startIdx; i < engineScores.length; i++) {
                 final int score = engineScores[i] - maxScore;
+                if (score < worstScore[i]) {
+                    System.out.printf("* Worst diff (%d) for '%s'\r\n", score, engines[i].getName());
+                    worstScore[i] = score;
+                }
                 scores[i] += score;
                 allScores[i][testCount - 1] = score;
                 Arrays.sort(allScores[i]);

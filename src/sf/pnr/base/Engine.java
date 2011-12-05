@@ -526,7 +526,7 @@ public final class Engine {
         // futility pruning
         final boolean futility;
         if (depth < (3 << SHIFT_PLY) && !inCheck) {
-            final int value = board.getMaterialValue();
+            final int value = evaluation.evaluate(board);
             if (depth < (2 << SHIFT_PLY)) {
                 futility = value < alpha - VAL_FUTILITY_THRESHOLD;
             } else {

@@ -74,8 +74,10 @@ public final class Evaluation {
     public static int BONUS_PAWN_STORM_DEDUCTION_MAIN_FILE = 6;
     @Configurable(Configurable.Key.EVAL_PENALTY_PAWN_STORM_MAX_SIDE)
     public static int BONUS_PAWN_STORM_DEDUCTION_SIDE_FILE = 5;
-    public static final int[] BONUS_PASSED_PAWN_BONUS_OPENING = new int[]{150, 100, 75, 50, 25, 15, 10};
-    public static final int[] BONUS_PASSED_PAWN_BONUS_ENDGAME = new int[]{400, 250, 150, 100, 50, 25, 10};
+    public static final int[] BONUS_PASSED_PAWN_BONUS_OPENING = new int[]{75, 50, 35, 25, 15, 10, 5};
+    public static final int[] BONUS_PASSED_PAWN_BONUS_ENDGAME = new int[]{200, 125, 75, 50, 25, 15, 10};
+    //public static final int[] BONUS_PASSED_PAWN_BONUS_OPENING = new int[]{150, 100, 75, 50, 25, 15, 10};
+    //public static final int[] BONUS_PASSED_PAWN_BONUS_ENDGAME = new int[]{400, 250, 150, 100, 50, 25, 10};
     @Configurable(Configurable.Key.EVAL_BONUS_DEFENSE)
     public static int BONUS_DEFENSE = 2;
     @Configurable(Configurable.Key.EVAL_BONUS_ATTACK)
@@ -1126,8 +1128,8 @@ public final class Evaluation {
                                 unstoppablePawnIfNextWhite = realDist;
                             }
                         }
-                        passedPawnOpening += BONUS_PASSED_PAWN_BONUS_OPENING[promotionDistance];
-                        passedPawnEndgame += BONUS_PASSED_PAWN_BONUS_ENDGAME[promotionDistance];
+                        passedPawnOpening += BONUS_PASSED_PAWN_BONUS_OPENING[promotionDistance - 1];
+                        passedPawnEndgame += BONUS_PASSED_PAWN_BONUS_ENDGAME[promotionDistance - 1];
                     }
                     if (realDist < blackKingDist) {
                         if (realDist < unstoppablePawnIfNextWhite) {
@@ -1160,8 +1162,8 @@ public final class Evaluation {
                                 unstoppablePawnIfNextBlack = realDist;
                             }
                         }
-                        passedPawnOpening -= BONUS_PASSED_PAWN_BONUS_OPENING[promotionDistance];
-                        passedPawnEndgame -= BONUS_PASSED_PAWN_BONUS_ENDGAME[promotionDistance];
+                        passedPawnOpening -= BONUS_PASSED_PAWN_BONUS_OPENING[promotionDistance - 1];
+                        passedPawnEndgame -= BONUS_PASSED_PAWN_BONUS_ENDGAME[promotionDistance - 1];
                     }
                     if (realDist < whiteKingDist) {
                         if (realDist < unstoppablePawnIfNextBlack) {

@@ -336,9 +336,15 @@ public final class Evaluation {
             return VAL_DRAW;
         }
 
+        final int state2 = board.getState2();
+        final int stage = board.getStage();
         final long whiteBitBoard = board.getBitboard(WHITE);
         final long blackBitBoard = board.getBitboard(BLACK);
         final long allPieces = whiteBitBoard | blackBitBoard;
+        final int shiftPositionBonusWhite = SHIFT_POSITION_BONUS[WHITE];
+        final int shiftPositionBonusBlack = SHIFT_POSITION_BONUS[BLACK];
+        int positionalScoreOpening = 0;
+        int positionalScoreEndgame = 0;
         long whitePawnsBitBoard = 0L;
         long blackPawnsBitBoard = 0L;
         long whitePawnAttackBitboard = 0L;
@@ -402,11 +408,15 @@ public final class Evaluation {
         }
         int score = attackCount * BONUS_ATTACK + defenseCount * BONUS_DEFENSE + mobilityCount * BONUS_MOBILITY +
             hungPieceCount * BONUS_HUNG_PIECE;
+
+        // knights
         int distance = 0;
         final long piecesMaskWhite = board.getBitboard(WHITE);
         final long piecesMaskBlack = board.getBitboard(BLACK);
         final int blackKing = board.getKing(BLACK);
         final int[] whiteKnights = board.getPieces(WHITE, KNIGHT);
+        int[] positionalBonusOpening = VAL_POSITION_BONUS_OPENING[KNIGHT];
+        int[] positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[KNIGHT];
         for (int i = whiteKnights[0]; i > 0; i--) {
             final int knight = whiteKnights[i];
             final int knight64 = convert0x88To64(knight);
@@ -418,6 +428,8 @@ public final class Evaluation {
             score += BONUS_MOBILITY_KNIGHT[Long.bitCount(knightMask ^ defended ^ attacked)];
             distance += BONUS_DISTANCE_KNIGHT[
                 distance(knight, blackKing, ATTACK_DISTANCE_KNIGHT, SHIFT_ATTACK_DISTANCE_KNIGHT)];
+            positionalScoreOpening += positionalBonusOpening[knight + shiftPositionBonusWhite];
+            positionalScoreEndgame += positionalBonusEndGame[knight + shiftPositionBonusWhite];
         }
         final int whiteKing = board.getKing(WHITE);
         final int[] blackKnights = board.getPieces(BLACK, KNIGHT);
@@ -432,9 +444,15 @@ public final class Evaluation {
             score -= BONUS_MOBILITY_KNIGHT[Long.bitCount(knightMask ^ defended ^ attacked)];
             distance -= BONUS_DISTANCE_KNIGHT[
                 distance(knight, whiteKing, ATTACK_DISTANCE_KNIGHT, SHIFT_ATTACK_DISTANCE_KNIGHT)];
+            positionalScoreOpening -= positionalBonusOpening[knight + shiftPositionBonusBlack];
+            positionalScoreEndgame -= positionalBonusEndGame[knight + shiftPositionBonusBlack];
         }
+
+        // bishops
         final int[] squares = board.getBoard();
         final int[] whiteBishops = board.getPieces(WHITE, BISHOP);
+        positionalBonusOpening = VAL_POSITION_BONUS_OPENING[BISHOP];
+        positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[BISHOP];
         for (int i = whiteBishops[0]; i > 0; i--) {
             final int bishop = whiteBishops[i];
             int mobility = 0;
@@ -454,6 +472,8 @@ public final class Evaluation {
             score += BONUS_MOBILITY_BISHOP[mobility];
             distance += BONUS_DISTANCE_BISHOP[distance(bishop, blackKing, ATTACK_DISTANCE_MASKS[BISHOP],
                 SHIFT_ATTACK_DISTANCES[BISHOP])];
+            positionalScoreOpening += positionalBonusOpening[bishop + shiftPositionBonusWhite];
+            positionalScoreEndgame += positionalBonusEndGame[bishop + shiftPositionBonusWhite];
         }
         final int[] blackBishops = board.getPieces(BLACK, BISHOP);
         for (int i = blackBishops[0]; i > 0; i--) {
@@ -475,8 +495,14 @@ public final class Evaluation {
             score -= BONUS_MOBILITY_BISHOP[mobility];
             distance -= BONUS_DISTANCE_BISHOP[distance(bishop, whiteKing, ATTACK_DISTANCE_MASKS[BISHOP],
                 SHIFT_ATTACK_DISTANCES[BISHOP])];
+            positionalScoreOpening -= positionalBonusOpening[bishop + shiftPositionBonusBlack];
+            positionalScoreEndgame -= positionalBonusEndGame[bishop + shiftPositionBonusBlack];
         }
+
+        // rooks
         final int[] whiteRooks = board.getPieces(WHITE, ROOK);
+        positionalBonusOpening = VAL_POSITION_BONUS_OPENING[ROOK];
+        positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[ROOK];
         for (int i = whiteRooks[0]; i > 0; i--) {
             final int rook = whiteRooks[i];
             int mobility = 0;
@@ -496,6 +522,8 @@ public final class Evaluation {
             score += BONUS_MOBILITY_ROOK[mobility];
             distance += BONUS_DISTANCE_ROOK[distance(rook, blackKing, ATTACK_DISTANCE_MASKS[ROOK],
                 SHIFT_ATTACK_DISTANCES[ROOK])];
+            positionalScoreOpening += positionalBonusOpening[rook + shiftPositionBonusWhite];
+            positionalScoreEndgame += positionalBonusEndGame[rook + shiftPositionBonusWhite];
         }
         final int[] blackRooks = board.getPieces(BLACK, ROOK);
         for (int i = blackRooks[0]; i > 0; i--) {
@@ -517,8 +545,14 @@ public final class Evaluation {
             score -= BONUS_MOBILITY_ROOK[mobility];
             distance -= BONUS_DISTANCE_ROOK[distance(rook, whiteKing, ATTACK_DISTANCE_MASKS[ROOK],
                 SHIFT_ATTACK_DISTANCES[ROOK])];
+            positionalScoreOpening -= positionalBonusOpening[rook + shiftPositionBonusBlack];
+            positionalScoreEndgame -= positionalBonusEndGame[rook + shiftPositionBonusBlack];
         }
+
+        // queens
         final int[] whiteQueens = board.getPieces(WHITE, QUEEN);
+        positionalBonusOpening = VAL_POSITION_BONUS_OPENING[QUEEN];
+        positionalBonusEndGame = VAL_POSITION_BONUS_ENDGAME[QUEEN];
         for (int i = whiteQueens[0]; i > 0; i--) {
             final int queen = whiteQueens[i];
             int mobility = 0;
@@ -538,6 +572,8 @@ public final class Evaluation {
             score += BONUS_MOBILITY_QUEEN[mobility];
             distance += BONUS_DISTANCE_QUEEN[distance(queen, blackKing, ATTACK_DISTANCE_MASKS[QUEEN],
                 SHIFT_ATTACK_DISTANCES[QUEEN])];
+            positionalScoreOpening += positionalBonusOpening[queen + shiftPositionBonusWhite];
+            positionalScoreEndgame += positionalBonusEndGame[queen + shiftPositionBonusWhite];
         }
         final int[] blackQueens = board.getPieces(BLACK, QUEEN);
         for (int i = blackQueens[0]; i > 0; i--) {
@@ -559,7 +595,13 @@ public final class Evaluation {
             score -= BONUS_MOBILITY_QUEEN[mobility];
             distance -= BONUS_DISTANCE_QUEEN[distance(queen, whiteKing, ATTACK_DISTANCE_MASKS[QUEEN],
                 SHIFT_ATTACK_DISTANCES[QUEEN])];
+            positionalScoreOpening -= positionalBonusOpening[queen + shiftPositionBonusBlack];
+            positionalScoreEndgame -= positionalBonusEndGame[queen + shiftPositionBonusBlack];
         }
+        score += (positionalScoreOpening * (STAGE_MAX - stage) + positionalScoreEndgame * stage) / STAGE_MAX +
+            computeRookBonus(board, WHITE) - computeRookBonus(board, BLACK);
+
+        // kings
         int whiteKingMobility = 0;
         for (int delta: DELTA_KING) {
             int pos = whiteKing + delta;
@@ -588,51 +630,37 @@ public final class Evaluation {
             }
         }
         score -= BONUS_MOBILITY_KING[blackKingMobility];
-        final int state2 = board.getState2();
+
         final int castlingPenalty = getCastlingPenaltyAsWhite(state, state2);
-        final int stage = board.getStage();
         score += (distance * stage + castlingPenalty * (STAGE_MAX - stage)) / STAGE_MAX;
 
         final int materialValueWhite = board.getMaterialValue(WHITE);
         final int materialValueBlack = board.getMaterialValue(BLACK);
-        int scoreAsWhite = score + materialValueWhite - materialValueBlack;
-        scoreAsWhite += computePositionalBonusNoPawnAsWhite(board);
-        scoreAsWhite += getTrappedPiecesPenaltyAsWhite(board);
+        score += materialValueWhite - materialValueBlack;
+        //score += computePositionalBonusNoPawnAsWhite(board);
+        score += getTrappedPiecesPenaltyAsWhite(board);
         final int pawnHashValue = pawnEval(board);
-        scoreAsWhite += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
+        score += PawnHashTable.getValueFromPawnHashValue(pawnHashValue);
         if ((materialValueWhite == VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]]) &&
                 (materialValueBlack == VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]])) {
             final int unstoppablePawnDistWhite = PawnHashTable.getUnstoppablePawnDistWhite(pawnHashValue, toMove);
             final int unstoppablePawnDistBlack = PawnHashTable.getUnstoppablePawnDistBlack(pawnHashValue, toMove);
             if (unstoppablePawnDistWhite < unstoppablePawnDistBlack) {
-                scoreAsWhite += BONUS_UNSTOPPABLE_PAWN;
+                score += BONUS_UNSTOPPABLE_PAWN;
             } else if (unstoppablePawnDistWhite > unstoppablePawnDistBlack) {
-                scoreAsWhite -= BONUS_UNSTOPPABLE_PAWN;
+                score -= BONUS_UNSTOPPABLE_PAWN;
             } else if (unstoppablePawnDistWhite == unstoppablePawnDistBlack && unstoppablePawnDistWhite != 7) {
-                scoreAsWhite += signum * BONUS_UNSTOPPABLE_PAWN;
+                score += signum * BONUS_UNSTOPPABLE_PAWN;
             }
         }
 
-        if (scoreAsWhite * signum > 0 && board.getMaterialValue(toMove) <= VAL_PIECE_COUNTS[BISHOP][2]) {
-            scoreAsWhite *= (1.0 - drawProbability(board));
+        if (score * signum > 0 && board.getMaterialValue(toMove) <= VAL_PIECE_COUNTS[BISHOP][2]) {
+            score *= (1.0 - drawProbability(board));
         }
 
-        evalHashTable.set(zobrist, scoreAsWhite - VAL_MIN);
+        evalHashTable.set(zobrist, score - VAL_MIN);
 
-        return scoreAsWhite * signum;
-    }
-
-    public static int computeMaterialValueAsWhite(final Board board) {
-        int score = VAL_PIECE_COUNTS[KNIGHT][board.getPieces(WHITE, KNIGHT)[0]] -
-            VAL_PIECE_COUNTS[KNIGHT][board.getPieces(BLACK, KNIGHT)[0]];
-        score += VAL_PIECE_COUNTS[BISHOP][board.getPieces(WHITE, BISHOP)[0]] -
-            VAL_PIECE_COUNTS[BISHOP][board.getPieces(BLACK, BISHOP)[0]];
-        score += VAL_PIECE_COUNTS[ROOK][board.getPieces(WHITE, ROOK)[0]] -
-            VAL_PIECE_COUNTS[ROOK][board.getPieces(BLACK, ROOK)[0]];
-        score += VAL_PIECE_COUNTS[QUEEN][board.getPieces(WHITE, QUEEN)[0]] -
-            VAL_PIECE_COUNTS[QUEEN][board.getPieces(BLACK, QUEEN)[0]];
-        return score + VAL_PIECE_COUNTS[PAWN][board.getPieces(WHITE, PAWN)[0]] -
-            VAL_PIECE_COUNTS[PAWN][board.getPieces(BLACK, PAWN)[0]];
+        return score * signum;
     }
 
     public static int computeMaterialValueOneSide(final Board board, final int side) {

@@ -842,4 +842,208 @@ public class StringUtils {
         final int attackValue = ATTACK_ARRAY[(targetPos - piecePos + 120)];
         return (attackValue & attackBits) > 0 && board.isAttackedBySlidingInSight(targetPos, piecePos, attackValue);
     }
+
+    public static String prettyPrint(final ColumnFormatter... formatters) {
+        String padding = " ";
+        String horizontalSeparator = "|";
+        String verticalSeparator = "-";
+        int rowCount = 0;
+        boolean printTitle = false;
+        for (ColumnFormatter formatter : formatters) {
+            rowCount = Math.max(rowCount, formatter.getRowCount());
+            printTitle |= formatter.hasTitle();
+        }
+
+        final StringBuilder builder = new StringBuilder(formatters.length * formatters[0].getRowCount() * 10);
+        if (printTitle) {
+            boolean firstCol = true;
+            for (ColumnFormatter formatter : formatters) {
+                if (!firstCol) {
+                    builder.append(padding).append(horizontalSeparator).append(padding);
+                } else {
+                    firstCol = false;
+                }
+                builder.append(formatter.getTitle());
+            }
+            final int width = builder.length();
+            builder.append("\r\n");
+            for (int i = 0; i < width / verticalSeparator.length(); i++) {
+                builder.append(verticalSeparator);
+            }
+            builder.append("\r\n");
+        }
+
+        for (int i = 0; i < rowCount; i++) {
+            boolean firstCol = true;
+            for (ColumnFormatter formatter : formatters) {
+                if (!firstCol) {
+                    builder.append(padding).append(horizontalSeparator).append(padding);
+                } else {
+                    firstCol = false;
+                }
+                builder.append(formatter.format(i));
+            }
+            builder.append("\r\n");
+        }
+
+        return builder.toString();
+    }
+
+    public static ColumnFormatter formatter(final String title, final String[] values) {
+        return new StringColumnFormatter(title, values);
+    }
+
+    public static ColumnFormatter formatter(final String title, final int[] values) {
+        return new IntColumnFormatter(title, values);
+    }
+
+    public static ColumnFormatter formatter(final String title, final double[] values, final int precision) {
+        return new DoubleColumnFormatter(title, values, precision);
+    }
+
+    public static interface ColumnFormatter {
+        public boolean hasTitle();
+        public String getTitle();
+        public String format(final int index);
+        public int getRowCount();
+    }
+
+    public static class StringColumnFormatter implements ColumnFormatter {
+        private final String title;
+        private final String[] values;
+        private int width;
+
+        public StringColumnFormatter(final String title, final String[] values) {
+            this.title = title;
+            this.values = values;
+            width = title == null? 0: title.length();
+            if (values != null && values.length > 0) {
+                for (String value : values) {
+                    width = Math.max(width, value.length());
+                }
+            }
+        }
+
+        @Override
+        public boolean hasTitle() {
+            return title != null;
+        }
+
+        @Override
+        public String getTitle() {
+            final String titleStr = title == null? "": title;
+            return String.format("%" + width + "s", titleStr);
+        }
+
+        @Override
+        public String format(final int index) {
+            return index < values.length? String.format("%" + width + "s", values[index]):
+                String.format("%" + width + "s", "");
+        }
+
+        @Override
+        public int getRowCount() {
+            return values.length;
+        }
+    }
+
+    public static class IntColumnFormatter implements ColumnFormatter {
+        private final String title;
+        private final int[] values;
+        private int width;
+        private int min;
+        private int max;
+
+        public IntColumnFormatter(final String title, final int[] values) {
+            this.title = title;
+            this.values = values;
+            width = title == null? 0: title.length();
+            if (values != null && values.length > 0) {
+                min = values[0];
+                max = values[0];
+                for (int value : values) {
+                    if (value < min) {
+                        min = value;
+                        width = Math.max(width, Integer.toString(value).length());
+                    } else if (value > max) {
+                        max = value;
+                        width = Math.max(width, Integer.toString(value).length());
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean hasTitle() {
+            return title != null;
+        }
+
+        @Override
+        public String getTitle() {
+            final String titleStr = title == null? "": title;
+            return String.format("%" + width + "s", titleStr);
+        }
+
+        @Override
+        public String format(final int index) {
+            return index < values.length? String.format("%" + width + "d", values[index]):
+                String.format("%" + width + "s", "");
+        }
+
+        @Override
+        public int getRowCount() {
+            return values.length;
+        }
+    }
+
+    public static class DoubleColumnFormatter implements ColumnFormatter {
+        private final String title;
+        private final double[] values;
+        private final int precision;
+        private int width;
+        private double min;
+        private double max;
+
+        public DoubleColumnFormatter(final String title, final double[] values, final int precision) {
+            this.title = title;
+            this.values = values;
+            this.precision = precision;
+            width = title == null? 0: title.length();
+            if (values != null && values.length > 0) {
+                min = values[0];
+                max = values[0];
+                for (double value : values) {
+                    if (value < min) {
+                        min = value;
+                        width = Math.max(width, String.format("%." + precision + "f", value).length());
+                    } else if (value > max) {
+                        max = value;
+                        width = Math.max(width, String.format("%." + precision + "f", value).length());
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean hasTitle() {
+            return title != null;
+        }
+
+        @Override
+        public String getTitle() {
+            final String titleStr = title == null? "": title;
+            return String.format("%" + width + "s", titleStr);
+        }
+
+        @Override
+        public String format(final int index) {
+            return index < values.length? String.format("%" + width + "." + precision + "f", values[index]):
+                String.format("%" + width + "s", "");
+        }
+
+        @Override
+        public int getRowCount() {
+            return values.length;
+        }
+    }
 }

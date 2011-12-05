@@ -399,9 +399,6 @@ public final class Evaluation {
             mobilityCount -= Long.bitCount(mobility64 & ~(doubleBlocker64 >> 8));
         }
 
-        final int hungPieceCount = Long.bitCount(whitePawnAttacks64 & blacks64 & ~blackPawns64) -
-            Long.bitCount(blackPawnAttacks64 & whites64 & ~whitePawns64);
-
         // en passant
         final int enPassant = (state & EN_PASSANT) >> SHIFT_EN_PASSANT;
         if (enPassant != 0) {
@@ -420,18 +417,14 @@ public final class Evaluation {
         final int hungPieceCountWhite = Long.bitCount(blackPawnAttacks64 & whites64 & ~whitePawns64);
         int scoreHungPiece = 0;
         if (toMove == WHITE_TO_MOVE) {
-            if (hungPieceCountBlack > 1) {
-                scoreHungPiece += BONUS_HUNG_PIECE;
-            }
+            scoreHungPiece += (hungPieceCountBlack * BONUS_HUNG_PIECE);
             if (hungPieceCountWhite > 1) {
                 scoreHungPiece -= BONUS_HUNG_PIECE >> 2;
             }
         } else {
-            if (hungPieceCountWhite > 1) {
-                scoreHungPiece += BONUS_HUNG_PIECE;
-            }
+            scoreHungPiece -= (hungPieceCountWhite * BONUS_HUNG_PIECE);
             if (hungPieceCountBlack > 1) {
-                scoreHungPiece -= BONUS_HUNG_PIECE >> 2;
+                scoreHungPiece += BONUS_HUNG_PIECE >> 2;
             }
         }
 

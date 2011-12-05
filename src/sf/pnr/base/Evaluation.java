@@ -117,6 +117,8 @@ public final class Evaluation {
     public static int BONUS_ROOKS_ON_SAME_FILE = 12;
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMERANK)
     public static int BONUS_ROOKS_ON_SAME_RANK = 12;
+    @Configurable(Configurable.Key.EVAL_PENALTY_ATTACKS_AROUND_KING)
+    public static int[] PENALTY_ATTACKS_AROUND_KING = new int[]{0, -3, -6, -10, -20, -35, -50, -100, -200};
     public static final double DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE = 0.2;
 
     public static final int INITIAL_MATERIAL_VALUE;
@@ -363,7 +365,7 @@ public final class Evaluation {
 
             final long pawnAttack64 = whitePawnAttacks[pawn64];
             final long attacked64 = pawnAttack64 & blacks64;
-            whitePawnAttacks64 |= attacked64;
+            whitePawnAttacks64 |= pawnAttack64;
             attackCount += Long.bitCount(attacked64);
             final long defended64 = pawnAttack64 & whites64;
             defenseCount += Long.bitCount(defended64);
@@ -383,7 +385,7 @@ public final class Evaluation {
 
             final long pawnAttack64 = blackPawnAttacks[pawn64];
             final long attacked64 = pawnAttack64 & whites64;
-            blackPawnAttacks64 |= attacked64;
+            blackPawnAttacks64 |= pawnAttack64;
             attackCount -= Long.bitCount(attacked64);
             final long defended64 = pawnAttack64 & blacks64;
             defenseCount -= Long.bitCount(defended64);
@@ -393,8 +395,8 @@ public final class Evaluation {
             mobilityCount -= Long.bitCount(mobility64 & ~(doubleBlocker64 >> 8));
         }
 
-        final int hungPieceCount = Long.bitCount(whitePawnAttacks64 & ~blackPawns64) -
-            Long.bitCount(blackPawnAttacks64 & ~whitePawns64);
+        final int hungPieceCount = Long.bitCount(whitePawnAttacks64 & blacks64 & ~blackPawns64) -
+            Long.bitCount(blackPawnAttacks64 & whites64 & ~whitePawns64);
 
         // en passant
         final int enPassant = (state & EN_PASSANT) >> SHIFT_EN_PASSANT;
@@ -468,7 +470,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[BISHOP]) {
                 for (int pos = bishop + delta; (pos & 0x88) == 0; pos += delta) {
-                    whiteAttacks64 |= convert0x88To64(pos);
+                    whiteAttacks64 |= 1L << convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (WHITE == side(squares[pos])) {
@@ -493,7 +495,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[BISHOP]) {
                 for (int pos = bishop + delta; (pos & 0x88) == 0; pos += delta) {
-                    blackAttacks64 |= convert0x88To64(pos);
+                    blackAttacks64 |= 1L << convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (BLACK == side(squares[pos])) {
@@ -525,7 +527,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[ROOK]) {
                 for (int pos = rook + delta; (pos & 0x88) == 0; pos += delta) {
-                    whiteAttacks64 |= convert0x88To64(pos);
+                    whiteAttacks64 |= 1L << convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (WHITE == side(squares[pos])) {
@@ -555,7 +557,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[ROOK]) {
                 for (int pos = rook + delta; (pos & 0x88) == 0; pos += delta) {
-                    blackAttacks64 |= convert0x88To64(pos);
+                    blackAttacks64 |= 1L << convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (BLACK == side(squares[pos])) {
@@ -586,7 +588,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[QUEEN]) {
                 for (int pos = queen + delta; (pos & 0x88) == 0; pos += delta) {
-                    whiteAttacks64 |= convert0x88To64(pos);
+                    whiteAttacks64 |= 1L << convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (WHITE == side(squares[pos])) {
@@ -611,7 +613,7 @@ public final class Evaluation {
             int mobility = 0;
             for (int delta: DELTA[QUEEN]) {
                 for (int pos = queen + delta; (pos & 0x88) == 0; pos += delta) {
-                    blackAttacks64 |= convert0x88To64(pos);
+                    blackAttacks64 |= 1L << convert0x88To64(pos);
                     if (squares[pos] == EMPTY) {
                         mobility++;
                     } else if (BLACK == side(squares[pos])) {
@@ -642,6 +644,9 @@ public final class Evaluation {
         scoreAttack -= Long.bitCount(blackKingAttacks64 & whites64) * BONUS_ATTACK;
         scoreMobility -= BONUS_MOBILITY_KING[Long.bitCount(blackKingAttacks64 & ~whites64 & ~blacks64)];
 
+        final int scoreAttacksAroundKingPenalty = PENALTY_ATTACKS_AROUND_KING[Long.bitCount(whiteKingAttacks64 & blackAttacks64 & ~whites64)] -
+            PENALTY_ATTACKS_AROUND_KING[Long.bitCount(blackKingAttacks64 & whiteAttacks64 & ~blacks64)];
+
         final int scoreCastlingPenalty = getCastlingPenaltyAsWhite(state, state2);
         final int scoreRookBonus = BONUS_ROOKS_ON_SAME_FILE * (whiteRookCount - Integer.bitCount(whiteRookFiles)) +
             BONUS_ROOKS_ON_SAME_RANK * (whiteRookCount - Integer.bitCount(whiteRookRanks)) -
@@ -665,7 +670,7 @@ public final class Evaluation {
         }
 
         int score = scoreAttack + scoreDefense + scoreMobility + scoreHungPiece + scoreMaterialValue +
-            scorePawn + scoreRookBonus + scoreTrappedPieces;
+            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty;
         score += ((scorePositionalOpening + scoreCastlingPenalty) * (STAGE_MAX - stage) +
             (scorePositionalEndgame + scoreDistance) * stage) / STAGE_MAX;
 

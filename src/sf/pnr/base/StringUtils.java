@@ -700,6 +700,21 @@ public class StringUtils {
         return builder.toString();
     }
 
+    public static String toString64(long bitboard) {
+        final StringBuilder builder = new StringBuilder();
+        final StringBuilder rowBuilder = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            rowBuilder.delete(0, rowBuilder.length());
+            for (int j = 0; j < 8; j++) {
+                rowBuilder.append((bitboard & 0x01L) == 0? '.': '1');
+                bitboard >>>= 1;
+            }
+            rowBuilder.append("\r\n");
+            builder.insert(0, rowBuilder);
+        }
+        return builder.toString();
+    }
+
     public static int fromString0x88(final String posStr) {
         final char file = posStr.charAt(0);
         final char rank = posStr.charAt(1);

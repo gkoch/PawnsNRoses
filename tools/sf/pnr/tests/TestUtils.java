@@ -41,6 +41,13 @@ public class TestUtils {
             }
             engines[0] = new UciRunner("Pawns N' Roses Latest", options, new PipedUciProcess());
         }
+        final String includeLatestExternal = System.getProperty("searchTask.includeLatestExternal");
+        if (includeLatestExternal != null) {
+            final UciRunner[] enginesWithLatest = new UciRunner[engines.length + 1];
+            System.arraycopy(engines, 0, enginesWithLatest, 1, engines.length);
+            engines = enginesWithLatest;
+            engines[0] = new UciRunner("Pawns N' Roses Latest Ext", new ExternalUciProcess(includeLatestExternal));
+        }
         final String debugFile = System.getProperty("searchTask.debugFile");
         if (debugFile != null) {
             final UncloseableOutputStream os = new UncloseableOutputStream(new FileOutputStream(debugFile));

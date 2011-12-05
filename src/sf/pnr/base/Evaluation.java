@@ -166,25 +166,43 @@ public final class Evaluation {
             {
                 // pnr-pawn-opening3
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0,
-                  5, 10, 10,-20,-20, 10, 10,  5,     50, 50, 50, 50, 50, 50, 50, 50,
-                  5, -5,-10,  0,  0,-10, -5,  5,     10, 10, 20, 30, 30, 20, 10, 10,
-                  0,  0,  0, 20, 20,  0,  0,  0,      5,  5, 10, 25, 25, 10,  5,  5,
-                  5,  5, 10, 25, 25, 10,  5,  5,      0,  0,  0, 20, 20,  0,  0,  0,
-                 10, 10, 20, 30, 30, 20, 10, 10,      5, -5,-10,  0,  0,-10, -5,  5,
-                 50, 50, 50, 50, 50, 50, 50, 50,      5, 10, 10,-20,-20, 10, 10,  5,
+                  6,  8,  8,-10,-10,  8,  8,  6,     15, 15, 15, 15, 15, 15, 15, 15,
+                  5,  3, -2,  4,  4, -2,  3,  5,      4,  4,  5,  6,  6,  5,  4,  4,
+                  0,  0,  0, 12, 12,  0,  0,  0,      1,  1,  2,  8,  8,  2,  1,  1,
+                  1,  1,  2,  8,  8,  2,  1,  1,      0,  0,  0, 12, 12,  0,  0,  0,
+                  4,  4,  5,  6,  6,  5,  4,  4,      5,  3, -2,  4,  4, -2,  3,  5,
+                 15, 15, 15, 15, 15, 15, 15, 15,      6,  8,  8,-10,-10,  8,  8,  6,
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0
+                // pnr-pawn-opening3
+                //  0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0,
+                //  5, 10, 10,-20,-20, 10, 10,  5,     50, 50, 50, 50, 50, 50, 50, 50,
+                //  5, -5,-10,  0,  0,-10, -5,  5,     10, 10, 20, 30, 30, 20, 10, 10,
+                //  0,  0,  0, 20, 20,  0,  0,  0,      5,  5, 10, 25, 25, 10,  5,  5,
+                //  5,  5, 10, 25, 25, 10,  5,  5,      0,  0,  0, 20, 20,  0,  0,  0,
+                // 10, 10, 20, 30, 30, 20, 10, 10,      5, -5,-10,  0,  0,-10, -5,  5,
+                // 50, 50, 50, 50, 50, 50, 50, 50,      5, 10, 10,-20,-20, 10, 10,  5,
+                //  0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0
             };
         VAL_POSITION_BONUS_PAWN_ENDGAME = new int[]
             {
-                // pnr-pawn-endgame3
+                // pnr-pawn-endgame5
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0,
-                  0,  0,  0,  0,  0,  0,  0,  0,     10, 10, 10, 11, 11, 10, 10, 10,
-                  2,  2,  2,  3,  3,  2,  2,  2,      8,  8,  9,  9,  9,  9,  8,  8,
-                  4,  4,  5,  6,  6,  5,  4,  4,      6,  6,  7,  8,  8,  7,  6,  6,
-                  6,  6,  7,  8,  8,  7,  6,  6,      4,  4,  5,  6,  6,  5,  4,  4,
-                  8,  8,  9,  9,  9,  9,  8,  8,      2,  2,  2,  3,  3,  2,  2,  2,
-                 10, 10, 10, 11, 11, 10, 10, 10,      0,  0,  0,  0,  0,  0,  0,  0,
+                 10, 10, 10, 10, 10, 10, 10, 10,     50, 50, 50, 50, 50, 50, 50, 50,
+                 18, 18, 16, 14, 14, 16, 18, 18,     40, 40, 40, 40, 40, 40, 40, 40,
+                 26, 26, 26, 28, 28, 26, 26, 26,     34, 34, 34, 34, 34, 34, 34, 34,
+                 34, 34, 34, 34, 34, 34, 34, 34,     26, 26, 26, 28, 28, 26, 26, 26,
+                 40, 40, 40, 40, 40, 40, 40, 40,     18, 18, 16, 14, 14, 16, 18, 18,
+                 50, 50, 50, 50, 50, 50, 50, 50,     10, 10, 10, 10, 10, 10, 10, 10,
                   0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0
+                // pnr-pawn-endgame3
+                //  0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0,
+                //  0,  0,  0,  0,  0,  0,  0,  0,     10, 10, 10, 11, 11, 10, 10, 10,
+                //  2,  2,  2,  3,  3,  2,  2,  2,      8,  8,  9,  9,  9,  9,  8,  8,
+                //  4,  4,  5,  6,  6,  5,  4,  4,      6,  6,  7,  8,  8,  7,  6,  6,
+                //  6,  6,  7,  8,  8,  7,  6,  6,      4,  4,  5,  6,  6,  5,  4,  4,
+                //  8,  8,  9,  9,  9,  9,  8,  8,      2,  2,  2,  3,  3,  2,  2,  2,
+                // 10, 10, 10, 11, 11, 10, 10, 10,      0,  0,  0,  0,  0,  0,  0,  0,
+                //  0,  0,  0,  0,  0,  0,  0,  0,      0,  0,  0,  0,  0,  0,  0,  0
             };
         VAL_POSITION_BONUS_KNIGHT = new int[]
             {
@@ -699,7 +717,8 @@ public final class Evaluation {
         }
 
         int score = scoreAttack + scoreDefense + scoreMobility + scoreHungPiece + scoreMaterialValue +
-            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty + scoreRooksOnOpenFiles;
+            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty  +
+            scoreRooksOnOpenFiles;
         score += ((scorePositionalOpening + scoreCastlingPenalty) * (STAGE_MAX - stage) +
             (scorePositionalEndgame + scoreDistance) * stage) / STAGE_MAX;
 
@@ -719,7 +738,7 @@ public final class Evaluation {
         //System.out.printf("Castling Penalty:    %4d\r\n", scoreCastlingPenalty);
         //System.out.printf("Distance:            %4d\r\n", scoreDistance);
         //System.out.printf("Rooks on Open Files: %4d\r\n", scoreRooksOnOpenFiles);
-        //System.out.printf("Before Draw Prob.  : %4d\r\n", score);
+        //System.out.printf("Before Draw Prob.:   %4d\r\n", score);
 
         final int materialValueNoPawnToMove = toMove == BLACK? materialValueNoPawnBlack: materialValueNoPawnWhite;
         if (score * signum > 0 && materialValueNoPawnToMove <= VAL_PIECE_COUNTS[BISHOP][2]) {

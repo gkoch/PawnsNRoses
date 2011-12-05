@@ -685,11 +685,13 @@ public final class Evaluation {
         scoreDefense += Long.bitCount(whiteKingAttacks64 & whites64) * BONUS_DEFENSE;
         scoreAttack += Long.bitCount(whiteKingAttacks64 & blacks64) * BONUS_ATTACK;
         scoreMobility += BONUS_MOBILITY_KING[Long.bitCount(whiteKingAttacks64 & ~whites64 & ~blacks64)];
+        whiteAttacks64 |= whiteKingAttacks64;
         final int blackKing64 = convert0x88To64(blackKing);
         final long blackKingAttacks64 = KING_MOVES[blackKing64];
         scoreDefense -= Long.bitCount(blackKingAttacks64 & blacks64) * BONUS_DEFENSE;
         scoreAttack -= Long.bitCount(blackKingAttacks64 & whites64) * BONUS_ATTACK;
         scoreMobility -= BONUS_MOBILITY_KING[Long.bitCount(blackKingAttacks64 & ~whites64 & ~blacks64)];
+        blackAttacks64 |= blackKingAttacks64;
 
         final int scoreAttacksAroundKingPenalty = PENALTY_ATTACKS_AROUND_KING[Long.bitCount(whiteKingAttacks64 & blackAttacks64 & ~whites64)] -
             PENALTY_ATTACKS_AROUND_KING[Long.bitCount(blackKingAttacks64 & whiteAttacks64 & ~blacks64)];

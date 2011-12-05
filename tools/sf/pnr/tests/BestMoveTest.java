@@ -31,6 +31,7 @@ public class BestMoveTest {
         final int printInterval = Integer.parseInt(System.getProperty("searchTask.printInterval", "10"));
         final int maxScore = Integer.parseInt(System.getProperty("searchTask.maxScore", "20000"));
         final long rndSeed = Long.parseLong(System.getProperty("searchTask.rndSeed", "-1"));
+        final boolean includeRefEngines = Boolean.parseBoolean(System.getProperty("searchTask.includeRefEngines", "true"));
 
         final List<String> testFiles = new ArrayList<String>();
         //testFiles.add("pos.epd");
@@ -42,7 +43,7 @@ public class BestMoveTest {
         testFiles.add("gmgames-min3.epd");
         //testFiles.add("med-games.epd");
 
-        new EpdProcessor().process(testFiles, new BestMoveTask(players, refEngines, depth, time, printInterval, maxScore), rndSeed);
+        new EpdProcessor().process(testFiles, new BestMoveTask(players, refEngines, depth, time, printInterval, maxScore, includeRefEngines), rndSeed);
 
         if (debugOs != null) {
             debugOs.close();
@@ -67,19 +68,18 @@ public class BestMoveTest {
         private final int time;
         private final int printInterval;
         private final int maxScore;
+        private final boolean includeRefEngines;
         private int testCount;
         private long startTime;
         private int maxNameLen;
         private int referenceEngineCount;
 
         private BestMoveTask(final UciRunner[] engines, final UciRunner[] referenceEngines, final int depth, final int time,
-                             final int printInterval, final int maxScore) {
-            this.maxScore = maxScore;
+                             final int printInterval, final int maxScore, final boolean includeRefEngines) {
             this.engines = new UciRunner[referenceEngines.length + engines.length];
             this.referenceEngineCount = referenceEngines.length;
             System.arraycopy(referenceEngines, 0, this.engines, 0, referenceEngines.length);
             System.arraycopy(engines, 0, this.engines, referenceEngines.length, engines.length);
-            this.printInterval = printInterval;
             scores = new long[this.engines.length];
             nodeCounts = new long[this.engines.length];
             moveTimes = new long[this.engines.length];
@@ -87,8 +87,11 @@ public class BestMoveTest {
             allScores = new int[this.engines.length][1000];
             this.depth = depth;
             this.time = time;
-            startTime = System.currentTimeMillis();
+            this.printInterval = printInterval;
+            this.maxScore = maxScore;
+            this.includeRefEngines = includeRefEngines;
             maxNameLen = TestUtils.getMaxNameLen(engines);
+            startTime = System.currentTimeMillis();
         }
 
         @Override
@@ -101,7 +104,8 @@ public class BestMoveTest {
             final Map<String, int[]> scoresMap = new HashMap<String, int[]>();
             final int[] engineScores = new int[engines.length];
             int maxScore = Integer.MIN_VALUE;
-            for (int i = 0; i < engines.length; i++) {
+            final int startIdx = includeRefEngines? 0: referenceEngineCount;
+            for (int i = startIdx; i < engines.length; i++) {
                 final UciRunner engine = engines[i];
                 TestUtils.compute(engine, board, depth, time);
                 final long engineNodeCount = engine.getNodeCount();
@@ -133,7 +137,7 @@ public class BestMoveTest {
                 engineScores[i] = score;
             }
 
-            for (int i = 0; i < engineScores.length; i++) {
+            for (int i = startIdx; i < engineScores.length; i++) {
                 final int score = engineScores[i] - maxScore;
                 scores[i] += score;
                 allScores[i][testCount - 1] = score;
@@ -158,7 +162,8 @@ public class BestMoveTest {
                 testCount, ((double) System.currentTimeMillis() - startTime) / 1000);
             System.out.printf("%" + (maxNameLen + 4) + "s\t%7s\t%7s\t%9s\t%6s\t%7s\t%7s\r\n",
                     "Engine name", "cp(avg)", "cp(mid)", "nodes", "ms", "nodes/sec", "depth");
-            for (int i = 0; i < engines.length; i++) {
+            final int startIdx = includeRefEngines? 0: referenceEngineCount;
+            for (int i = startIdx; i < engines.length; i++) {
                 final UciRunner engine = engines[i];
                 final double avgScore = ((double) scores[i]) / testCount;
                 final int from = testCount / 100 + 1;

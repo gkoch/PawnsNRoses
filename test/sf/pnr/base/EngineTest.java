@@ -502,8 +502,9 @@ public class EngineTest extends TestCase {
             "57. Rg8 Rxg8 58. Bxg8 Kc7 59. Be6 g3 60. fxg3 Kd6 61. Bc4 Kc5 62. Bd3 Kd4 63. g4 Kxd3 64. g5 Ke4 \n" +
             "65. g6 Ke5 66. g7 Kd6 67. Kb1 Kc7 68. g8=Q Kb7 69. Qf7+ Kb8 70. Qd7 Ka8 71. Qd5+ Ka7 72. Qa5+ Kb7 \n" +
             "73. Qc5 Kb8 74. Kc2 Kb7 75. Kb1 Kb8 76. Kc2 Kb7");
+        engine.getTranspositionTable().setAge((board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
         engine.getTranspositionTable().set(board.getZobristKey(), TranspositionTable.TT_TYPE_EXACT,
-            StringUtils.fromShort(board, "Kb1"), 10, 1000, (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
+            StringUtils.fromShort(board, "Kb1"), 10, 1000);
         assertEquals(0, engine.removeThreefoldRepetition(board, engine.getTranspositionTable().read(board.getZobristKey())));
     }
 
@@ -527,8 +528,9 @@ public class EngineTest extends TestCase {
             "33. a4 h5 34. g3 f5 35. Rh4 g5 36. Rxb7+ Kg6 37. Rb6 gxh4 38. Rxd6+ Kf7 39. Rxa6 hxg3 40. fxg3 Rd1+ \n" +
             "41. Kg2 Rxd4 42. Rf6+ Kg7 43. Rxf5 h4 44. gxh4 Rxa4 45. h5 Rd4 46. Rg5+ Kh6 47. Re5 Rd2+ 48. Kg1 Rd1+ \n" +
             "49. Kf2 Rd2+ 50. Kg1 Rd1+ 51. Kf2 Rd2+");
+        engine.getTranspositionTable().setAge((board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
         engine.getTranspositionTable().set(board.getZobristKey(), TranspositionTable.TT_TYPE_EXACT,
-            StringUtils.fromShort(board, "Kg1"), 1, 1000, (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
+            StringUtils.fromShort(board, "Kg1"), 1, 1000);
         assertEquals(0, engine.removeThreefoldRepetition(board, engine.getTranspositionTable().read(board.getZobristKey())));
     }
 
@@ -556,8 +558,9 @@ public class EngineTest extends TestCase {
             "65. f6 gxf6 66. Ne7 Rd4 67. Rxf6 Rxg4+ 68. Kf2 Rxh5 69. Rxb6 Rh2+ 70. Kf1 Rh1+ 71. Kf2 Rh2+ 72. Kf1 Ra4 \n" +
             "73. Kg1 Re2 74. Rb1 Rg4+ 75. Kh1 Rxe7 76. Rb2 Rh4+ 77. Kg1 Re1+ 78. Kg2 Reh1 79. Rb7+ Kg8 80. Rb8+ Kg7 \n" +
             "81. Rb7+ Kf8 82. Rb8+ Kg7 83. Rb7+ Kf8 84. Rb8+ Kf7 85. Rb7+ Kg8 86. Rb8+");
+        engine.getTranspositionTable().setAge((board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
         engine.getTranspositionTable().set(board.getZobristKey(), TranspositionTable.TT_TYPE_EXACT,
-            StringUtils.fromShort(board, "Kg7"), 3, 1000, (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
+            StringUtils.fromShort(board, "Kg7"), 3, 1000);
         assertEquals(0, engine.removeThreefoldRepetition(board, engine.getTranspositionTable().read(board.getZobristKey())));
     }
 

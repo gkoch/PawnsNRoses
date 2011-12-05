@@ -95,10 +95,9 @@ public final class Engine {
     private int historyShift = 0;
     private int historyShiftGlobal = 0;
     private BestMoveListener listener;
-    private int age;
 
     public long search(final Board board, int maxDepth, final long timeLeft) {
-        age = (board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES;
+        transpositionTable.setAge((board.getState() & FULL_MOVES) >> SHIFT_FULL_MOVES);
         if (maxDepth == 0) {
             assert timeLeft > 0;
             maxDepth = MAX_SEARCH_DEPTH;
@@ -355,7 +354,7 @@ public final class Engine {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
                         assert board.getBoard()[getFromPosition(move)] != EMPTY;
-                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
+                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN);
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
                         assert move != 0;
@@ -376,7 +375,7 @@ public final class Engine {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
                         assert board.getBoard()[getFromPosition(move)] != EMPTY;
-                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
+                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN);
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
                         assert move != 0;
@@ -417,7 +416,7 @@ public final class Engine {
             }
         }
         final long result;
-        transpositionTable.set(zobristKey, bestMoveType, bestMove, depth >> SHIFT_PLY, bestScore - VAL_MIN, age);
+        transpositionTable.set(zobristKey, bestMoveType, bestMove, depth >> SHIFT_PLY, bestScore - VAL_MIN);
         if (bestMove != 0) {
             result = getSearchResult(bestMove, bestScore);
         } else {
@@ -658,7 +657,7 @@ public final class Engine {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
                         assert board.getBoard()[getFromPosition(move)] != EMPTY;
-                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
+                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN);
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
                         return a;
@@ -677,7 +676,7 @@ public final class Engine {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
                         assert board.getBoard()[getFromPosition(move)] != EMPTY;
-                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN, age);
+                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, depth >> SHIFT_PLY, a - VAL_MIN);
                         addMoveToHistoryTable(board, move);
                         addMoveToKillers(searchedPly, searchStage, move);
                         return a;
@@ -727,7 +726,7 @@ public final class Engine {
             }
         }
 
-        transpositionTable.set(zobristKey, bestMoveType, bestMove, depth >> SHIFT_PLY, bestScore - VAL_MIN, age);
+        transpositionTable.set(zobristKey, bestMoveType, bestMove, depth >> SHIFT_PLY, bestScore - VAL_MIN);
         assert (Utils.getFromPosition(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
         assert (Utils.getToPosition(bestMove) & 0x88) == 0: Integer.toHexString(bestMove) + "/" + StringUtils.toSimple(bestMove);
         assert (Utils.getFromPosition(ttMove) & 0x88) == 0: Integer.toHexString(ttMove) + "/" + StringUtils.toSimple(ttMove);
@@ -864,7 +863,7 @@ public final class Engine {
                     board.takeBack(undo);
                     moveGenerator.popFrame();
                     assert board.getBoard()[getFromPosition(move)] != EMPTY;
-                    transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN, age);
+                    transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN);
                     addMoveToHistoryTable(board, move);
                     assert a > VAL_MIN;
                     return a;
@@ -881,7 +880,7 @@ public final class Engine {
                         board.takeBack(undo);
                         moveGenerator.popFrame();
                         assert board.getBoard()[getFromPosition(move)] != EMPTY;
-                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN, age);
+                        transpositionTable.set(zobristKey, TT_TYPE_BETA_CUT, move, 0, a - VAL_MIN);
                         addMoveToHistoryTable(board, move);
                         assert a > VAL_MIN;
                         return a;
@@ -915,9 +914,9 @@ public final class Engine {
         }
 
         if (bestMove != 0) {
-            transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, 0, alpha - VAL_MIN, age);
+            transpositionTable.set(zobristKey, TT_TYPE_EXACT, bestMove, 0, alpha - VAL_MIN);
         } else {
-            transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, 0, 0, bestScore - VAL_MIN, age);
+            transpositionTable.set(zobristKey, TT_TYPE_ALPHA_CUT, 0, 0, bestScore - VAL_MIN);
         }
         assert alpha > VAL_MIN;
         return alpha;

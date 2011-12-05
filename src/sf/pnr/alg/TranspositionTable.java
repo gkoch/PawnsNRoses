@@ -37,6 +37,7 @@ public final class TranspositionTable {
     private static int TABLE_SIZE = 1;
 
     private final long[][] arrays;
+    private long age;
 
     public TranspositionTable() {
         final int size = TABLE_SIZE * 1024 * 1024;
@@ -71,8 +72,7 @@ public final class TranspositionTable {
         return 0;
     }
 
-    public void set(final long zobrist, final long type, final int move, final int depth, final int value,
-                    final int age) {
+    public void set(final long zobrist, final long type, final int move, final int depth, final int value) {
         assert (Utils.getFromPosition(move) & 0x88) == 0;
         assert (Utils.getToPosition(move) & 0x88) == 0;
         assert move != 0 || type != TT_TYPE_EXACT;
@@ -81,7 +81,7 @@ public final class TranspositionTable {
         final int startIndex = hashed << 1;
         final long[] array = getArraySegment(zobrist);
         final long ttValue = type | (((long) (move & BASE_INFO)) << TT_SHIFT_MOVE) | (depth << TT_SHIFT_DEPTH) |
-            (value << TT_SHIFT_VALUE) | (((long) age) << TT_SHIFT_AGE);
+            (value << TT_SHIFT_VALUE) | (age << TT_SHIFT_AGE);
         int minAge = Integer.MAX_VALUE;
         int minAgeIndex = startIndex;
         for (int i = startIndex; i < ARRAY_LENGHT; i += 2) {
@@ -163,5 +163,9 @@ public final class TranspositionTable {
             }
         }
         return emptySlots;
+    }
+
+    public void setAge(final long age) {
+        this.age = age;
     }
 }

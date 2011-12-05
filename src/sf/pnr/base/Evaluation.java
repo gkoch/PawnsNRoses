@@ -117,6 +117,10 @@ public final class Evaluation {
     public static int BONUS_ROOKS_ON_SAME_FILE = 12;
     @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SAMERANK)
     public static int BONUS_ROOKS_ON_SAME_RANK = 12;
+    @Configurable(Configurable.Key.EVAL_BONUS_ROOK_SEMIOPENFILE)
+    public static int BONUS_ROOKS_ON_SEMI_OPEN_FILE = 10;
+    @Configurable(Configurable.Key.EVAL_BONUS_ROOK_OPENFILE)
+    public static int BONUS_ROOKS_ON_OPEN_FILE = 10;
     @Configurable(Configurable.Key.EVAL_PENALTY_ATTACKS_AROUND_KING)
     public static int[] PENALTY_ATTACKS_AROUND_KING = new int[]{0, -3, -6, -10, -20, -35, -50, -100, -200};
     public static final double DRAW_PROBABILITY_BISHOPS_ON_OPPOSITE = 0.2;
@@ -523,6 +527,7 @@ public final class Evaluation {
         materialValueNoPawnWhite += VAL_PIECE_COUNTS[ROOK][whiteRookCount];
         int whiteRookFiles = 0;
         int whiteRookRanks = 0;
+        int scoreRooksOnOpenFiles = 0;
         for (int i = whiteRookCount; i > 0; i--) {
             final int rook = whiteRooks[i];
             int mobility = 0;
@@ -540,13 +545,19 @@ public final class Evaluation {
                     }
                 }
             }
-            whiteRookFiles |= FILE_RANK_BITS[getFile(rook)];
-            whiteRookRanks |= FILE_RANK_BITS[getRank(rook)];
+            final int file = getFile(rook);
+            final int rank = getRank(rook);
+            whiteRookFiles |= FILE_RANK_BITS[file];
+            whiteRookRanks |= FILE_RANK_BITS[rank];
             scoreMobility += BONUS_MOBILITY_ROOK[mobility];
             scoreDistance += BONUS_DISTANCE_ROOK[distance(rook, blackKing, ATTACK_DISTANCE_MASKS[ROOK],
                 SHIFT_ATTACK_DISTANCES[ROOK])];
             scorePositionalOpening += positionalBonusOpening[rook + shiftPositionBonusWhite];
             scorePositionalEndgame += positionalBonusEndGame[rook + shiftPositionBonusWhite];
+            final long file64 = BitBoard.BITBOARD_FILE[file];
+            final long ranksAbove64 = BitBoard.BITBOARD_RANKS_ABOVE[rank];
+            scoreRooksOnOpenFiles += (ranksAbove64 & (whitePawns64 | blackPawns64) & file64) == 0? BONUS_ROOKS_ON_SEMI_OPEN_FILE: 0;
+            scoreRooksOnOpenFiles += (ranksAbove64 & allPieces64 & file64) == 0? BONUS_ROOKS_ON_OPEN_FILE: 0;
         }
         final int[] blackRooks = board.getPieces(BLACK, ROOK);
         final int blackRookCount = blackRooks[0];
@@ -570,13 +581,19 @@ public final class Evaluation {
                     }
                 }
             }
-            blackRookFiles |= FILE_RANK_BITS[getFile(rook)];
-            blackRookRanks |= FILE_RANK_BITS[getRank(rook)];
+            final int file = getFile(rook);
+            final int rank = getRank(rook);
+            blackRookFiles |= FILE_RANK_BITS[file];
+            blackRookRanks |= FILE_RANK_BITS[rank];
             scoreMobility -= BONUS_MOBILITY_ROOK[mobility];
             scoreDistance -= BONUS_DISTANCE_ROOK[distance(rook, whiteKing, ATTACK_DISTANCE_MASKS[ROOK],
                 SHIFT_ATTACK_DISTANCES[ROOK])];
             scorePositionalOpening -= positionalBonusOpening[rook + shiftPositionBonusBlack];
             scorePositionalEndgame -= positionalBonusEndGame[rook + shiftPositionBonusBlack];
+            final long file64 = BitBoard.BITBOARD_FILE[file];
+            final long ranksBelow64 = BitBoard.BITBOARD_RANKS_BELOW[rank];
+            scoreRooksOnOpenFiles -= (ranksBelow64 & (whitePawns64 | blackPawns64) & file64) == 0? BONUS_ROOKS_ON_SEMI_OPEN_FILE: 0;
+            scoreRooksOnOpenFiles -= (ranksBelow64 & allPieces64 & file64) == 0? BONUS_ROOKS_ON_OPEN_FILE: 0;
         }
 
         // queens
@@ -685,9 +702,10 @@ public final class Evaluation {
         //System.out.printf("Positional Endgame:  %4d\r\n", scorePositionalEndgame);
         //System.out.printf("Castling Penalty:    %4d\r\n", scoreCastlingPenalty);
         //System.out.printf("Distance:            %4d\r\n", scoreDistance);
+        //System.out.printf("Rooks on Open Files: %4d\r\n", scoreRooksOnOpenFiles);
 
         int score = scoreAttack + scoreDefense + scoreMobility + scoreHungPiece + scoreMaterialValue +
-            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty;
+            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty + scoreRooksOnOpenFiles;
         score += ((scorePositionalOpening + scoreCastlingPenalty) * (STAGE_MAX - stage) +
             (scorePositionalEndgame + scoreDistance) * stage) / STAGE_MAX;
 

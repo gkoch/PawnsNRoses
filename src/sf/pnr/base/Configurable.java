@@ -44,6 +44,8 @@ public @interface Configurable {
         EVAL_PENALTY_CASTLING_PENDING_BOTH("evaluation.penalty.castling.pendingBoth"),
         EVAL_BONUS_ROOK_SAMEFILE("evaluation.bonus.rook.sameFile"),
         EVAL_BONUS_ROOK_SAMERANK("evaluation.bonus.rook.sameRank"),
+        EVAL_BONUS_ROOK_SEMIOPENFILE("evaluation.bonus.rook.semiOpenFile"),
+        EVAL_BONUS_ROOK_OPENFILE("evaluation.bonus.rook.openFile"),
         EVAL_PENALTY_ATTACKS_AROUND_KING("evaluation.penalty.attacksAroundKing"),
         ENGINE_DEPTH_EXT_CHECK("engine.depthExt.check"), ENGINE_DEPTH_EXT_7TH_RANK_PAWN("engine.depthExt.7thRankPawn"),
         ENGINE_DEPTH_EXT_MATE_THREAT("engine.depthExt.mateThreat"), ENGINE_DEPTH_EXT_MAX("engine.depthExt.max"),

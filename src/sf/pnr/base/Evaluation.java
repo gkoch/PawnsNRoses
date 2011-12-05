@@ -876,9 +876,15 @@ public final class Evaluation {
         final int whiteBishopCount = whiteBishops[0];
         final int[] blackBishops = board.getPieces(BLACK_TO_MOVE, BISHOP);
         final int blackBishopCount = blackBishops[0];
-        if (whiteKnightCount + whiteBishopCount <= 2 && whiteBishopCount < 2 &&
-            blackKnightCount + blackBishopCount <= 2 && blackBishopCount < 2) {
-            return true;
+        final int whiteMinorPieceCount = whiteKnightCount + whiteBishopCount;
+        final int blackMinorPieceCount = blackKnightCount + blackBishopCount;
+        if (whiteMinorPieceCount <= 2 && whiteBishopCount < 2 && blackMinorPieceCount <= 2 && blackBishopCount < 2) {
+            if (blackMinorPieceCount == 1 || whiteMinorPieceCount == 1) {
+                return true;
+            }
+            if (blackKnightCount == 2 || whiteKnightCount == 2) {
+                return true;
+            }
         }
         if (whiteKnightCount + blackKnightCount > 0) {
             return false;

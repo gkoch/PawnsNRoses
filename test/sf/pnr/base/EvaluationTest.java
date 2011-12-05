@@ -79,6 +79,11 @@ public class EvaluationTest extends TestCase {
         assertTrue(Evaluation.drawByInsufficientMaterial(board));
     }
 
+    public void testDrawByInsufficientMaterialKBNK() {
+        final Board board = StringUtils.fromFen("1k6/4K3/8/1B1N4/8/8/8/8 w - - 0 1");
+        assertFalse(Evaluation.drawByInsufficientMaterial(board));
+    }
+
     public void testDrawByInsufficientMaterialKBBKN() {
             final Board board = StringUtils.fromFen("7k/5n2/7K/8/4B2B/8/8/8 w - - 0 1");
         assertFalse(Evaluation.drawByInsufficientMaterial(board));

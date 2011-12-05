@@ -415,7 +415,25 @@ public final class Evaluation {
         int scoreAttack = attackCount * BONUS_ATTACK;
         int scoreDefense = defenseCount * BONUS_DEFENSE;
         int scoreMobility = mobilityCount * BONUS_MOBILITY;
-        int scoreHungPiece = hungPieceCount * BONUS_HUNG_PIECE;
+
+        final int hungPieceCountBlack = Long.bitCount(whitePawnAttacks64 & blacks64 & ~blackPawns64);
+        final int hungPieceCountWhite = Long.bitCount(blackPawnAttacks64 & whites64 & ~whitePawns64);
+        int scoreHungPiece = 0;
+        if (toMove == WHITE_TO_MOVE) {
+            if (hungPieceCountBlack > 1) {
+                scoreHungPiece += BONUS_HUNG_PIECE;
+            }
+            if (hungPieceCountWhite > 1) {
+                scoreHungPiece -= BONUS_HUNG_PIECE >> 2;
+            }
+        } else {
+            if (hungPieceCountWhite > 1) {
+                scoreHungPiece += BONUS_HUNG_PIECE;
+            }
+            if (hungPieceCountBlack > 1) {
+                scoreHungPiece -= BONUS_HUNG_PIECE >> 2;
+            }
+        }
 
         // knights
         int scoreDistance = 0;
@@ -687,6 +705,11 @@ public final class Evaluation {
             }
         }
 
+        int score = scoreAttack + scoreDefense + scoreMobility + scoreHungPiece + scoreMaterialValue +
+            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty + scoreRooksOnOpenFiles;
+        score += ((scorePositionalOpening + scoreCastlingPenalty) * (STAGE_MAX - stage) +
+            (scorePositionalEndgame + scoreDistance) * stage) / STAGE_MAX;
+
         //System.out.printf("Attack:              %4d\r\n", scoreAttack);
         //System.out.printf("Defense:             %4d\r\n", scoreDefense);
         //System.out.printf("Mobility:            %4d\r\n", scoreMobility);
@@ -703,15 +726,12 @@ public final class Evaluation {
         //System.out.printf("Castling Penalty:    %4d\r\n", scoreCastlingPenalty);
         //System.out.printf("Distance:            %4d\r\n", scoreDistance);
         //System.out.printf("Rooks on Open Files: %4d\r\n", scoreRooksOnOpenFiles);
-
-        int score = scoreAttack + scoreDefense + scoreMobility + scoreHungPiece + scoreMaterialValue +
-            scorePawn + scoreRookBonus + scoreTrappedPieces + scoreAttacksAroundKingPenalty + scoreRooksOnOpenFiles;
-        score += ((scorePositionalOpening + scoreCastlingPenalty) * (STAGE_MAX - stage) +
-            (scorePositionalEndgame + scoreDistance) * stage) / STAGE_MAX;
+        //System.out.printf("Before Draw Prob.  : %4d\r\n", score);
 
         final int materialValueNoPawnToMove = toMove == BLACK? materialValueNoPawnBlack: materialValueNoPawnWhite;
         if (score * signum > 0 && materialValueNoPawnToMove <= VAL_PIECE_COUNTS[BISHOP][2]) {
             score *= (1.0 - drawProbability(board));
+            //System.out.printf("After Draw Prob.   : %4d\r\n", score);
         }
 
         evalHashTable.set(zobrist, score - VAL_MIN);
